@@ -35,14 +35,15 @@ extension CLLocation {
 }
 
 struct Track {
-    let coordinates: [CLLocationCoordinate2D]
+    let coordinates: [(CLLocationCoordinate2D, elevation: Double)]
     let color: Color
+    let number: Int
     
     var distance: CLLocationDistance {
         guard let first = coordinates.first else { return 0 }
         
-        let (result, _) = coordinates.reduce(into: (0 as CLLocationDistance, previous: CLLocation(first))) { r, coord in
-            let loc = CLLocation(coord)
+        let (result, _) = coordinates.reduce(into: (0 as CLLocationDistance, previous: CLLocation(first.0))) { r, coord in
+            let loc = CLLocation(coord.0)
             let distance = loc.distance(from: r.1)
             r.1 = loc
             r.0 += distance
@@ -52,10 +53,11 @@ struct Track {
 }
 
 extension Track {
-    init(color: Color, points: [Point]) {
+    init(color: Color, number: Int, points: [Point]) {
         self.color = color
+        self.number = number
         coordinates = points.map { point in
-            CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon)
+            (CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon), elevation: point.ele)
         }
     }
 }

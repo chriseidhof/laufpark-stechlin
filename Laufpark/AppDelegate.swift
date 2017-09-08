@@ -51,13 +51,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             (.lightPink, 6)
         ]
         let allTracks: [[Track]] = definitions.map { (color, count) in
-            let trackNames: [String] = (1...count).map { "wabe \(color.name)-strecke \($0)" }
-            return trackNames.map { name -> Track in
-                let reader = TrackReader(url: Bundle.main.url(forResource: name, withExtension: "gpx")!)!
-                return Track(color: color, points: reader.points)
+            let trackNames: [(Int, String)] = (1...count).map { ($0, "wabe \(color.name)-strecke \($0)") }
+            return trackNames.map { numberAndName -> Track in
+                let reader = TrackReader(url: Bundle.main.url(forResource: numberAndName.1, withExtension: "gpx")!)!
+                return Track(color: color, number: numberAndName.0, points: reader.points)
             }
         }
-        let tracks: [Track] = Array(allTracks.joined())
+        let tracks: [Track] = Array(allTracks.joined())        
         window?.rootViewController = ViewController(tracks: tracks)
         window?.makeKeyAndVisible()
         return true
