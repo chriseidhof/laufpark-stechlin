@@ -1,0 +1,630 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		834078E91F62695600BC7C98 /* wabe tuerkis-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */; };
+		834078EA1F62695600BC7C98 /* wabe tuerkis-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */; };
+		834078EB1F62695600BC7C98 /* wabe tuerkis-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E61F62679900BC7C98 /* wabe tuerkis-strecke 3.gpx */; };
+		834078EC1F62695600BC7C98 /* wabe tuerkis-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E41F62679900BC7C98 /* wabe tuerkis-strecke 4.gpx */; };
+		834078ED1F62695600BC7C98 /* wabe tuerkis-strecke 5.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E71F62679900BC7C98 /* wabe tuerkis-strecke 5.gpx */; };
+		834078F71F626A2600BC7C98 /* wabe hellgruen-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F01F6269E000BC7C98 /* wabe hellgruen-strecke 1.gpx */; };
+		834078F81F626A2600BC7C98 /* wabe hellgruen-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F11F6269E000BC7C98 /* wabe hellgruen-strecke 2.gpx */; };
+		834078F91F626A2600BC7C98 /* wabe hellgruen-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F21F6269E000BC7C98 /* wabe hellgruen-strecke 3.gpx */; };
+		834078FA1F626A2600BC7C98 /* wabe hellgruen-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F41F6269E000BC7C98 /* wabe hellgruen-strecke 4.gpx */; };
+		834078FB1F626A2600BC7C98 /* wabe hellgruen-strecke 5.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F31F6269E000BC7C98 /* wabe hellgruen-strecke 5.gpx */; };
+		834078FC1F626A2600BC7C98 /* wabe hellgruen-strecke 7.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F51F6269E000BC7C98 /* wabe hellgruen-strecke 7.gpx */; };
+		834078FD1F626A2600BC7C98 /* wabe hellgruen-strecke 6.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F61F626A1200BC7C98 /* wabe hellgruen-strecke 6.gpx */; };
+		8340790B1F626B2300BC7C98 /* wabe beige-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079051F626B1F00BC7C98 /* wabe beige-strecke 1.gpx */; };
+		8340790C1F626B2300BC7C98 /* wabe beige-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079071F626B1F00BC7C98 /* wabe beige-strecke 2.gpx */; };
+		8340790D1F626B2300BC7C98 /* wabe gruen-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079001F626B1F00BC7C98 /* wabe gruen-strecke 1.gpx */; };
+		8340790E1F626B2300BC7C98 /* wabe gruen-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079011F626B1F00BC7C98 /* wabe gruen-strecke 2.gpx */; };
+		8340790F1F626B2300BC7C98 /* wabe gruen-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079091F626B1F00BC7C98 /* wabe gruen-strecke 3.gpx */; };
+		834079101F626B2300BC7C98 /* wabe gruen-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340790A1F626B1F00BC7C98 /* wabe gruen-strecke 4.gpx */; };
+		834079111F626B2300BC7C98 /* wabe lila-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079061F626B1F00BC7C98 /* wabe lila-strecke 1.gpx */; };
+		834079121F626B2300BC7C98 /* wabe lila-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078FF1F626B1F00BC7C98 /* wabe lila-strecke 2.gpx */; };
+		834079131F626B2300BC7C98 /* wabe lila-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079081F626B1F00BC7C98 /* wabe lila-strecke 3.gpx */; };
+		834079141F626B2300BC7C98 /* wabe violett-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079021F626B1F00BC7C98 /* wabe violett-strecke 1.gpx */; };
+		834079151F626B2300BC7C98 /* wabe violett-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079031F626B1F00BC7C98 /* wabe violett-strecke 2.gpx */; };
+		834079161F626B2300BC7C98 /* wabe violett-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079041F626B1F00BC7C98 /* wabe violett-strecke 3.gpx */; };
+		834079171F626B2300BC7C98 /* wabe violett-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078FE1F626B1F00BC7C98 /* wabe violett-strecke 4.gpx */; };
+		8340793C1F626EC600BC7C98 /* wabe blau-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079391F626D8700BC7C98 /* wabe blau-strecke 1.gpx */; };
+		8340793D1F626EC600BC7C98 /* wabe blau-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340791D1F626D8300BC7C98 /* wabe blau-strecke 2.gpx */; };
+		8340793E1F626EC600BC7C98 /* wabe blau-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079211F626D8400BC7C98 /* wabe blau-strecke 3.gpx */; };
+		8340793F1F626EC600BC7C98 /* wabe braun-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079311F626D8600BC7C98 /* wabe braun-strecke 1.gpx */; };
+		834079401F626EC600BC7C98 /* wabe braun-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079291F626D8500BC7C98 /* wabe braun-strecke 2.gpx */; };
+		834079411F626EC600BC7C98 /* wabe braun-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079201F626D8300BC7C98 /* wabe braun-strecke 3.gpx */; };
+		834079431F626EC600BC7C98 /* wabe gelb-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792E1F626D8500BC7C98 /* wabe gelb-strecke 1.gpx */; };
+		834079441F626EC600BC7C98 /* wabe gelb-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079251F626D8400BC7C98 /* wabe gelb-strecke 2.gpx */; };
+		834079451F626EC600BC7C98 /* wabe gelb-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079361F626D8600BC7C98 /* wabe gelb-strecke 3.gpx */; };
+		834079461F626EC600BC7C98 /* wabe gelb-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079321F626D8600BC7C98 /* wabe gelb-strecke 4.gpx */; };
+		834079471F626EC600BC7C98 /* wabe grau-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079341F626D8600BC7C98 /* wabe grau-strecke 1.gpx */; };
+		834079481F626EC600BC7C98 /* wabe hellblau-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792A1F626D8500BC7C98 /* wabe hellblau-strecke 1.gpx */; };
+		834079491F626EC600BC7C98 /* wabe hellblau-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340791C1F626D8300BC7C98 /* wabe hellblau-strecke 2.gpx */; };
+		8340794A1F626EC600BC7C98 /* wabe hellblau-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079371F626D8700BC7C98 /* wabe hellblau-strecke 3.gpx */; };
+		8340794B1F626EC600BC7C98 /* wabe hellblau-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792B1F626D8500BC7C98 /* wabe hellblau-strecke 4.gpx */; };
+		8340794C1F626EC600BC7C98 /* wabe hellbraun-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079331F626D8600BC7C98 /* wabe hellbraun-strecke 1.gpx */; };
+		8340794D1F626EC600BC7C98 /* wabe hellbraun-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792F1F626D8500BC7C98 /* wabe hellbraun-strecke 2.gpx */; };
+		8340794E1F626EC600BC7C98 /* wabe hellbraun-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079231F626D8400BC7C98 /* wabe hellbraun-strecke 3.gpx */; };
+		8340794F1F626EC600BC7C98 /* wabe hellbraun-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079221F626D8400BC7C98 /* wabe hellbraun-strecke 4.gpx */; };
+		834079501F626EC600BC7C98 /* wabe hellbraun-strecke 5.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792C1F626D8500BC7C98 /* wabe hellbraun-strecke 5.gpx */; };
+		834079511F626EC600BC7C98 /* wabe orange-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792D1F626D8500BC7C98 /* wabe orange-strecke 1.gpx */; };
+		834079521F626EC600BC7C98 /* wabe pink-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079381F626D8700BC7C98 /* wabe pink-strecke 1.gpx */; };
+		834079531F626EC600BC7C98 /* wabe pink-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079241F626D8400BC7C98 /* wabe pink-strecke 2.gpx */; };
+		834079541F626EC600BC7C98 /* wabe pink-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079271F626D8400BC7C98 /* wabe pink-strecke 3.gpx */; };
+		834079551F626EC600BC7C98 /* wabe pink-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340791F1F626D8300BC7C98 /* wabe pink-strecke 4.gpx */; };
+		834079561F626EC600BC7C98 /* wabe rosa-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079261F626D8400BC7C98 /* wabe rosa-strecke 1.gpx */; };
+		834079571F626EC600BC7C98 /* wabe rosa-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340793A1F626D8700BC7C98 /* wabe rosa-strecke 2.gpx */; };
+		834079581F626EC600BC7C98 /* wabe rosa-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340791E1F626D8300BC7C98 /* wabe rosa-strecke 3.gpx */; };
+		834079591F626EC600BC7C98 /* wabe rosa-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079301F626D8500BC7C98 /* wabe rosa-strecke 4.gpx */; };
+		8340795A1F626EC600BC7C98 /* wabe rosa-strecke 5.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079351F626D8600BC7C98 /* wabe rosa-strecke 5.gpx */; };
+		8340795B1F626EC600BC7C98 /* wabe rosa-strecke 6.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079281F626D8400BC7C98 /* wabe rosa-strecke 6.gpx */; };
+		8340795D1F626F0700BC7C98 /* wabe braun-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340795C1F626F0100BC7C98 /* wabe braun-strecke 4.gpx */; };
+		8340DF941F61B1F8002176C6 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8340DF931F61B1F8002176C6 /* AppDelegate.swift */; };
+		8340DF961F61B1F8002176C6 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8340DF951F61B1F8002176C6 /* ViewController.swift */; };
+		8340DF9B1F61B1F8002176C6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8340DF9A1F61B1F8002176C6 /* Assets.xcassets */; };
+		8340DFAC1F61B2C5002176C6 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8340DFAB1F61B2C5002176C6 /* MapKit.framework */; };
+		8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8340DFAD1F61B2F6002176C6 /* Model.swift */; };
+		8340DFAF1F61B40C002176C6 /* wabe rot-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA71F61B227002176C6 /* wabe rot-strecke 1.gpx */; };
+		8340DFB01F61B40C002176C6 /* wabe rot-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA61F61B227002176C6 /* wabe rot-strecke 2.gpx */; };
+		8340DFB11F61B40C002176C6 /* wabe rot-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA51F61B227002176C6 /* wabe rot-strecke 3.gpx */; };
+		8340DFB21F61B40C002176C6 /* wabe rot-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 1.gpx"; sourceTree = "<group>"; };
+		834078E41F62679900BC7C98 /* wabe tuerkis-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 4.gpx"; sourceTree = "<group>"; };
+		834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 2.gpx"; sourceTree = "<group>"; };
+		834078E61F62679900BC7C98 /* wabe tuerkis-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 3.gpx"; sourceTree = "<group>"; };
+		834078E71F62679900BC7C98 /* wabe tuerkis-strecke 5.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 5.gpx"; sourceTree = "<group>"; };
+		834078EE1F6269C500BC7C98 /* wabe tuerkis-strecke 6.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 6.gpx"; sourceTree = "<group>"; };
+		834078F01F6269E000BC7C98 /* wabe hellgruen-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellgruen-strecke 1.gpx"; sourceTree = "<group>"; };
+		834078F11F6269E000BC7C98 /* wabe hellgruen-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellgruen-strecke 2.gpx"; sourceTree = "<group>"; };
+		834078F21F6269E000BC7C98 /* wabe hellgruen-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellgruen-strecke 3.gpx"; sourceTree = "<group>"; };
+		834078F31F6269E000BC7C98 /* wabe hellgruen-strecke 5.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellgruen-strecke 5.gpx"; sourceTree = "<group>"; };
+		834078F41F6269E000BC7C98 /* wabe hellgruen-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellgruen-strecke 4.gpx"; sourceTree = "<group>"; };
+		834078F51F6269E000BC7C98 /* wabe hellgruen-strecke 7.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellgruen-strecke 7.gpx"; sourceTree = "<group>"; };
+		834078F61F626A1200BC7C98 /* wabe hellgruen-strecke 6.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellgruen-strecke 6.gpx"; sourceTree = "<group>"; };
+		834078FE1F626B1F00BC7C98 /* wabe violett-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe violett-strecke 4.gpx"; sourceTree = "<group>"; };
+		834078FF1F626B1F00BC7C98 /* wabe lila-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe lila-strecke 2.gpx"; sourceTree = "<group>"; };
+		834079001F626B1F00BC7C98 /* wabe gruen-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gruen-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079011F626B1F00BC7C98 /* wabe gruen-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gruen-strecke 2.gpx"; sourceTree = "<group>"; };
+		834079021F626B1F00BC7C98 /* wabe violett-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe violett-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079031F626B1F00BC7C98 /* wabe violett-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe violett-strecke 2.gpx"; sourceTree = "<group>"; };
+		834079041F626B1F00BC7C98 /* wabe violett-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe violett-strecke 3.gpx"; sourceTree = "<group>"; };
+		834079051F626B1F00BC7C98 /* wabe beige-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe beige-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079061F626B1F00BC7C98 /* wabe lila-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe lila-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079071F626B1F00BC7C98 /* wabe beige-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe beige-strecke 2.gpx"; sourceTree = "<group>"; };
+		834079081F626B1F00BC7C98 /* wabe lila-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe lila-strecke 3.gpx"; sourceTree = "<group>"; };
+		834079091F626B1F00BC7C98 /* wabe gruen-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gruen-strecke 3.gpx"; sourceTree = "<group>"; };
+		8340790A1F626B1F00BC7C98 /* wabe gruen-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gruen-strecke 4.gpx"; sourceTree = "<group>"; };
+		8340791C1F626D8300BC7C98 /* wabe hellblau-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellblau-strecke 2.gpx"; sourceTree = "<group>"; };
+		8340791D1F626D8300BC7C98 /* wabe blau-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe blau-strecke 2.gpx"; sourceTree = "<group>"; };
+		8340791E1F626D8300BC7C98 /* wabe rosa-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rosa-strecke 3.gpx"; sourceTree = "<group>"; };
+		8340791F1F626D8300BC7C98 /* wabe pink-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe pink-strecke 4.gpx"; sourceTree = "<group>"; };
+		834079201F626D8300BC7C98 /* wabe braun-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe braun-strecke 3.gpx"; sourceTree = "<group>"; };
+		834079211F626D8400BC7C98 /* wabe blau-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe blau-strecke 3.gpx"; sourceTree = "<group>"; };
+		834079221F626D8400BC7C98 /* wabe hellbraun-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellbraun-strecke 4.gpx"; sourceTree = "<group>"; };
+		834079231F626D8400BC7C98 /* wabe hellbraun-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellbraun-strecke 3.gpx"; sourceTree = "<group>"; };
+		834079241F626D8400BC7C98 /* wabe pink-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe pink-strecke 2.gpx"; sourceTree = "<group>"; };
+		834079251F626D8400BC7C98 /* wabe gelb-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gelb-strecke 2.gpx"; sourceTree = "<group>"; };
+		834079261F626D8400BC7C98 /* wabe rosa-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rosa-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079271F626D8400BC7C98 /* wabe pink-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe pink-strecke 3.gpx"; sourceTree = "<group>"; };
+		834079281F626D8400BC7C98 /* wabe rosa-strecke 6.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rosa-strecke 6.gpx"; sourceTree = "<group>"; };
+		834079291F626D8500BC7C98 /* wabe braun-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe braun-strecke 2.gpx"; sourceTree = "<group>"; };
+		8340792A1F626D8500BC7C98 /* wabe hellblau-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellblau-strecke 1.gpx"; sourceTree = "<group>"; };
+		8340792B1F626D8500BC7C98 /* wabe hellblau-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellblau-strecke 4.gpx"; sourceTree = "<group>"; };
+		8340792C1F626D8500BC7C98 /* wabe hellbraun-strecke 5.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellbraun-strecke 5.gpx"; sourceTree = "<group>"; };
+		8340792D1F626D8500BC7C98 /* wabe orange-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe orange-strecke 1.gpx"; sourceTree = "<group>"; };
+		8340792E1F626D8500BC7C98 /* wabe gelb-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gelb-strecke 1.gpx"; sourceTree = "<group>"; };
+		8340792F1F626D8500BC7C98 /* wabe hellbraun-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellbraun-strecke 2.gpx"; sourceTree = "<group>"; };
+		834079301F626D8500BC7C98 /* wabe rosa-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rosa-strecke 4.gpx"; sourceTree = "<group>"; };
+		834079311F626D8600BC7C98 /* wabe braun-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe braun-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079321F626D8600BC7C98 /* wabe gelb-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gelb-strecke 4.gpx"; sourceTree = "<group>"; };
+		834079331F626D8600BC7C98 /* wabe hellbraun-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellbraun-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079341F626D8600BC7C98 /* wabe grau-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe grau-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079351F626D8600BC7C98 /* wabe rosa-strecke 5.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rosa-strecke 5.gpx"; sourceTree = "<group>"; };
+		834079361F626D8600BC7C98 /* wabe gelb-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gelb-strecke 3.gpx"; sourceTree = "<group>"; };
+		834079371F626D8700BC7C98 /* wabe hellblau-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellblau-strecke 3.gpx"; sourceTree = "<group>"; };
+		834079381F626D8700BC7C98 /* wabe pink-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe pink-strecke 1.gpx"; sourceTree = "<group>"; };
+		834079391F626D8700BC7C98 /* wabe blau-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe blau-strecke 1.gpx"; sourceTree = "<group>"; };
+		8340793A1F626D8700BC7C98 /* wabe rosa-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rosa-strecke 2.gpx"; sourceTree = "<group>"; };
+		8340795C1F626F0100BC7C98 /* wabe braun-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe braun-strecke 4.gpx"; sourceTree = "<group>"; };
+		8340DF901F61B1F8002176C6 /* Laufpark.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Laufpark.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8340DF931F61B1F8002176C6 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		8340DF951F61B1F8002176C6 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8340DF9A1F61B1F8002176C6 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8340DF9F1F61B1F8002176C6 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8340DFA51F61B227002176C6 /* wabe rot-strecke 3.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rot-strecke 3.gpx"; sourceTree = "<group>"; };
+		8340DFA61F61B227002176C6 /* wabe rot-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rot-strecke 2.gpx"; sourceTree = "<group>"; };
+		8340DFA71F61B227002176C6 /* wabe rot-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rot-strecke 1.gpx"; sourceTree = "<group>"; };
+		8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rot-strecke 4.gpx"; sourceTree = "<group>"; };
+		8340DFAB1F61B2C5002176C6 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		8340DFAD1F61B2F6002176C6 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8340DF8D1F61B1F8002176C6 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8340DFAC1F61B2C5002176C6 /* MapKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		834078E21F62678F00BC7C98 /* rot */ = {
+			isa = PBXGroup;
+			children = (
+				8340DFA71F61B227002176C6 /* wabe rot-strecke 1.gpx */,
+				8340DFA61F61B227002176C6 /* wabe rot-strecke 2.gpx */,
+				8340DFA51F61B227002176C6 /* wabe rot-strecke 3.gpx */,
+				8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */,
+			);
+			path = rot;
+			sourceTree = "<group>";
+		};
+		834078E81F6267A000BC7C98 /* tuerkis */ = {
+			isa = PBXGroup;
+			children = (
+				834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */,
+				834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */,
+				834078E61F62679900BC7C98 /* wabe tuerkis-strecke 3.gpx */,
+				834078E41F62679900BC7C98 /* wabe tuerkis-strecke 4.gpx */,
+				834078E71F62679900BC7C98 /* wabe tuerkis-strecke 5.gpx */,
+				834078EE1F6269C500BC7C98 /* wabe tuerkis-strecke 6.gpx */,
+			);
+			path = tuerkis;
+			sourceTree = "<group>";
+		};
+		834078EF1F6269D800BC7C98 /* hellgruen */ = {
+			isa = PBXGroup;
+			children = (
+				834078F01F6269E000BC7C98 /* wabe hellgruen-strecke 1.gpx */,
+				834078F11F6269E000BC7C98 /* wabe hellgruen-strecke 2.gpx */,
+				834078F21F6269E000BC7C98 /* wabe hellgruen-strecke 3.gpx */,
+				834078F41F6269E000BC7C98 /* wabe hellgruen-strecke 4.gpx */,
+				834078F31F6269E000BC7C98 /* wabe hellgruen-strecke 5.gpx */,
+				834078F51F6269E000BC7C98 /* wabe hellgruen-strecke 7.gpx */,
+				834078F61F626A1200BC7C98 /* wabe hellgruen-strecke 6.gpx */,
+			);
+			path = hellgruen;
+			sourceTree = "<group>";
+		};
+		834079181F626B2900BC7C98 /* beige */ = {
+			isa = PBXGroup;
+			children = (
+				834079051F626B1F00BC7C98 /* wabe beige-strecke 1.gpx */,
+				834079071F626B1F00BC7C98 /* wabe beige-strecke 2.gpx */,
+			);
+			path = beige;
+			sourceTree = "<group>";
+		};
+		834079191F626B3000BC7C98 /* gruen */ = {
+			isa = PBXGroup;
+			children = (
+				834079001F626B1F00BC7C98 /* wabe gruen-strecke 1.gpx */,
+				834079011F626B1F00BC7C98 /* wabe gruen-strecke 2.gpx */,
+				834079091F626B1F00BC7C98 /* wabe gruen-strecke 3.gpx */,
+				8340790A1F626B1F00BC7C98 /* wabe gruen-strecke 4.gpx */,
+			);
+			path = gruen;
+			sourceTree = "<group>";
+		};
+		8340791A1F626B3700BC7C98 /* lila */ = {
+			isa = PBXGroup;
+			children = (
+				834079061F626B1F00BC7C98 /* wabe lila-strecke 1.gpx */,
+				834078FF1F626B1F00BC7C98 /* wabe lila-strecke 2.gpx */,
+				834079081F626B1F00BC7C98 /* wabe lila-strecke 3.gpx */,
+			);
+			path = lila;
+			sourceTree = "<group>";
+		};
+		8340791B1F626B3D00BC7C98 /* violett */ = {
+			isa = PBXGroup;
+			children = (
+				834079021F626B1F00BC7C98 /* wabe violett-strecke 1.gpx */,
+				834079031F626B1F00BC7C98 /* wabe violett-strecke 2.gpx */,
+				834079041F626B1F00BC7C98 /* wabe violett-strecke 3.gpx */,
+				834078FE1F626B1F00BC7C98 /* wabe violett-strecke 4.gpx */,
+			);
+			path = violett;
+			sourceTree = "<group>";
+		};
+		8340DF871F61B1F8002176C6 = {
+			isa = PBXGroup;
+			children = (
+				8340DF921F61B1F8002176C6 /* Laufpark */,
+				8340DF911F61B1F8002176C6 /* Products */,
+				8340DFAA1F61B2C5002176C6 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		8340DF911F61B1F8002176C6 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8340DF901F61B1F8002176C6 /* Laufpark.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8340DF921F61B1F8002176C6 /* Laufpark */ = {
+			isa = PBXGroup;
+			children = (
+				8340DFA91F61B22D002176C6 /* gpx */,
+				8340DF931F61B1F8002176C6 /* AppDelegate.swift */,
+				8340DFAD1F61B2F6002176C6 /* Model.swift */,
+				8340DF951F61B1F8002176C6 /* ViewController.swift */,
+				8340DF9A1F61B1F8002176C6 /* Assets.xcassets */,
+				8340DF9F1F61B1F8002176C6 /* Info.plist */,
+			);
+			path = Laufpark;
+			sourceTree = "<group>";
+		};
+		8340DFA91F61B22D002176C6 /* gpx */ = {
+			isa = PBXGroup;
+			children = (
+				834079391F626D8700BC7C98 /* wabe blau-strecke 1.gpx */,
+				8340791D1F626D8300BC7C98 /* wabe blau-strecke 2.gpx */,
+				834079211F626D8400BC7C98 /* wabe blau-strecke 3.gpx */,
+				834079311F626D8600BC7C98 /* wabe braun-strecke 1.gpx */,
+				834079291F626D8500BC7C98 /* wabe braun-strecke 2.gpx */,
+				834079201F626D8300BC7C98 /* wabe braun-strecke 3.gpx */,
+				8340795C1F626F0100BC7C98 /* wabe braun-strecke 4.gpx */,
+				8340792E1F626D8500BC7C98 /* wabe gelb-strecke 1.gpx */,
+				834079251F626D8400BC7C98 /* wabe gelb-strecke 2.gpx */,
+				834079361F626D8600BC7C98 /* wabe gelb-strecke 3.gpx */,
+				834079321F626D8600BC7C98 /* wabe gelb-strecke 4.gpx */,
+				834079341F626D8600BC7C98 /* wabe grau-strecke 1.gpx */,
+				8340792A1F626D8500BC7C98 /* wabe hellblau-strecke 1.gpx */,
+				8340791C1F626D8300BC7C98 /* wabe hellblau-strecke 2.gpx */,
+				834079371F626D8700BC7C98 /* wabe hellblau-strecke 3.gpx */,
+				8340792B1F626D8500BC7C98 /* wabe hellblau-strecke 4.gpx */,
+				834079331F626D8600BC7C98 /* wabe hellbraun-strecke 1.gpx */,
+				8340792F1F626D8500BC7C98 /* wabe hellbraun-strecke 2.gpx */,
+				834079231F626D8400BC7C98 /* wabe hellbraun-strecke 3.gpx */,
+				834079221F626D8400BC7C98 /* wabe hellbraun-strecke 4.gpx */,
+				8340792C1F626D8500BC7C98 /* wabe hellbraun-strecke 5.gpx */,
+				8340792D1F626D8500BC7C98 /* wabe orange-strecke 1.gpx */,
+				834079381F626D8700BC7C98 /* wabe pink-strecke 1.gpx */,
+				834079241F626D8400BC7C98 /* wabe pink-strecke 2.gpx */,
+				834079271F626D8400BC7C98 /* wabe pink-strecke 3.gpx */,
+				8340791F1F626D8300BC7C98 /* wabe pink-strecke 4.gpx */,
+				834079261F626D8400BC7C98 /* wabe rosa-strecke 1.gpx */,
+				8340793A1F626D8700BC7C98 /* wabe rosa-strecke 2.gpx */,
+				8340791E1F626D8300BC7C98 /* wabe rosa-strecke 3.gpx */,
+				834079301F626D8500BC7C98 /* wabe rosa-strecke 4.gpx */,
+				834079351F626D8600BC7C98 /* wabe rosa-strecke 5.gpx */,
+				834079281F626D8400BC7C98 /* wabe rosa-strecke 6.gpx */,
+				834079181F626B2900BC7C98 /* beige */,
+				834079191F626B3000BC7C98 /* gruen */,
+				8340791A1F626B3700BC7C98 /* lila */,
+				8340791B1F626B3D00BC7C98 /* violett */,
+				834078EF1F6269D800BC7C98 /* hellgruen */,
+				834078E81F6267A000BC7C98 /* tuerkis */,
+				834078E21F62678F00BC7C98 /* rot */,
+			);
+			path = gpx;
+			sourceTree = "<group>";
+		};
+		8340DFAA1F61B2C5002176C6 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8340DFAB1F61B2C5002176C6 /* MapKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8340DF8F1F61B1F8002176C6 /* Laufpark */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8340DFA21F61B1F8002176C6 /* Build configuration list for PBXNativeTarget "Laufpark" */;
+			buildPhases = (
+				8340DF8C1F61B1F8002176C6 /* Sources */,
+				8340DF8D1F61B1F8002176C6 /* Frameworks */,
+				8340DF8E1F61B1F8002176C6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Laufpark;
+			productName = Laufpark;
+			productReference = 8340DF901F61B1F8002176C6 /* Laufpark.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8340DF881F61B1F8002176C6 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0900;
+				LastUpgradeCheck = 0900;
+				ORGANIZATIONNAME = objc.io;
+				TargetAttributes = {
+					8340DF8F1F61B1F8002176C6 = {
+						CreatedOnToolsVersion = 9.0;
+						SystemCapabilities = {
+							com.apple.Maps.iOS = {
+								enabled = 1;
+							};
+						};
+					};
+				};
+			};
+			buildConfigurationList = 8340DF8B1F61B1F8002176C6 /* Build configuration list for PBXProject "Laufpark" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8340DF871F61B1F8002176C6;
+			productRefGroup = 8340DF911F61B1F8002176C6 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8340DF8F1F61B1F8002176C6 /* Laufpark */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		8340DF8E1F61B1F8002176C6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				834079581F626EC600BC7C98 /* wabe rosa-strecke 3.gpx in Resources */,
+				834079461F626EC600BC7C98 /* wabe gelb-strecke 4.gpx in Resources */,
+				834078ED1F62695600BC7C98 /* wabe tuerkis-strecke 5.gpx in Resources */,
+				8340794E1F626EC600BC7C98 /* wabe hellbraun-strecke 3.gpx in Resources */,
+				834078FD1F626A2600BC7C98 /* wabe hellgruen-strecke 6.gpx in Resources */,
+				8340DFB11F61B40C002176C6 /* wabe rot-strecke 3.gpx in Resources */,
+				8340795D1F626F0700BC7C98 /* wabe braun-strecke 4.gpx in Resources */,
+				8340793F1F626EC600BC7C98 /* wabe braun-strecke 1.gpx in Resources */,
+				8340794A1F626EC600BC7C98 /* wabe hellblau-strecke 3.gpx in Resources */,
+				8340795B1F626EC600BC7C98 /* wabe rosa-strecke 6.gpx in Resources */,
+				834078FA1F626A2600BC7C98 /* wabe hellgruen-strecke 4.gpx in Resources */,
+				834079121F626B2300BC7C98 /* wabe lila-strecke 2.gpx in Resources */,
+				834079151F626B2300BC7C98 /* wabe violett-strecke 2.gpx in Resources */,
+				834078FC1F626A2600BC7C98 /* wabe hellgruen-strecke 7.gpx in Resources */,
+				8340793D1F626EC600BC7C98 /* wabe blau-strecke 2.gpx in Resources */,
+				834078EA1F62695600BC7C98 /* wabe tuerkis-strecke 2.gpx in Resources */,
+				8340DFAF1F61B40C002176C6 /* wabe rot-strecke 1.gpx in Resources */,
+				834079491F626EC600BC7C98 /* wabe hellblau-strecke 2.gpx in Resources */,
+				834079141F626B2300BC7C98 /* wabe violett-strecke 1.gpx in Resources */,
+				834079501F626EC600BC7C98 /* wabe hellbraun-strecke 5.gpx in Resources */,
+				834079591F626EC600BC7C98 /* wabe rosa-strecke 4.gpx in Resources */,
+				834078E91F62695600BC7C98 /* wabe tuerkis-strecke 1.gpx in Resources */,
+				834079441F626EC600BC7C98 /* wabe gelb-strecke 2.gpx in Resources */,
+				834079401F626EC600BC7C98 /* wabe braun-strecke 2.gpx in Resources */,
+				8340DF9B1F61B1F8002176C6 /* Assets.xcassets in Resources */,
+				834079161F626B2300BC7C98 /* wabe violett-strecke 3.gpx in Resources */,
+				834079571F626EC600BC7C98 /* wabe rosa-strecke 2.gpx in Resources */,
+				834078FB1F626A2600BC7C98 /* wabe hellgruen-strecke 5.gpx in Resources */,
+				8340795A1F626EC600BC7C98 /* wabe rosa-strecke 5.gpx in Resources */,
+				834079101F626B2300BC7C98 /* wabe gruen-strecke 4.gpx in Resources */,
+				834079471F626EC600BC7C98 /* wabe grau-strecke 1.gpx in Resources */,
+				834079481F626EC600BC7C98 /* wabe hellblau-strecke 1.gpx in Resources */,
+				834079131F626B2300BC7C98 /* wabe lila-strecke 3.gpx in Resources */,
+				8340794F1F626EC600BC7C98 /* wabe hellbraun-strecke 4.gpx in Resources */,
+				8340DFB01F61B40C002176C6 /* wabe rot-strecke 2.gpx in Resources */,
+				834078EB1F62695600BC7C98 /* wabe tuerkis-strecke 3.gpx in Resources */,
+				834079411F626EC600BC7C98 /* wabe braun-strecke 3.gpx in Resources */,
+				8340DFB21F61B40C002176C6 /* wabe rot-strecke 4.gpx in Resources */,
+				8340794B1F626EC600BC7C98 /* wabe hellblau-strecke 4.gpx in Resources */,
+				834078F91F626A2600BC7C98 /* wabe hellgruen-strecke 3.gpx in Resources */,
+				834078F71F626A2600BC7C98 /* wabe hellgruen-strecke 1.gpx in Resources */,
+				834079561F626EC600BC7C98 /* wabe rosa-strecke 1.gpx in Resources */,
+				834079511F626EC600BC7C98 /* wabe orange-strecke 1.gpx in Resources */,
+				834078F81F626A2600BC7C98 /* wabe hellgruen-strecke 2.gpx in Resources */,
+				8340790F1F626B2300BC7C98 /* wabe gruen-strecke 3.gpx in Resources */,
+				8340790D1F626B2300BC7C98 /* wabe gruen-strecke 1.gpx in Resources */,
+				8340793C1F626EC600BC7C98 /* wabe blau-strecke 1.gpx in Resources */,
+				8340794D1F626EC600BC7C98 /* wabe hellbraun-strecke 2.gpx in Resources */,
+				834079431F626EC600BC7C98 /* wabe gelb-strecke 1.gpx in Resources */,
+				8340790E1F626B2300BC7C98 /* wabe gruen-strecke 2.gpx in Resources */,
+				834079111F626B2300BC7C98 /* wabe lila-strecke 1.gpx in Resources */,
+				834079531F626EC600BC7C98 /* wabe pink-strecke 2.gpx in Resources */,
+				834079541F626EC600BC7C98 /* wabe pink-strecke 3.gpx in Resources */,
+				834078EC1F62695600BC7C98 /* wabe tuerkis-strecke 4.gpx in Resources */,
+				8340790B1F626B2300BC7C98 /* wabe beige-strecke 1.gpx in Resources */,
+				8340790C1F626B2300BC7C98 /* wabe beige-strecke 2.gpx in Resources */,
+				8340794C1F626EC600BC7C98 /* wabe hellbraun-strecke 1.gpx in Resources */,
+				834079171F626B2300BC7C98 /* wabe violett-strecke 4.gpx in Resources */,
+				834079521F626EC600BC7C98 /* wabe pink-strecke 1.gpx in Resources */,
+				834079451F626EC600BC7C98 /* wabe gelb-strecke 3.gpx in Resources */,
+				8340793E1F626EC600BC7C98 /* wabe blau-strecke 3.gpx in Resources */,
+				834079551F626EC600BC7C98 /* wabe pink-strecke 4.gpx in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8340DF8C1F61B1F8002176C6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */,
+				8340DF961F61B1F8002176C6 /* ViewController.swift in Sources */,
+				8340DF941F61B1F8002176C6 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		8340DFA01F61B1F8002176C6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		8340DFA11F61B1F8002176C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		8340DFA31F61B1F8002176C6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = SL7736T2Z4;
+				INFOPLIST_FILE = Laufpark/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Laufpark;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8340DFA41F61B1F8002176C6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				DEVELOPMENT_TEAM = SL7736T2Z4;
+				INFOPLIST_FILE = Laufpark/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Laufpark;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_VERSION = 4.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8340DF8B1F61B1F8002176C6 /* Build configuration list for PBXProject "Laufpark" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8340DFA01F61B1F8002176C6 /* Debug */,
+				8340DFA11F61B1F8002176C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8340DFA21F61B1F8002176C6 /* Build configuration list for PBXNativeTarget "Laufpark" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8340DFA31F61B1F8002176C6 /* Debug */,
+				8340DFA41F61B1F8002176C6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8340DF881F61B1F8002176C6 /* Project object */;
+}
