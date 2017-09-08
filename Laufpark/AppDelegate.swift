@@ -50,14 +50,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             (.pink, 4),
             (.lightPink, 6)
         ]
-        let tracks: [[Track]] = definitions.map { (color, count) in
+        let allTracks: [[Track]] = definitions.map { (color, count) in
             let trackNames: [String] = (1...count).map { "wabe \(color.name)-strecke \($0)" }
             return trackNames.map { name -> Track in
                 let reader = TrackReader(url: Bundle.main.url(forResource: name, withExtension: "gpx")!)!
                 return Track(color: color, points: reader.points)
             }
         }
-        window?.rootViewController = ViewController(tracks: Array(tracks.joined()))
+        let tracks: [Track] = Array(allTracks.joined())
+        window?.rootViewController = ViewController(tracks: tracks)
         window?.makeKeyAndVisible()
         return true
     }
