@@ -9,85 +9,14 @@
 import UIKit
 import MapKit
 
-extension UIColor {
-    convenience init(r: Int, g: Int, b: Int) {
-        self.init(red: CGFloat(r)/255, green: CGFloat(g)/255, blue: CGFloat(b)/255, alpha: 1)
-    }
-}
-
-extension Color {
-    var uiColor: UIColor {
-        switch self {
-        case .red: 
-           return UIColor(r: 255, g: 0, b: 0)
-        case .turquoise:
-            return UIColor(r: 0, g: 159, b: 159)
-        case .brightGreen:
-            return UIColor(r: 104, g: 195, b: 12)
-        case .violet:
-            return UIColor(r: 174, g: 165, b: 213)
-        case .purple:
-            return UIColor(r: 135, g: 27, b: 138)
-        case .green:
-            return UIColor(r: 0, g: 132, b: 70)
-        case .beige:
-            return UIColor(r: 227, g: 177, b: 151)
-        case .blue:
-            return UIColor(r: 0, g: 92, b: 181)
-        case .brown:
-            return UIColor(r: 0, g: 92, b: 181)
-        case .yellow:
-            return UIColor(r: 255, g: 244, b: 0)
-        case .gray:
-            return UIColor(r: 174, g: 165, b: 213)
-        case .lightBlue:
-            return UIColor(r: 0, g: 166, b: 198)
-        case .lightBrown:
-            return UIColor(r: 190, g: 135, b: 90)
-        case .orange:
-            return UIColor(r: 255, g: 122, b: 36)
-        case .pink:
-            return UIColor(r: 255, g: 0, b: 94)
-        case .lightPink:
-            return UIColor(r: 255, g: 122, b: 183)
-        }
-    }
-}
-
-extension Track {
-    var line: MKPolygon {
-        var coordinates = self.coordinates.map { $0.0 }
-        let result = MKPolygon(coordinates: &coordinates, count: coordinates.count)
-        return result
-    }
-    
-    var name: String {
-        return "\(color.name) \(number)"
-    }
-    
-    var ascentAndDescent: (Double, Double) {
-        var ascent = 0.0
-        var descent = 0.0
-        var previous = self.coordinates.first!.elevation
-        for x in self.coordinates {
-            let diff = previous - x.elevation
-            if diff > 0 {
-                ascent += diff
-            } else {
-                descent += diff
-            }
-            previous = x.elevation
-        }
-        return (ascent, descent)
-    }
-}
-
 class ViewController: UIViewController, MKMapViewDelegate {
     let tracks: [Track]
     let mapView = MKMapView()
     var lines: [MKPolygon:Color] = [:]
     var renderers: [MKPolygon: MKPolygonRenderer] = [:]
     var trackForPolygon: [MKPolygon:Track] = [:]
+    let lineView = LineView()
+    var stackView: UIStackView = UIStackView(arrangedSubviews: [])
     
     var selection: MKPolygon? {
         didSet {
@@ -95,7 +24,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             if let t = selectedTrack {
                 print(t.name)
                 print("\(t.distance / 1000) km")
-                let (a,d) = t.ascentAndDescent
+                let a = t.ascent
                 print("ascent: \(a)m")
             }
         }
@@ -115,7 +44,15 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
-        self.view.addSubview(mapView)
+        view.addSubview(stackView)
+        lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        lineView.backgroundColor = .white
+        stackView.addArrangedSubview(mapView)
+        stackView.addArrangedSubview(lineView)
+        stackView.distribution = .fill
+        stackView.axis = .vertical
+        stackView.backgroundColor = .green
+        stackView.translatesAutoresizingMaskIntoConstraints = false
         mapView.delegate = self
         tracks.forEach {
             let line = $0.line
@@ -123,10 +60,14 @@ class ViewController: UIViewController, MKMapViewDelegate {
             lines[line] = $0.color
             trackForPolygon[line] = $0
         }
+        
+        stackView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        stackView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        stackView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        mapView.frame = view.bounds
         mapView.showsCompass = true
         mapView.showsScale = true
         mapView.showsUserLocation = true
@@ -151,6 +92,15 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func updateForSelection() {
+        if let track = selectedTrack {
+            let profile = track.elevationProfile
+            let elevations = profile.map { $0.elevation }
+            let rect = CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
+            lineView.pointsRect = rect
+            lineView.points = profile.map { CGPoint(x: $0.distance, y: $0.elevation) }
+        } else {
+            lineView.points = []
+        }
         for (line, renderer) in renderers {
             if selection != nil && line != selection {
                 renderer.lineWidth = 1

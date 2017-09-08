@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		83099ADF1F630FC100D3EBB8 /* LineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83099ADE1F630FC100D3EBB8 /* LineView.swift */; };
 		834078E91F62695600BC7C98 /* wabe tuerkis-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */; };
 		834078EA1F62695600BC7C98 /* wabe tuerkis-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */; };
 		834078EB1F62695600BC7C98 /* wabe tuerkis-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E61F62679900BC7C98 /* wabe tuerkis-strecke 3.gpx */; };
@@ -73,9 +74,12 @@
 		8340DFB01F61B40C002176C6 /* wabe rot-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA61F61B227002176C6 /* wabe rot-strecke 2.gpx */; };
 		8340DFB11F61B40C002176C6 /* wabe rot-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA51F61B227002176C6 /* wabe rot-strecke 3.gpx */; };
 		8340DFB21F61B40C002176C6 /* wabe rot-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */; };
+		83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824D1F6302DF004070DA /* Model+UIKit.swift */; };
+		83B082501F63052D004070DA /* Incremental.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824F1F63052D004070DA /* Incremental.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		83099ADE1F630FC100D3EBB8 /* LineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineView.swift; sourceTree = "<group>"; };
 		834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 1.gpx"; sourceTree = "<group>"; };
 		834078E41F62679900BC7C98 /* wabe tuerkis-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 4.gpx"; sourceTree = "<group>"; };
 		834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 2.gpx"; sourceTree = "<group>"; };
@@ -145,6 +149,9 @@
 		8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rot-strecke 4.gpx"; sourceTree = "<group>"; };
 		8340DFAB1F61B2C5002176C6 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		8340DFAD1F61B2F6002176C6 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
+		83B0824F1F63052D004070DA /* Incremental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incremental.swift; sourceTree = "<group>"; };
+		83B082511F630835004070DA /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -241,6 +248,7 @@
 		8340DF871F61B1F8002176C6 = {
 			isa = PBXGroup;
 			children = (
+				83B082511F630835004070DA /* MyPlayground.playground */,
 				8340DF921F61B1F8002176C6 /* Laufpark */,
 				8340DF911F61B1F8002176C6 /* Products */,
 				8340DFAA1F61B2C5002176C6 /* Frameworks */,
@@ -260,10 +268,13 @@
 			children = (
 				8340DFA91F61B22D002176C6 /* gpx */,
 				8340DF931F61B1F8002176C6 /* AppDelegate.swift */,
-				8340DFAD1F61B2F6002176C6 /* Model.swift */,
 				8340DF951F61B1F8002176C6 /* ViewController.swift */,
+				8340DFAD1F61B2F6002176C6 /* Model.swift */,
+				83B0824D1F6302DF004070DA /* Model+UIKit.swift */,
+				83B0824F1F63052D004070DA /* Incremental.swift */,
 				8340DF9A1F61B1F8002176C6 /* Assets.xcassets */,
 				8340DF9F1F61B1F8002176C6 /* Info.plist */,
+				83099ADE1F630FC100D3EBB8 /* LineView.swift */,
 			);
 			path = Laufpark;
 			sourceTree = "<group>";
@@ -458,7 +469,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */,
+				83B082501F63052D004070DA /* Incremental.swift in Sources */,
+				83099ADF1F630FC100D3EBB8 /* LineView.swift in Sources */,
 				8340DF961F61B1F8002176C6 /* ViewController.swift in Sources */,
+				83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */,
 				8340DF941F61B1F8002176C6 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -34,6 +34,17 @@ extension CLLocation {
     }
 }
 
+extension Sequence where SubSequence: Sequence, SubSequence.Element == Element {
+    func diffed() -> AnySequence<(Element, Element)> {
+        return AnySequence(zip(self, self.dropFirst()))
+    }
+    
+    func diffed<Result>(with combine: (Element, Element) -> Result) -> [Result] {
+        return zip(self, self.dropFirst()).map { combine($0.0, $0.1) }
+    }
+
+}
+
 struct Track {
     let coordinates: [(CLLocationCoordinate2D, elevation: Double)]
     let color: Color
@@ -50,6 +61,12 @@ struct Track {
         }
         return result
     }
+    
+    var ascent: Double {
+        let elevations = coordinates.lazy.map { $0.elevation }
+        return elevations.diffed(with: -).filter({ $0 > 0 }).reduce(0,+)
+    }
+
 }
 
 extension Track {
