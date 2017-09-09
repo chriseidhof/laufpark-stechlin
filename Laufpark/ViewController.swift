@@ -126,6 +126,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         if let s = selection, possibilities.count > 1 && possibilities.contains(s) {
             selection = possibilities.first(where: { $0 != s })
         } else {
+            // start out with the smallest route
             selection = possibilities.sorted { $0.pointCount < $1.pointCount }.first
         }
     }
@@ -144,6 +145,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         } else {
             lineView.points = []
             draggedPointAnnotation.coordinate = .init() // hide
+            lineView.position = nil
         }
         for (line, renderer) in renderers {
             if selection != nil && line != selection {
