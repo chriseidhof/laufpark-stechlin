@@ -11,6 +11,8 @@ import UIKit
 final class LineView: UIView {
     var strokeWidth: CGFloat = 1 { didSet { setNeedsDisplay() }}
     var strokeColor: UIColor = .black { didSet { setNeedsDisplay() }}
+    var position: CGFloat? = nil { didSet { setNeedsDisplay() }}
+    var positionColor: UIColor = .red { didSet { setNeedsDisplay() }}
     
     var pointsRect: CGRect = .zero {
         didSet { setNeedsDisplay() }
@@ -60,6 +62,15 @@ final class LineView: UIView {
                     ])
                 currentTick += cgTickWidth
             }
+        }
+        
+        if let position = position {
+            let start = CGPoint(x: position*scaleX, y: 0)
+            let end = CGPoint(x: position*scaleX, y: -bounds.size.height)
+            context.move(to: start)
+            context.addLine(to: end)
+            positionColor.setStroke()
+            context.strokePath()
         }
         
         context.setLineWidth(strokeWidth)

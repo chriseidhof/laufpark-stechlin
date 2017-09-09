@@ -17,6 +17,10 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var trackForPolygon: [MKPolygon:Track] = [:]
     let lineView = LineView()
     var stackView: UIStackView = UIStackView(arrangedSubviews: [])
+    let totalAscent = UILabel()
+    let totalDistance = UILabel()
+    let name = UILabel()
+    let draggedPointAnnotation = MKPointAnnotation()
     
     var selection: MKPolygon? {
         didSet {
@@ -45,14 +49,22 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     override func viewDidLoad() {
         view.addSubview(stackView)
-        lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        lineView.backgroundColor = .white
-        stackView.addArrangedSubview(mapView)
-        stackView.addArrangedSubview(lineView)
+        stackView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
+        stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
+        stackView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        stackView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+
         stackView.distribution = .fill
         stackView.axis = .vertical
         stackView.backgroundColor = .green
         stackView.translatesAutoresizingMaskIntoConstraints = false
+
+        // Lineview
+        lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        lineView.backgroundColor = .white
+        lineView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
+        
+        // MapView
         mapView.delegate = self
         tracks.forEach {
             let line = $0.line
@@ -61,33 +73,60 @@ class ViewController: UIViewController, MKMapViewDelegate {
             trackForPolygon[line] = $0
         }
         
-        stackView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        stackView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        stackView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        // Track information
+        let trackInfo = UIStackView(arrangedSubviews: [
+            name,
+            totalDistance,
+            totalAscent
+        ])
+        trackInfo.axis = .horizontal
+        trackInfo.distribution = .equalCentering
+        trackInfo.heightAnchor.constraint(equalToConstant: 20)
+        for s in trackInfo.arrangedSubviews { s.backgroundColor = .white }
+        
+        stackView.addArrangedSubview(mapView)
+        stackView.addArrangedSubview(trackInfo)
+        stackView.addArrangedSubview(lineView)
+        view.backgroundColor = .white
+        
+        mapView.addAnnotation(draggedPointAnnotation)
     }
     
     override func viewDidAppear(_ animated: Bool) {
         mapView.showsCompass = true
         mapView.showsScale = true
         mapView.showsUserLocation = true
-        mapView.mapType = .hybrid
+        mapView.mapType = .standard
         mapView.setVisibleMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)), edgePadding: UIEdgeInsetsMake(10, 10, 10, 10), animated: true)
         mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
+    }
+    
+    @objc func linePanned(sender: UIPanGestureRecognizer) {
+        guard let track = selectedTrack else { return }
+        let normalizedLocation = sender.location(in: lineView).x / lineView.bounds.size.width
+        let distance = Double(normalizedLocation) * track.distance
+        let point = track.point(at: distance)!
+        draggedPointAnnotation.coordinate = point.coordinate
+        lineView.position = CGFloat(distance)
+        if !mapView.annotations(in: mapView.visibleMapRect).contains(draggedPointAnnotation) {
+            mapView.setCenter(point.coordinate, animated: true)
+        }
     }
     
     @objc func mapTapped(sender: UITapGestureRecognizer) {
         let point = sender.location(ofTouch: 0, in: mapView)
         let mapPoint = MKMapPointForCoordinate(mapView.convert(point, toCoordinateFrom: mapView))
-        let newSelection = lines.keys.first { line in
+        let possibilities = lines.keys.filter { line in
             let renderer = renderers[line]!
             let point = renderer.point(for: mapPoint)
             return renderer.path.contains(point)
         }
-        if selection == newSelection {
-            selection = nil
+        
+        // in case of multiple matches, toggle between the selections
+        if let s = selection, possibilities.count > 1 && possibilities.contains(s) {
+            selection = possibilities.first(where: { $0 != s })
         } else {
-            selection = newSelection
+            selection = possibilities.sorted { $0.pointCount < $1.pointCount }.first
         }
     }
     
@@ -98,8 +137,13 @@ class ViewController: UIViewController, MKMapViewDelegate {
             let rect = CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
             lineView.pointsRect = rect
             lineView.points = profile.map { CGPoint(x: $0.distance, y: $0.elevation) }
+            name.text = track.name
+            let formatter = MKDistanceFormatter()
+            totalDistance.text = formatter.string(fromDistance: track.distance)
+            totalAscent.text = "↗ \(formatter.string(fromDistance: track.ascent))"
         } else {
             lineView.points = []
+            draggedPointAnnotation.coordinate = .init() // hide
         }
         for (line, renderer) in renderers {
             if selection != nil && line != selection {

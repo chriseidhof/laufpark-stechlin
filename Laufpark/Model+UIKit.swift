@@ -36,7 +36,7 @@ extension Color {
         case .blue:
             return UIColor(r: 0, g: 92, b: 181)
         case .brown:
-            return UIColor(r: 0, g: 92, b: 181)
+            return UIColor(r: 126, g: 50, b: 55)
         case .yellow:
             return UIColor(r: 255, g: 244, b: 0)
         case .gray:

@@ -67,6 +67,14 @@ struct Track {
         return elevations.diffed(with: -).filter({ $0 > 0 }).reduce(0,+)
     }
 
+    func point(at distance: CLLocationDistance) -> CLLocation? {
+        var current = 0 as CLLocationDistance
+        for (p1, p2) in coordinates.lazy.map({ CLLocation($0.0) }).diffed() {
+            current += p2.distance(from: p1)
+            if current > distance { return p2 }
+        }
+        return nil
+    }
 }
 
 extension Track {
