@@ -48,6 +48,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
+
         view.addSubview(stackView)
         stackView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
@@ -132,6 +133,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func updateForSelection() {
+        lineView.position = nil
+        draggedPointAnnotation.coordinate = .init() // hide
         if let track = selectedTrack {
             let profile = track.elevationProfile
             let elevations = profile.map { $0.elevation }
@@ -144,8 +147,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
             totalAscent.text = "↗ \(formatter.string(fromDistance: track.ascent))"
         } else {
             lineView.points = []
-            draggedPointAnnotation.coordinate = .init() // hide
-            lineView.position = nil
         }
         for (line, renderer) in renderers {
             if selection != nil && line != selection {

@@ -49,6 +49,7 @@ struct Track {
     let coordinates: [(CLLocationCoordinate2D, elevation: Double)]
     let color: Color
     let number: Int
+    let name: String
     
     var distance: CLLocationDistance {
         guard let first = coordinates.first else { return 0 }
@@ -78,9 +79,10 @@ struct Track {
 }
 
 extension Track {
-    init(color: Color, number: Int, points: [Point]) {
+    init(color: Color, number: Int, name: String, points: [Point]) {
         self.color = color
         self.number = number
+        self.name = name
         coordinates = points.map { point in
             (CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon), elevation: point.ele)
         }
@@ -93,12 +95,19 @@ struct Point {
     let ele: Double
 }
 
+extension String {
+    func remove(prefix: String) -> String {
+        return String(dropFirst(prefix.count))
+    }
+}
+
 final class TrackReader: NSObject, XMLParserDelegate {
     var inTrk = false
 
     var points: [Point] = []
     var pending: (lat: Double, lon: Double)?
     var elementContents: String = ""
+    var name = ""
     
     init?(url: URL) {
         guard let parser = XMLParser(contentsOf: url) else { return nil }
@@ -125,12 +134,14 @@ final class TrackReader: NSObject, XMLParserDelegate {
     
     func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
         defer { elementContents = "" }
+        var trimmed: String { return elementContents.trimmingCharacters(in: .whitespacesAndNewlines) }
         if elementName == "trk" {
             inTrk = false
         } else if elementName == "ele" {
-            let elementText = elementContents.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard let p = pending, let ele = Double(elementText) else { return }
+            guard let p = pending, let ele = Double(trimmed) else { return }
             points.append(Point(lat: p.lat, lon: p.lon, ele: ele))
+        } else if elementName == "name" && inTrk {
+            name = trimmed.remove(prefix: "Laufpark Stechlin - Wabe ")
         }
     }
 }

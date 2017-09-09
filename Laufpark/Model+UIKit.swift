@@ -61,11 +61,7 @@ extension Track {
         let result = MKPolygon(coordinates: &coordinates, count: coordinates.count)
         return result
     }
-    
-    var name: String {
-        return "\(color.name) \(number)"
-    }
-    
+
     var elevationProfile: [(distance: CLLocationDistance, elevation: Double)] {
         let result = coordinates.diffed { l, r in
             (CLLocation(l.0).distance(from: CLLocation(r.0)), r.elevation)
