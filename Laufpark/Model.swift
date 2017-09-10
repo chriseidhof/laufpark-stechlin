@@ -78,6 +78,12 @@ struct Track {
     }
 }
 
+extension Track: Equatable {
+    static func ==(l: Track, r: Track) -> Bool {
+        return l.name == r.name // todo
+    }
+}
+
 extension Track {
     init(color: Color, number: Int, name: String, points: [Point]) {
         self.color = color

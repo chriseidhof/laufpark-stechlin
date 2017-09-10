@@ -83,14 +83,14 @@ struct Height: CustomStringConvertible, Comparable {
 // This class is not thread-safe
 final class Queue {
     static let shared = Queue()
-    var edges: [Edge] = []
+    var edges: [(Edge, Height)] = []
     var processed: [Edge] = []
     var fired: [AnyI] = []
     var processing: Bool = false
     
-    func enqueue(_ edges: [Edge]){
-        self.edges.append(contentsOf: edges)
-        self.edges.sort { $0.height < $1.height }
+    func enqueue(_ edges: [Edge]){        
+        self.edges.append(contentsOf: edges.map { ($0, $0.height) })
+        self.edges.sort { $0.1 < $1.1 }
     }
     
     func fired(_ source: AnyI) {
@@ -99,13 +99,15 @@ final class Queue {
     
     func process() {
         guard !processing else { return }
+        var count = 0
         processing = true
-        while let edge = edges.popLast() {
+        while let (edge, _) = edges.popLast() {
             guard !processed.contains(where: { $0 === edge }) else {
                 continue
             }
             processed.append(edge)
             edge.fire()
+            count += 1
         }
         
         // cleanup
@@ -115,6 +117,7 @@ final class Queue {
         fired = []
         processed = []
         processing = false
+        print("processed \(count) edges")
     }
 }
 
@@ -175,8 +178,8 @@ protocol AnyI: class {
 final class Var<A> {
     let i: I<A>
     
-    init(_ value: A) {
-        i = I(value: value)
+    init(_ value: A, eq: @escaping (A,A) -> Bool) {
+        i = I(value: value, eq: eq)
     }
     
     func set(_ newValue: A) {
@@ -184,8 +187,21 @@ final class Var<A> {
     }
 }
 
+extension Var where A: Equatable {
+    convenience init(value: A) {
+        self.init(value, eq: ==)
+    }
+}
+
+
+extension I where A: Equatable {
+    convenience init(value: A) {
+        self.init(value: value, eq: ==)
+    }
+}
+
 final class I<A>: AnyI, Node {
-    fileprivate var value: A!
+    fileprivate(set) var value: A!
     var observers = Register<Observer>()
     var readers: Register<Reader> = Register()
     var height: Height {
@@ -193,11 +209,15 @@ final class I<A>: AnyI, Node {
     }
     var firedAlready: Bool = false
     var strongReferences: Register<Any> = Register()
+    var eq: (A,A) -> Bool
     
-    init(value: A) {
+    init(value: A, eq: @escaping (A, A) -> Bool) {
         self.value = value
+        self.eq = eq
     }
-    fileprivate init() {
+
+    fileprivate init(eq: @escaping (A,A) -> Bool) {
+        self.eq = eq
     }
     
     func observe(_ observer: @escaping (A) -> ()) -> Disposable {
@@ -212,6 +232,8 @@ final class I<A>: AnyI, Node {
     /// Returns `self`
     @discardableResult
     fileprivate func write(_ value: A) -> I<A> {
+        if let existing = self.value, eq(existing, value) { return self }
+        
         self.value = value
         guard !firedAlready else { return self }
         firedAlready = true
@@ -247,14 +269,22 @@ final class I<A>: AnyI, Node {
         }
     }
     
-    func map<B>(_ transform: @escaping (A) -> B) -> I<B> {
-        let result = I<B>()
+    func map<B: Equatable>(_ transform: @escaping (A) -> B) -> I<B> {
+        let result = I<B>(eq: ==)
         connect(result: result, transform)
         return result
     }
     
-    func flatMap<B>(_ transform: @escaping (A) -> I<B>) -> I<B> {
-        let result = I<B>()
+    // convenience for optionals
+    func map<B: Equatable>(_ transform: @escaping (A) -> B?) -> I<B?> {
+        let result = I<B?>(eq: ==)
+        connect(result: result, transform)
+        return result
+    }
+
+    
+    func flatMap<B: Equatable>(_ transform: @escaping (A) -> I<B>) -> I<B> {
+        let result = I<B>(eq: ==)
         var previous: Disposable?
         // todo: we might be able to avoid this closure by having a custom "flatMap" reader
         read(target: result) { value in
@@ -269,11 +299,11 @@ final class I<A>: AnyI, Node {
         return result
     }
     
-    func zip2<B,C>(_ other: I<B>, _ with: @escaping (A,B) -> C) -> I<C> {
+    func zip2<B: Equatable,C: Equatable>(_ other: I<B>, _ with: @escaping (A,B) -> C) -> I<C> {
         return flatMap { value in other.map { with(value, $0) } }
     }
     
-    func zip3<B,C,D>(_ x: I<B>, _ y: I<C>, _ with: @escaping (A,B,C) -> D) -> I<D> {
+    func zip3<B: Equatable,C: Equatable,D: Equatable>(_ x: I<B>, _ y: I<C>, _ with: @escaping (A,B,C) -> D) -> I<D> {
         return flatMap { value1 in
             x.flatMap { value2 in
                 y.map { with(value1, value2, $0) }
@@ -289,7 +319,23 @@ final class I<A>: AnyI, Node {
     }
 }
 
-enum IList<A> {
+func if_<A: Equatable>(_ condition: I<Bool>, then l: I<A>, else r: I<A>) -> I<A> {
+    return condition.flatMap { $0 ? l : r }
+}
+
+func &&(l: I<Bool>, r: I<Bool>) -> I<Bool> {
+    return l.zip2(r, { $0 && $1 })
+}
+
+func ||(l: I<Bool>, r: I<Bool>) -> I<Bool> {
+    return l.zip2(r, { $0 || $1 })
+}
+
+prefix func !(l: I<Bool>) -> I<Bool> {
+    return l.map { !$0 }
+}
+
+enum IList<A>: Equatable where A: Equatable {
     case empty
     case cons(A, I<IList<A>>)
     
@@ -310,6 +356,15 @@ enum IList<A> {
             return tail.read(target: destination) { newTail in
                 newTail.reduceH(destination: destination, initial: intermediate, combine: combine)
             }
+        }
+    }
+}
+
+extension IList {
+    static func ==(l: IList<A>, r: IList<A>) -> Bool {
+        switch (l, r) {
+        case (.empty, .empty): return true
+        default: return false
         }
     }
 }

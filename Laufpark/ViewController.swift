@@ -9,11 +9,32 @@
 import UIKit
 import MapKit
 
+extension NSObjectProtocol {
+    /// One-way binding
+    func bind<Value>(keyPath: ReferenceWritableKeyPath<Self, Value>, _ i: I<Value>) -> Disposable {
+        return i.observe {
+            self[keyPath: keyPath] = $0
+        }
+    }
+}
+
+final class PolygonRenderer {
+    let renderer: MKPolygonRenderer
+    var disposables: [Disposable] = []
+    
+    init(polygon: MKPolygon, strokeColor: I<UIColor>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) {
+        renderer = MKPolygonRenderer(polygon: polygon)
+        disposables.append(renderer.bind(keyPath: \MKPolygonRenderer.strokeColor, strokeColor.map { $0 }))
+        disposables.append(renderer.bind(keyPath: \.alpha, alpha))
+        disposables.append(renderer.bind(keyPath: \.lineWidth, lineWidth))
+    }
+}
+
 class ViewController: UIViewController, MKMapViewDelegate {
     let tracks: [Track]
     let mapView = MKMapView()
     var lines: [MKPolygon:Color] = [:]
-    var renderers: [MKPolygon: MKPolygonRenderer] = [:]
+    var renderers: [MKPolygon: PolygonRenderer] = [:]
     var trackForPolygon: [MKPolygon:Track] = [:]
     let lineView = LineView()
     var stackView: UIStackView = UIStackView(arrangedSubviews: [])
@@ -21,25 +42,29 @@ class ViewController: UIViewController, MKMapViewDelegate {
     let totalDistance = UILabel()
     let name = UILabel()
     let draggedPointAnnotation = MKPointAnnotation()
+    let selection = Var<MKPolygon?>(nil, eq: ==)
+    let hasSelection: I<Bool>
+
+    var disposables: [Any] = []
     
-    var selection: MKPolygon? {
-        didSet {
-            updateForSelection()
-            if let t = selectedTrack {
-                print(t.name)
-                print("\(t.distance / 1000) km")
-                let a = t.ascent
-                print("ascent: \(a)m")
-            }
+//    var selection: MKPolygon? {
+//        didSet {
+//            updateForSelection()
+//            if let t = selectedTrack {
+//            }
+//        }
+//    }
+    
+    var selectedTrack: I<Track?> {
+        return selection.i.map {
+            guard let p = $0 else { return nil }
+            return self.trackForPolygon[p]
         }
-    }
-    
-    var selectedTrack: Track? {
-        return selection.flatMap { trackForPolygon[$0] }
     }
     
     init(tracks: [Track]) {
         self.tracks = tracks
+        hasSelection = selection.i.map { $0 != nil }
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -48,7 +73,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
-
+        disposables.append(selection.i.observe { value in
+            self.updateForSelection()
+        })
         view.addSubview(stackView)
         stackView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
         stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
@@ -103,7 +130,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     @objc func linePanned(sender: UIPanGestureRecognizer) {
-        guard let track = selectedTrack else { return }
+        guard let track = selectedTrack.value ?? nil else { return }
         let normalizedLocation = sender.location(in: lineView).x / lineView.bounds.size.width
         let distance = Double(normalizedLocation) * track.distance
         let point = track.point(at: distance)!
@@ -118,24 +145,24 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let point = sender.location(ofTouch: 0, in: mapView)
         let mapPoint = MKMapPointForCoordinate(mapView.convert(point, toCoordinateFrom: mapView))
         let possibilities = lines.keys.filter { line in
-            let renderer = renderers[line]!
+            let renderer = renderers[line]!.renderer
             let point = renderer.point(for: mapPoint)
             return renderer.path.contains(point)
         }
         
-        // in case of multiple matches, toggle between the selections
-        if let s = selection, possibilities.count > 1 && possibilities.contains(s) {
-            selection = possibilities.first(where: { $0 != s })
+        // in case of multiple matches, toggle between the selections, and start out with the smallest route
+        if let s = selection.i.value ?? nil, possibilities.count > 1 && possibilities.contains(s) {
+            
+            selection.set(possibilities.lazy.sorted { $0.pointCount < $1.pointCount }.first(where: { $0 != s }))
         } else {
-            // start out with the smallest route
-            selection = possibilities.sorted { $0.pointCount < $1.pointCount }.first
+            selection.set(possibilities.first)
         }
     }
     
     func updateForSelection() {
         lineView.position = nil
         draggedPointAnnotation.coordinate = .init() // hide
-        if let track = selectedTrack {
+        if let track = selectedTrack.value ?? nil {
             let profile = track.elevationProfile
             let elevations = profile.map { $0.elevation }
             let rect = CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
@@ -148,25 +175,29 @@ class ViewController: UIViewController, MKMapViewDelegate {
         } else {
             lineView.points = []
         }
-        for (line, renderer) in renderers {
-            if selection != nil && line != selection {
-                renderer.lineWidth = 1
-                renderer.alpha = 0.5
-            } else {
-                renderer.alpha = 1
-                renderer.lineWidth = 3
-            }
-        }
+//        for (line, renderer) in renderers {
+//            if selection != nil && line != selection {
+//                renderer.lineWidth = 1
+//                renderer.alpha = 0.5
+//            } else {
+//                renderer.alpha = 1
+//                renderer.lineWidth = 3
+//            }
+//        }
     }
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         if let line = overlay as? MKPolygon {
-            if let renderer = renderers[line] { return renderer }
-            let renderer = MKPolygonRenderer(polygon: line)
-            renderer.strokeColor = lines[line]!.uiColor
-            renderer.lineWidth = 2
+            if let renderer = renderers[line] { return renderer.renderer }
+            
+            let isSelected: I<Bool> = selection.i.map { $0 == line }
+            let shouldHighlight: I<Bool> = !hasSelection || isSelected
+            let strokeColor: I<UIColor> = I(value: lines[line]!.uiColor)
+            let alpha: I<CGFloat> = if_(shouldHighlight, then: I(value: 1), else: I(value: 0.5))
+            let lineWidth: I<CGFloat> = if_(shouldHighlight, then: I(value: 3), else: I(value: 0.5))
+            let renderer = PolygonRenderer(polygon: line, strokeColor: strokeColor, alpha: alpha, lineWidth: lineWidth)
             renderers[line] = renderer
-            return renderer
+            return renderer.renderer
         }
         return MKOverlayRenderer()
     }
