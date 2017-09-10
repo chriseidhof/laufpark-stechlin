@@ -99,7 +99,7 @@ final class Queue {
     
     func process() {
         guard !processing else { return }
-        var count = 0
+//        var count = 0
         processing = true
         while let (edge, _) = edges.popLast() {
             guard !processed.contains(where: { $0 === edge }) else {
@@ -107,7 +107,7 @@ final class Queue {
             }
             processed.append(edge)
             edge.fire()
-            count += 1
+//            count += 1
         }
         
         // cleanup
@@ -117,7 +117,7 @@ final class Queue {
         fired = []
         processed = []
         processing = false
-        print("processed \(count) edges")
+//        print("processed \(count) edges")
     }
 }
 
@@ -184,6 +184,12 @@ final class Var<A> {
     
     func set(_ newValue: A) {
         i.write(newValue)
+    }
+    
+    func change(_ by: (inout A) -> ()) {
+        var copy = i.value!
+        by(&copy)
+        i.write(copy)
     }
 }
 
@@ -281,6 +287,26 @@ final class I<A>: AnyI, Node {
         connect(result: result, transform)
         return result
     }
+    
+    // convenience for other types
+    func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B) -> I<B> {
+        let result = I<B>(eq: eq)
+        connect(result: result, transform)
+        return result
+    }
+
+//    // convenience for other types
+//    func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B?) -> I<B?> {
+//        let result = I<B?>(eq: {
+//            switch ($0, $1) {
+//            case (nil,nil): return true
+//            case let (x?, y?): return eq(x,y)
+//            default: return false
+//            }
+//        })
+//        connect(result: result, transform)
+//        return result
+//    }
 
     
     func flatMap<B: Equatable>(_ transform: @escaping (A) -> I<B>) -> I<B> {

@@ -61,8 +61,9 @@ extension Track {
         let result = MKPolygon(coordinates: &coordinates, count: coordinates.count)
         return result
     }
-        
-    var elevationProfile: [(distance: CLLocationDistance, elevation: Double)] {
+
+    typealias ElevationProfile = [(distance: CLLocationDistance, elevation: Double)]
+    var elevationProfile: ElevationProfile {
         let result = coordinates.diffed { l, r in
             (CLLocation(l.0).distance(from: CLLocation(r.0)), r.elevation)
         }
