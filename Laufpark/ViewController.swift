@@ -31,6 +31,8 @@ final class PolygonRenderer {
 }
 
 struct State: Equatable {
+    let tracks: [Track]
+
     var selection: MKPolygon? {
         didSet {
             trackPosition = nil
@@ -38,9 +40,10 @@ struct State: Equatable {
     }
     var trackPosition: CGFloat? // 0...1
     
-    init() {
+    init(tracks: [Track]) {
         selection = nil
         trackPosition = nil
+        self.tracks = tracks
     }
     
     static func ==(lhs: State, rhs: State) -> Bool {
@@ -87,7 +90,6 @@ func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
 }
 
 class ViewController: UIViewController, MKMapViewDelegate {
-    let tracks: [Track]
     let mapView = MKMapView()
     var lines: [MKPolygon:Color] = [:]
     var renderers: [MKPolygon: PolygonRenderer] = [:]
@@ -100,7 +102,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var draggedPointAnnotation: PointAnnotation!
     var draggedLocation: I<(distance: Double, location: CLLocation)?>!
     
-    let state = Var<State>(value: State())
+    let state: Var<State>
     let selection: I<MKPolygon?>
     let hasSelection: I<Bool>
 
@@ -114,7 +116,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     init(tracks: [Track]) {
-        self.tracks = tracks
+        state = Var<State>(value: State(tracks: tracks))
         selection = state.i.map { $0.selection }
         hasSelection = state.i.map { $0.selection != nil }
 
@@ -179,12 +181,14 @@ class ViewController: UIViewController, MKMapViewDelegate {
         
         // MapView
         mapView.delegate = self
-        tracks.forEach {
-            let line = $0.line
-            mapView.add(line)
-            lines[line] = $0.color
-            trackForPolygon[line] = $0
-        }
+        disposables.append(state.i.map { $0.tracks }.observe {
+            $0.forEach { track in
+                let line = track.line
+                self.mapView.add(line)
+                self.lines[line] = track.color
+                self.trackForPolygon[line] = track
+            }
+        })
         
         // Track information
         let trackInfo = UIStackView(arrangedSubviews: [

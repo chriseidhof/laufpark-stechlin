@@ -288,6 +288,13 @@ final class I<A>: AnyI, Node {
         return result
     }
     
+    // convenience for arrays
+    func map<B: Equatable>(_ transform: @escaping (A) -> [B]) -> I<[B]> {
+        let result = I<[B]>(eq: ==)
+        connect(result: result, transform)
+        return result
+    }
+
     // convenience for other types
     func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B) -> I<B> {
         let result = I<B>(eq: eq)
