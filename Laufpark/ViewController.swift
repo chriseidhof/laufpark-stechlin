@@ -31,6 +31,14 @@ final class PolygonRenderer {
     }
 }
 
+extension Comparable {
+    func clamped(to: ClosedRange<Self>) -> Self {
+        if self < to.lowerBound { return to.lowerBound }
+        if self > to.upperBound { return to.upperBound }
+        return self
+    }
+}
+
 struct State: Equatable {
     let tracks: [Track]
     
@@ -144,7 +152,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
                 let track = self?.trackForPolygon[s],
                 let location = state.trackPosition else { return nil }
             let distance = Double(location) * track.distance
-            let point = track.point(at: distance)!
+            guard let point = track.point(at: distance) else { return nil }
             return (distance: distance, location: point)
         })
 
@@ -225,10 +233,10 @@ class ViewController: UIViewController, MKMapViewDelegate {
         stackView.addConstraintsToSizeToParent(spacing: 10)
         stackView.translatesAutoresizingMaskIntoConstraints = false
         
-        let height: CGFloat = 100
+        let height: CGFloat = 120
         blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
         let bottomConstraint = blurredView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        disposables.append(if_(hasSelection, then: I<CGFloat>(constant: 0), else: I(constant: 100)).observe { newOffset in
+        disposables.append(if_(hasSelection, then: I<CGFloat>(constant: 0), else: I(constant: height)).observe { newOffset in
             bottomConstraint.constant = newOffset
             UIView.animate(withDuration: 0.2) {
                 self.view.layoutIfNeeded()
@@ -270,7 +278,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     @objc func linePanned(sender: UIPanGestureRecognizer) {
-        let normalizedLocation = sender.location(in: lineView.lineView).x / lineView.lineView.bounds.size.width
+        let normalizedLocation = (sender.location(in: lineView.lineView).x / lineView.lineView.bounds.size.width).clamped(to: 0.0...1.0)
         state.change { $0.trackPosition = normalizedLocation }
         
     }
