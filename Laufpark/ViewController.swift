@@ -24,7 +24,7 @@ final class PolygonRenderer {
     
     init(polygon: MKPolygon, strokeColor: I<UIColor>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) {
         renderer = MKPolygonRenderer(polygon: polygon)
-        disposables.append(renderer.bind(keyPath: \MKPolygonRenderer.strokeColor, strokeColor.map { $0 }))
+        disposables.append(renderer.bind(keyPath: \.strokeColor, strokeColor.map { $0 }))
         disposables.append(renderer.bind(keyPath: \.alpha, alpha))
         disposables.append(renderer.bind(keyPath: \.lineWidth, lineWidth))
     }
@@ -195,6 +195,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         trackInfo.axis = .horizontal
         trackInfo.distribution = .equalCentering
         trackInfo.heightAnchor.constraint(equalToConstant: 20)
+        trackInfo.spacing = 10
         for s in trackInfo.arrangedSubviews { s.backgroundColor = .white }
         
         stackView.addArrangedSubview(mapView)
@@ -208,14 +209,14 @@ class ViewController: UIViewController, MKMapViewDelegate {
         disposables.append(totalDistance.bind(keyPath: \.text, selectedTrack.map { track in
             track.map { formatter.string(fromDistance: $0.distance) }
         }))
-        disposables.append(totalDistance.bind(keyPath: \.text, selectedTrack.map { track in
+        disposables.append(totalAscent.bind(keyPath: \.text, selectedTrack.map { track in
             track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
         }))
 
         mapView.addAnnotation(draggedPointAnnotation.annotation)
 
         self.disposables.append(draggedLocation.observe { x in
-            guard let (distance, location) = x else { return }
+            guard let (_, location) = x else { return }
             if !self.mapView.annotations(in: self.mapView.visibleMapRect).contains(self.draggedPointAnnotation.annotation) {
                 self.mapView.setCenter(location.coordinate, animated: true)
             }
