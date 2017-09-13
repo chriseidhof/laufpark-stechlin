@@ -37,7 +37,7 @@ struct Register<A> {
     }
 }
 
-final class Disposable {
+public final class Disposable {
     private let dispose: () -> ()
     init(dispose: @escaping () -> ()) {
         self.dispose = dispose
@@ -175,26 +175,26 @@ protocol AnyI: class {
     var strongReferences: Register<Any> { get set }
 }
 
-final class Var<A> {
-    let i: I<A>
+public final class Var<A> {
+    public let i: I<A>
     
-    init(_ value: A, eq: @escaping (A,A) -> Bool) {
+    public init(_ value: A, eq: @escaping (A,A) -> Bool) {
         i = I(value: value, eq: eq)
     }
     
-    func set(_ newValue: A) {
+    public func set(_ newValue: A) {
         i.write(newValue)
     }
     
-    func change(_ by: (inout A) -> ()) {
+    public func change(_ by: (inout A) -> ()) {
         var copy = i.value!
         by(&copy)
         i.write(copy)
     }
 }
 
-extension Var where A: Equatable {
-    convenience init(value: A) {
+public extension Var where A: Equatable {
+    public convenience init(_ value: A) {
         self.init(value, eq: ==)
     }
 }
@@ -206,8 +206,8 @@ extension I where A: Equatable {
     }
 }
 
-final class I<A>: AnyI, Node {
-    fileprivate(set) var value: A!
+public final class I<A>: AnyI, Node {
+    fileprivate(set) public var value: A! // todo this will not be public!
     var observers = Register<Observer>()
     var readers: Register<Reader> = Register()
     var height: Height {
@@ -216,17 +216,26 @@ final class I<A>: AnyI, Node {
     var firedAlready: Bool = false
     var strongReferences: Register<Any> = Register()
     var eq: (A,A) -> Bool
+    private let constant: Bool
     
     init(value: A, eq: @escaping (A, A) -> Bool) {
         self.value = value
         self.eq = eq
+        self.constant = false
     }
 
     fileprivate init(eq: @escaping (A,A) -> Bool) {
         self.eq = eq
+        self.constant = false
     }
     
-    func observe(_ observer: @escaping (A) -> ()) -> Disposable {
+    public init(constant: A) {
+        self.value = constant
+        self.eq = { _, _ in true }
+        self.constant = true
+    }
+    
+    public func observe(_ observer: @escaping (A) -> ()) -> Disposable {
         let token = observers.add(Observer {
             observer(self.value)
         })
@@ -238,6 +247,7 @@ final class I<A>: AnyI, Node {
     /// Returns `self`
     @discardableResult
     fileprivate func write(_ value: A) -> I<A> {
+        assert(!constant)
         if let existing = self.value, eq(existing, value) { return self }
         
         self.value = value
@@ -251,10 +261,12 @@ final class I<A>: AnyI, Node {
     }
     
     func read(_ read: @escaping (A) -> Node) -> (Reader, Disposable) {
-        var reader: Reader!
-        reader = Reader(read: {
+        let reader = Reader(read: {
             read(self.value)
         })
+        if constant {
+            return (reader, Disposable { })
+        }
         let token = readers.add(reader)
         return (reader, Disposable {
             self.readers[token]?.invalidated = true
@@ -275,28 +287,28 @@ final class I<A>: AnyI, Node {
         }
     }
     
-    func map<B: Equatable>(_ transform: @escaping (A) -> B) -> I<B> {
+    public func map<B: Equatable>(_ transform: @escaping (A) -> B) -> I<B> {
         let result = I<B>(eq: ==)
         connect(result: result, transform)
         return result
     }
     
     // convenience for optionals
-    func map<B: Equatable>(_ transform: @escaping (A) -> B?) -> I<B?> {
+    public func map<B: Equatable>(_ transform: @escaping (A) -> B?) -> I<B?> {
         let result = I<B?>(eq: ==)
         connect(result: result, transform)
         return result
     }
     
     // convenience for arrays
-    func map<B: Equatable>(_ transform: @escaping (A) -> [B]) -> I<[B]> {
+    public func map<B: Equatable>(_ transform: @escaping (A) -> [B]) -> I<[B]> {
         let result = I<[B]>(eq: ==)
         connect(result: result, transform)
         return result
     }
 
     // convenience for other types
-    func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B) -> I<B> {
+    public func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B) -> I<B> {
         let result = I<B>(eq: eq)
         connect(result: result, transform)
         return result
@@ -316,7 +328,7 @@ final class I<A>: AnyI, Node {
 //    }
 
     
-    func flatMap<B: Equatable>(_ transform: @escaping (A) -> I<B>) -> I<B> {
+    public func flatMap<B: Equatable>(_ transform: @escaping (A) -> I<B>) -> I<B> {
         let result = I<B>(eq: ==)
         var previous: Disposable?
         // todo: we might be able to avoid this closure by having a custom "flatMap" reader
@@ -332,11 +344,11 @@ final class I<A>: AnyI, Node {
         return result
     }
     
-    func zip2<B: Equatable,C: Equatable>(_ other: I<B>, _ with: @escaping (A,B) -> C) -> I<C> {
+    public func zip2<B: Equatable,C: Equatable>(_ other: I<B>, _ with: @escaping (A,B) -> C) -> I<C> {
         return flatMap { value in other.map { with(value, $0) } }
     }
     
-    func zip3<B: Equatable,C: Equatable,D: Equatable>(_ x: I<B>, _ y: I<C>, _ with: @escaping (A,B,C) -> D) -> I<D> {
+    public func zip3<B: Equatable,C: Equatable,D: Equatable>(_ x: I<B>, _ y: I<C>, _ with: @escaping (A,B,C) -> D) -> I<D> {
         return flatMap { value1 in
             x.flatMap { value2 in
                 y.map { with(value1, value2, $0) }
@@ -352,20 +364,24 @@ final class I<A>: AnyI, Node {
     }
 }
 
-func if_<A: Equatable>(_ condition: I<Bool>, then l: I<A>, else r: I<A>) -> I<A> {
+public func if_<A: Equatable>(_ condition: I<Bool>, then l: I<A>, else r: I<A>) -> I<A> {
     return condition.flatMap { $0 ? l : r }
 }
 
-func &&(l: I<Bool>, r: I<Bool>) -> I<Bool> {
+public func &&(l: I<Bool>, r: I<Bool>) -> I<Bool> {
     return l.zip2(r, { $0 && $1 })
 }
 
-func ||(l: I<Bool>, r: I<Bool>) -> I<Bool> {
+public func ||(l: I<Bool>, r: I<Bool>) -> I<Bool> {
     return l.zip2(r, { $0 || $1 })
 }
 
-prefix func !(l: I<Bool>) -> I<Bool> {
+public prefix func !(l: I<Bool>) -> I<Bool> {
     return l.map { !$0 }
+}
+
+public func ==<A>(l: I<A>, r: I<A>) -> I<Bool> where A: Equatable {
+    return l.zip2(r, ==)
 }
 
 enum IList<A>: Equatable where A: Equatable {

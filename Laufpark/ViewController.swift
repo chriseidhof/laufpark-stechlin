@@ -8,6 +8,7 @@
 
 import UIKit
 import MapKit
+import Incremental
 
 extension NSObjectProtocol {
     /// One-way binding
@@ -32,7 +33,7 @@ final class PolygonRenderer {
 
 struct State: Equatable {
     let tracks: [Track]
-
+    
     var selection: MKPolygon? {
         didSet {
             trackPosition = nil
@@ -89,13 +90,29 @@ func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
     }
 }
 
+extension UIView {
+    func addConstraintsToSizeToParent(spacing: CGFloat = 0) {
+        guard let view = superview else { fatalError() }
+        let top = topAnchor.constraint(equalTo: view.topAnchor)
+        let bottom = bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        let left = leftAnchor.constraint(equalTo: view.leftAnchor)
+        let right = rightAnchor.constraint(equalTo: view.rightAnchor)
+        view.addConstraints([top,bottom,left,right])
+        if spacing != 0 {
+            top.constant = spacing
+            left.constant = spacing
+            right.constant = -spacing
+            bottom.constant = -spacing
+        }
+    }
+}
+
 class ViewController: UIViewController, MKMapViewDelegate {
     let mapView = MKMapView()
     var lines: [MKPolygon:Color] = [:]
     var renderers: [MKPolygon: PolygonRenderer] = [:]
     var trackForPolygon: [MKPolygon:Track] = [:]
     var lineView: ILineView!
-    var stackView: UIStackView = UIStackView(arrangedSubviews: [])
     let totalAscent = UILabel()
     let totalDistance = UILabel()
     let name = UILabel()
@@ -116,7 +133,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     init(tracks: [Track]) {
-        state = Var<State>(value: State(tracks: tracks))
+        state = Var(State(tracks: tracks))
         selection = state.i.map { $0.selection }
         hasSelection = state.i.map { $0.selection != nil }
 
@@ -131,7 +148,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
             return (distance: distance, location: point)
         })
 
-        let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map { (x: (distance: CLLocationDistance, location: CLLocation)?) in x?.location.coordinate ?? CLLocationCoordinate2D() }
+        let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
+            $0?.location.coordinate ?? CLLocationCoordinate2D()
+        }
         
         draggedPointAnnotation = PointAnnotation(draggedPoint)
         
@@ -139,7 +158,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             ($0?.distance).map { CGFloat($0) }
         }
         
-        let elevations: I<Track.ElevationProfile?> = selectedTrack.map(eq: { _, _ in false }) { track in
+        let elevations = selectedTrack.map(eq: { _, _ in false }) { track in
             track?.elevationProfile
         }
         
@@ -163,20 +182,14 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
-        view.addSubview(stackView)
-        stackView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        stackView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        stackView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        stackView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-
-        stackView.distribution = .fill
-        stackView.axis = .vertical
-        stackView.backgroundColor = .green
-        stackView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(mapView)
+        mapView.translatesAutoresizingMaskIntoConstraints = false
+        mapView.addConstraintsToSizeToParent()
+        
 
         // Lineview
         lineView.lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        lineView.lineView.backgroundColor = .white
+        lineView.lineView.backgroundColor = .clear
         lineView.lineView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
         
         // MapView
@@ -200,11 +213,31 @@ class ViewController: UIViewController, MKMapViewDelegate {
         trackInfo.distribution = .equalCentering
         trackInfo.heightAnchor.constraint(equalToConstant: 20)
         trackInfo.spacing = 10
-        for s in trackInfo.arrangedSubviews { s.backgroundColor = .white }
+        for s in trackInfo.arrangedSubviews { s.backgroundColor = .clear }
+
+        let blurredView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+        blurredView.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(blurredView)
         
-        stackView.addArrangedSubview(mapView)
-        stackView.addArrangedSubview(trackInfo)
-        stackView.addArrangedSubview(lineView.lineView)
+        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.lineView])
+        blurredView.addSubview(stackView)
+        stackView.axis = .vertical
+        stackView.addConstraintsToSizeToParent(spacing: 10)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        
+        let height: CGFloat = 100
+        blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
+        let bottomConstraint = blurredView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        disposables.append(if_(hasSelection, then: I<CGFloat>(constant: 0), else: I(constant: 100)).observe { newOffset in
+            bottomConstraint.constant = newOffset
+            UIView.animate(withDuration: 0.2) {
+                self.view.layoutIfNeeded()
+            }
+        })
+        bottomConstraint.isActive = true
+        blurredView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        blurredView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+
         view.backgroundColor = .white
         
         disposables.append(name.bind(keyPath: \UILabel.text, selectedTrack.map { $0?.name }))
@@ -252,6 +285,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         
         // in case of multiple matches, toggle between the selections, and start out with the smallest route
+        let t = DispatchTime.now()
         if let s = selection.value ?? nil, possibilities.count > 1 && possibilities.contains(s) {
             state.change {
                 $0.selection = possibilities.lazy.sorted { $0.pointCount < $1.pointCount }.first(where: { $0 != s })
@@ -259,6 +293,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         } else {
             state.change { $0.selection = possibilities.first }
         }
+        print((DispatchTime.now().uptimeNanoseconds - t.uptimeNanoseconds)/1_000_000)
     }
 
     
@@ -275,9 +310,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
     func buildRenderer(_ line: MKPolygon) -> PolygonRenderer {
         let isSelected: I<Bool> = selection.map { $0 == line }
         let shouldHighlight: I<Bool> = !hasSelection || isSelected
-        let strokeColor: I<UIColor> = I(value: lines[line]!.uiColor)
-        let alpha: I<CGFloat> = if_(shouldHighlight, then: I(value: 1), else: I(value: 0.5))
-        let lineWidth: I<CGFloat> = if_(shouldHighlight, then: I(value: 3), else: I(value: 0.5))
+        let strokeColor: I<UIColor> = I(constant: lines[line]!.uiColor)
+        let alpha: I<CGFloat> = if_(shouldHighlight, then: I(constant: 1), else: I(constant: 0.5))
+        let lineWidth: I<CGFloat> = if_(shouldHighlight, then: I(constant: 3), else: I(constant: 0.5))
         return PolygonRenderer(polygon: line, strokeColor: strokeColor, alpha: alpha, lineWidth: lineWidth)
     }
 }
