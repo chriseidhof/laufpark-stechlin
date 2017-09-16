@@ -98,6 +98,14 @@ func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
     }
 }
 
+func time(name: StaticString = #function, line: Int = #line, _ f: () -> ()) {
+    let startTime = DispatchTime.now()
+    f()
+    let endTime = DispatchTime.now()
+    let diff = (endTime.uptimeNanoseconds - startTime.uptimeNanoseconds) / 1_000_000
+    print("\(name) (line \(line)): \(diff)")
+}
+
 extension UIView {
     func addConstraintsToSizeToParent(spacing: CGFloat = 0) {
         guard let view = superview else { fatalError() }
@@ -132,6 +140,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     let hasSelection: I<Bool>
 
     var disposables: [Any] = []
+    let darkMode = true
+    var locationManager: CLLocationManager?
     
     var selectedTrack: I<Track?> {
         return selection.map {
@@ -195,9 +205,12 @@ class ViewController: UIViewController, MKMapViewDelegate {
         mapView.addConstraintsToSizeToParent()
         
 
+        let blurredViewForeground: UIColor = darkMode ? .white : .black
+
         // Lineview
         lineView.lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
         lineView.lineView.backgroundColor = .clear
+        lineView.lineView.strokeColor = blurredViewForeground
         lineView.lineView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
         
         // MapView
@@ -212,20 +225,25 @@ class ViewController: UIViewController, MKMapViewDelegate {
         })
         
         // Track information
-        let trackInfo = UIStackView(arrangedSubviews: [
+        let trackInfoLabels = [
             name,
             totalDistance,
             totalAscent
-        ])
+        ]
+        let trackInfo = UIStackView(arrangedSubviews: trackInfoLabels)
         trackInfo.axis = .horizontal
         trackInfo.distribution = .equalCentering
         trackInfo.heightAnchor.constraint(equalToConstant: 20)
         trackInfo.spacing = 10
-        for s in trackInfo.arrangedSubviews { s.backgroundColor = .clear }
+        for s in trackInfoLabels {
+            s.backgroundColor = .clear
+            s.textColor = blurredViewForeground
+        }
 
-        let blurredView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+        let blurredView = UIVisualEffectView(effect: UIBlurEffect(style: darkMode ? .dark : .light))
         blurredView.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(blurredView)
+        
         
         let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.lineView])
         blurredView.addSubview(stackView)
@@ -262,6 +280,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
         self.disposables.append(draggedLocation.observe { x in
             guard let (_, location) = x else { return }
+            // todo subtract the selection height
             if !self.mapView.annotations(in: self.mapView.visibleMapRect).contains(self.draggedPointAnnotation.annotation) {
                 self.mapView.setCenter(location.coordinate, animated: true)
             }
@@ -275,6 +294,11 @@ class ViewController: UIViewController, MKMapViewDelegate {
         mapView.mapType = .standard
         mapView.setVisibleMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)), edgePadding: UIEdgeInsetsMake(10, 10, 10, 10), animated: true)
         mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
+        
+        if CLLocationManager.authorizationStatus() == .notDetermined {
+            locationManager = CLLocationManager()
+            locationManager!.requestWhenInUseAuthorization()
+        }
     }
     
     @objc func linePanned(sender: UIPanGestureRecognizer) {

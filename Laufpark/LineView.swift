@@ -57,7 +57,7 @@ final class LineView: UIView {
                 context.strokePath()
                 let km = Int((currentTick/scaleX)/1000)
                 ("\(km) km" as NSString).draw(at: CGPoint(x: currentTick + 5, y: -15), withAttributes: [
-                    .foregroundColor: UIColor.black,
+                    .foregroundColor: strokeColor,
                     .font: UIFont.systemFont(ofSize: 12)
                     ])
                 currentTick += cgTickWidth
