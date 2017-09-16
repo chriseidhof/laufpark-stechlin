@@ -311,7 +311,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
         self.disposables.append(draggedLocation.observe { x in
             guard let (_, location) = x else { return }
-            // todo subtract the selection height
+            // todo subtract the height of the trackInfo box (if selected)
             if !self.mapView.annotations(in: self.mapView.visibleMapRect).contains(self.draggedPointAnnotation.annotation) {
                 self.mapView.setCenter(location.coordinate, animated: true)
             }
@@ -343,7 +343,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         
         // in case of multiple matches, toggle between the selections, and start out with the smallest route
-        let t = DispatchTime.now()
         if let s = selection.value ?? nil, possibilities.count > 1 && possibilities.contains(s) {
             state.change {
                 $0.selection = possibilities.lazy.sorted { $0.pointCount < $1.pointCount }.first(where: { $0 != s })
@@ -351,7 +350,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
         } else {
             state.change { $0.selection = possibilities.first }
         }
-        print((DispatchTime.now().uptimeNanoseconds - t.uptimeNanoseconds)/1_000_000)
     }
 
     
