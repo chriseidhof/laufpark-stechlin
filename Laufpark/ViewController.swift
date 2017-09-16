@@ -123,15 +123,83 @@ extension UIView {
     }
 }
 
+final class TrackInfoView {
+    private var lineView: ILineView
+    var view: UIView! = nil
+    let totalAscent = UILabel()
+    let totalDistance = UILabel()
+    let name = UILabel()
+    var disposables: [Any] = []
+
+    // 0...1.0
+    var pannedLocation: I<CGFloat> {
+        return _pannedLocation.i
+    }
+    private var _pannedLocation: Var<CGFloat> = Var(0)
+
+    init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, track: I<Track?>) {
+        lineView = ILineView(position: position, points: points, pointsRect: pointsRect)
+        let darkMode = true
+        let blurredViewForeground: UIColor = darkMode ? .white : .black
+
+        // Lineview
+        lineView.lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        lineView.lineView.backgroundColor = .clear
+        lineView.lineView.strokeColor = blurredViewForeground
+        lineView.lineView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
+
+        // Track information
+        let trackInfoLabels = [
+            name,
+            totalDistance,
+            totalAscent
+        ]
+        let trackInfo = UIStackView(arrangedSubviews: trackInfoLabels)
+        trackInfo.axis = .horizontal
+        trackInfo.distribution = .equalCentering
+        trackInfo.heightAnchor.constraint(equalToConstant: 20)
+        trackInfo.spacing = 10
+        for s in trackInfoLabels {
+            s.backgroundColor = .clear
+            s.textColor = blurredViewForeground
+        }
+
+        let blurredView = UIVisualEffectView(effect: UIBlurEffect(style: darkMode ? .dark : .light))
+        blurredView.translatesAutoresizingMaskIntoConstraints = false
+
+
+        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.lineView])
+        blurredView.addSubview(stackView)
+        stackView.axis = .vertical
+        stackView.addConstraintsToSizeToParent(spacing: 10)
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+
+        disposables.append(name.bind(keyPath: \UILabel.text, track.map { $0?.name }))
+
+        let formatter = MKDistanceFormatter()
+        disposables.append(totalDistance.bind(keyPath: \.text, track.map { track in
+            track.map { formatter.string(fromDistance: $0.distance) }
+        }))
+        disposables.append(totalAscent.bind(keyPath: \.text, track.map { track in
+            track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
+        }))
+
+        view = blurredView
+    }
+
+    @objc func linePanned(sender: UIPanGestureRecognizer) {
+        let normalizedLocation = (sender.location(in: lineView.lineView).x /
+        lineView.lineView.bounds.size.width).clamped(to: 0.0...1.0)
+        _pannedLocation.set(normalizedLocation)
+    }
+
+}
+
 class ViewController: UIViewController, MKMapViewDelegate {
     let mapView = MKMapView()
     var lines: [MKPolygon:Color] = [:]
     var renderers: [MKPolygon: PolygonRenderer] = [:]
     var trackForPolygon: [MKPolygon:Track] = [:]
-    var lineView: ILineView!
-    let totalAscent = UILabel()
-    let totalDistance = UILabel()
-    let name = UILabel()
     var draggedPointAnnotation: PointAnnotation!
     var draggedLocation: I<(distance: Double, location: CLLocation)?>!
     
@@ -142,6 +210,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var disposables: [Any] = []
     let darkMode = true
     var locationManager: CLLocationManager?
+    var trackInfoView: TrackInfoView!
     
     var selectedTrack: I<Track?> {
         return selection.map {
@@ -191,8 +260,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
             let elevations = profile.map { $0.elevation }
             return CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
         }
+        trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack)
         
-        lineView = ILineView(position: position, points: points, pointsRect: rect)
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -203,15 +272,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
         view.addSubview(mapView)
         mapView.translatesAutoresizingMaskIntoConstraints = false
         mapView.addConstraintsToSizeToParent()
-        
-
-        let blurredViewForeground: UIColor = darkMode ? .white : .black
-
-        // Lineview
-        lineView.lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        lineView.lineView.backgroundColor = .clear
-        lineView.lineView.strokeColor = blurredViewForeground
-        lineView.lineView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
         
         // MapView
         mapView.delegate = self
@@ -224,33 +284,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
             }
         })
         
-        // Track information
-        let trackInfoLabels = [
-            name,
-            totalDistance,
-            totalAscent
-        ]
-        let trackInfo = UIStackView(arrangedSubviews: trackInfoLabels)
-        trackInfo.axis = .horizontal
-        trackInfo.distribution = .equalCentering
-        trackInfo.heightAnchor.constraint(equalToConstant: 20)
-        trackInfo.spacing = 10
-        for s in trackInfoLabels {
-            s.backgroundColor = .clear
-            s.textColor = blurredViewForeground
-        }
-
-        let blurredView = UIVisualEffectView(effect: UIBlurEffect(style: darkMode ? .dark : .light))
-        blurredView.translatesAutoresizingMaskIntoConstraints = false
+        let blurredView = trackInfoView.view!
         view.addSubview(blurredView)
-        
-        
-        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.lineView])
-        blurredView.addSubview(stackView)
-        stackView.axis = .vertical
-        stackView.addConstraintsToSizeToParent(spacing: 10)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
         let height: CGFloat = 120
         blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
         let bottomConstraint = blurredView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -266,17 +301,13 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
         view.backgroundColor = .white
         
-        disposables.append(name.bind(keyPath: \UILabel.text, selectedTrack.map { $0?.name }))
-        
-        let formatter = MKDistanceFormatter()
-        disposables.append(totalDistance.bind(keyPath: \.text, selectedTrack.map { track in
-            track.map { formatter.string(fromDistance: $0.distance) }
-        }))
-        disposables.append(totalAscent.bind(keyPath: \.text, selectedTrack.map { track in
-            track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
-        }))
 
         mapView.addAnnotation(draggedPointAnnotation.annotation)
+
+        disposables.append(trackInfoView.pannedLocation.observe { loc in
+            self.state.change { $0.trackPosition = loc }
+        })
+
 
         self.disposables.append(draggedLocation.observe { x in
             guard let (_, location) = x else { return }
@@ -301,11 +332,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    @objc func linePanned(sender: UIPanGestureRecognizer) {
-        let normalizedLocation = (sender.location(in: lineView.lineView).x / lineView.lineView.bounds.size.width).clamped(to: 0.0...1.0)
-        state.change { $0.trackPosition = normalizedLocation }
-        
-    }
     
     @objc func mapTapped(sender: UITapGestureRecognizer) {
         let point = sender.location(ofTouch: 0, in: mapView)
