@@ -1,5 +1,6 @@
 import Foundation
 
+// TODO: it could be a lot faster (especially for n = small) to use an array
 struct Register<A> {
     typealias Token = Int
     private var items: [Token:A] = [:]

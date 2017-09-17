@@ -84,9 +84,37 @@ extension UIView {
     }
 }
 
+final class Button {
+    let button: UIButton
+    var disposables: [Disposable] = []
+    init(type: UIButtonType, title: I<String>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) {
+        button = UIButton(type: type)
+        disposables.append(button.bind(keyPath: \.backgroundColor, backgroundColor.map { $0 }))
+        button.backgroundColor = UIColor(white: 1, alpha: 0.8)
+        disposables.append(title.observe {
+            self.button.setTitle($0, for: .normal)
+        })
+        disposables.append(titleColor.observe {
+            self.button.setTitleColor($0, for: .normal)
+        })
+        button.layer.cornerRadius = 5
+    }
+}
+
+class MapView {
+    let view: MKMapView
+    init() {
+        view = MKMapView()
+
+        view.showsCompass = true
+        view.showsScale = true
+        view.showsUserLocation = true
+        view.mapType = .standard
+    }
+}
 
 class ViewController: UIViewController, MKMapViewDelegate {
-    let mapView = MKMapView()
+    let mapView = MapView()
     var lines: [MKPolygon:Color] = [:]
     var renderers: [MKPolygon: PolygonRenderer] = [:]
     var trackForPolygon: [MKPolygon:Track] = [:]
@@ -102,6 +130,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var locationManager: CLLocationManager?
     var trackInfoView: TrackInfoView!
     
+    var toggleMapButton: Button!
+
     var selectedTrack: I<Track?> {
         return selection.map {
             guard let p = $0 else { return nil }
@@ -152,6 +182,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack)
         
+        toggleMapButton = Button(type: .custom, title: I(constant: "🌍"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -159,16 +190,16 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
-        view.addSubview(mapView)
-        mapView.translatesAutoresizingMaskIntoConstraints = false
-        mapView.addConstraintsToSizeToParent()
+        view.addSubview(mapView.view)
+        mapView.view.translatesAutoresizingMaskIntoConstraints = false
+        mapView.view.addConstraintsToSizeToParent()
         
         // MapView
-        mapView.delegate = self
+        mapView.view.delegate = self
         disposables.append(state.i.map { $0.tracks }.observe {
             $0.forEach { track in
                 let line = track.line
-                self.mapView.add(line)
+                self.mapView.view.add(line)
                 self.lines[line] = track.color
                 self.trackForPolygon[line] = track
             }
@@ -192,7 +223,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         view.backgroundColor = .white
         
 
-        mapView.addAnnotation(draggedPointAnnotation.annotation)
+        mapView.view.addAnnotation(draggedPointAnnotation.annotation)
         
         disposables.append(trackInfoView.pannedLocation.observe { loc in
             self.state.change { $0.trackPosition = loc }
@@ -202,36 +233,28 @@ class ViewController: UIViewController, MKMapViewDelegate {
         self.disposables.append(draggedLocation.observe { x in
             guard let (_, location) = x else { return }
             // todo subtract the height of the trackInfo box (if selected)
-            if !self.mapView.annotations(in: self.mapView.visibleMapRect).contains(self.draggedPointAnnotation.annotation) {
-                self.mapView.setCenter(location.coordinate, animated: true)
+            if !self.mapView.view.annotations(in: self.mapView.view.visibleMapRect).contains(self.draggedPointAnnotation.annotation) {
+                self.mapView.view.setCenter(location.coordinate, animated: true)
             }
         })
 
-        let button = UIButton(type: .custom)
-        button.backgroundColor = UIColor(white: 1, alpha: 0.8)
-        button.setTitle("🌐", for: .normal)
-        button.setTitleColor(.white, for: .normal)
-        button.layer.cornerRadius = 5
-        view.addSubview(button)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        button.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
-        button.topAnchor.constraint(equalTo: view.topAnchor, constant: 25).isActive = true
-        button.widthAnchor.constraint(equalToConstant: 30)
-        button.heightAnchor.constraint(equalToConstant: 30)
-        button.addTarget(self, action: #selector(buttonTapped(button:)), for: .touchUpInside)
+        let buttonView = toggleMapButton.button
+        view.addSubview(buttonView)
+        buttonView.translatesAutoresizingMaskIntoConstraints = false
+        buttonView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
+        buttonView.topAnchor.constraint(equalTo: view.topAnchor, constant: 25).isActive = true
+        buttonView.widthAnchor.constraint(equalToConstant: 30)
+        buttonView.heightAnchor.constraint(equalToConstant: 30)
+        buttonView.addTarget(self, action: #selector(buttonTapped(button:)), for: .touchUpInside)
     }
 
     @IBAction func buttonTapped(button: UIButton) {
-        mapView.mapType = mapView.mapType == .standard ? .satellite : .standard
+        mapView.view.mapType = mapView.view.mapType == .standard ? .satellite : .standard
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        mapView.showsCompass = true
-        mapView.showsScale = true
-        mapView.showsUserLocation = true
-        mapView.mapType = .standard
-        mapView.setVisibleMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)), edgePadding: UIEdgeInsetsMake(10, 10, 10, 10), animated: true)
-        mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
+        mapView.view.setVisibleMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)), edgePadding: UIEdgeInsetsMake(10, 10, 10, 10), animated: true)
+        mapView.view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
         
         if CLLocationManager.authorizationStatus() == .notDetermined {
             locationManager = CLLocationManager()
@@ -241,8 +264,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     
     @objc func mapTapped(sender: UITapGestureRecognizer) {
-        let point = sender.location(ofTouch: 0, in: mapView)
-        let mapPoint = MKMapPointForCoordinate(mapView.convert(point, toCoordinateFrom: mapView))
+        let point = sender.location(ofTouch: 0, in: mapView.view)
+        let mapPoint = MKMapPointForCoordinate(mapView.view.convert(point, toCoordinateFrom: mapView.view))
         let possibilities = lines.keys.filter { line in
             let renderer = renderers[line]!.renderer
             let point = renderer.point(for: mapPoint)
