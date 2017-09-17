@@ -84,60 +84,8 @@ extension UIView {
     }
 }
 
-final class ViewBox<V: UIView> {
-    let view: V
-    var disposables: [Disposable] = []
-    init(_ view: V = V()) {
-        self.view = view
-    }
-
-    func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A>) where A: Equatable {
-        disposables.append(view.bind(keyPath: to, value))
-    }
-
-    func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A?>) where A: Equatable {
-        disposables.append(view.bind(keyPath: to, value.map { $0 }))
-    }
-
-    func observe<A>(value: I<A>, onChange: @escaping (V,A) -> ()) {
-        disposables.append(value.observe { newValue in
-            onChange(self.view,newValue) // ownership?
-        })
-    }
-}
-
-func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) -> ViewBox<UIButton> {
-    let result = ViewBox<UIButton>(UIButton(type: type))
-    result.bind(backgroundColor, to: \.backgroundColor)
-    result.observe(value: title, onChange: { $0.setTitle($1, for: .normal) })
-    result.observe(value: titleColor, onChange: { $0.setTitleColor($1, for: .normal)})
-    result.view.layer.cornerRadius = 5
-    return result
-}
-
-class MapView {
-    let view: MKMapView
-    var disposables: [Any] = []
-    init() {
-        view = MKMapView()
-
-        view.showsCompass = true
-        view.showsScale = true
-        view.showsUserLocation = true
-        view.mapType = .standard
-    }
-
-    var mapType: I<MKMapType> {
-        let t = Var<MKMapType>(view.mapType)
-        disposables.append(view.observe(\.mapType, options: .new, changeHandler: { m, _ in
-            t.set(m.mapType)
-        }))
-        return t.i
-    }
-}
-
 class ViewController: UIViewController, MKMapViewDelegate {
-    let mapView = MapView()
+    let mapView: ViewBox<MKMapView> = buildMapView()
     var lines: [MKPolygon:Color] = [:]
     var renderers: [MKPolygon: PolygonRenderer] = [:]
     var trackForPolygon: [MKPolygon:Track] = [:]
@@ -204,7 +152,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             return CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
         }
         
-        let darkMode = mapView.mapType == .standard
+        let darkMode = mapView[\.mapType] == .standard
         trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
         toggleMapButton = button(type: .custom, title: I(constant: "🌍"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
     }
@@ -267,13 +215,11 @@ class ViewController: UIViewController, MKMapViewDelegate {
         buttonView.translatesAutoresizingMaskIntoConstraints = false
         buttonView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
         buttonView.topAnchor.constraint(equalTo: view.topAnchor, constant: 25).isActive = true
-        buttonView.widthAnchor.constraint(equalToConstant: 30)
-        buttonView.heightAnchor.constraint(equalToConstant: 30)
         buttonView.addTarget(self, action: #selector(buttonTapped(button:)), for: .touchUpInside)
     }
 
     @IBAction func buttonTapped(button: UIButton) {
-        mapView.view.mapType = mapView.view.mapType == .standard ? .satellite : .standard
+        mapView.view.mapType = mapView.view.mapType == .standard ? .hybrid : .standard
     }
     
     override func viewDidAppear(_ animated: Bool) {

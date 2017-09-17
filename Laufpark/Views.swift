@@ -11,7 +11,7 @@ import Incremental
 import MapKit
 
 final class TrackInfoView {
-    private var lineView: ILineView
+    private var lineView: ViewBox<LineView>
     var view: UIView! = nil
     let totalAscent = UILabel()
     let totalDistance = UILabel()
@@ -26,13 +26,13 @@ final class TrackInfoView {
     
     init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, track: I<Track?>, darkMode: I<Bool>) {
         let blurredViewForeground: I<UIColor> = if_(darkMode, then: I(constant: .white), else: I(constant: .black))
-        lineView = ILineView(position: position, points: points, pointsRect: pointsRect, strokeColor: blurredViewForeground)
+        self.lineView = buildLineView(position: position, points: points, pointsRect: pointsRect, strokeColor: blurredViewForeground)
 
         
         // Lineview
-        lineView.lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        lineView.lineView.backgroundColor = .clear
-        lineView.lineView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
+        lineView.view.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        lineView.view.backgroundColor = .clear
+        lineView.view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
         
         // Track information
         let trackInfoLabels = [
@@ -63,7 +63,7 @@ final class TrackInfoView {
         })
         blurredView.translatesAutoresizingMaskIntoConstraints = false
         
-        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.lineView])
+        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.view])
         blurredView.addSubview(stackView)
         stackView.axis = .vertical
         stackView.addConstraintsToSizeToParent(spacing: 10)
@@ -83,10 +83,60 @@ final class TrackInfoView {
     }
     
     @objc func linePanned(sender: UIPanGestureRecognizer) {
-        let normalizedLocation = (sender.location(in: lineView.lineView).x /
-            lineView.lineView.bounds.size.width).clamped(to: 0.0...1.0)
+        let normalizedLocation = (sender.location(in: lineView.view).x /
+            lineView.view.bounds.size.width).clamped(to: 0.0...1.0)
         _pannedLocation.set(normalizedLocation)
     }
+}
+
+final class ViewBox<V: UIView> {
+    let view: V
+    var disposables: [Any] = []
+    init(_ view: V = V()) {
+        self.view = view
+    }
+    
+    func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A>) {
+        disposables.append(view.bind(keyPath: to, value))
+    }
+    
+    func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A?>) where A: Equatable {
+        disposables.append(view.bind(keyPath: to, value.map { $0 }))
+    }
+    
+    func observe<A>(value: I<A>, onChange: @escaping (V,A) -> ()) {
+        disposables.append(value.observe { newValue in
+            onChange(self.view,newValue) // ownership?
+        })
+    }
+    
+    subscript<A>(keyPath: KeyPath<V,A>) -> I<A> where A: Equatable {
+        let t = Var<A>(view[keyPath: keyPath]) // todo lifetime should be tied to I's lifetime
+        disposables.append(view.observe(keyPath, options: .new, changeHandler: { m, _ in
+            t.set(m[keyPath: keyPath])
+        }))
+        return t.i
+        
+    }
+}
+
+func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) -> ViewBox<UIButton> {
+    let result = ViewBox<UIButton>(UIButton(type: type))
+    result.bind(backgroundColor, to: \.backgroundColor)
+    result.observe(value: title, onChange: { $0.setTitle($1, for: .normal) })
+    result.observe(value: titleColor, onChange: { $0.setTitleColor($1, for: .normal)})
+    result.view.layer.cornerRadius = 5
+    return result
+}
+
+func buildMapView() -> ViewBox<MKMapView> {
+    let box = ViewBox<MKMapView>()
+    let view = box.view
+    view.showsCompass = true
+    view.showsScale = true
+    view.showsUserLocation = true
+    view.mapType = .standard
+    return box
 }
 
 final class PolygonRenderer {
@@ -119,14 +169,11 @@ extension CLLocationCoordinate2D: Equatable {
     }
 }
 
-final class ILineView {
-    let lineView = LineView()
-    var disposables: [Any] = []
-    init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, strokeColor: I<UIColor>) {
-        disposables.append(lineView.bind(keyPath: \.position, position))
-        disposables.append(lineView.bind(keyPath: \.points, points))
-        disposables.append(lineView.bind(keyPath: \.pointsRect, pointsRect))
-        disposables.append(lineView.bind(keyPath: \.strokeColor, strokeColor))
-    }
+func buildLineView(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, strokeColor: I<UIColor>) -> ViewBox<LineView> {
+    let box = ViewBox<LineView>()
+    box.bind(position, to: \LineView.position)
+    box.bind(points, to: \.points)
+    box.bind(pointsRect, to: \.pointsRect)
+    box.bind(strokeColor, to: \.strokeColor)
+    return box
 }
-
