@@ -206,6 +206,23 @@ class ViewController: UIViewController, MKMapViewDelegate {
                 self.mapView.setCenter(location.coordinate, animated: true)
             }
         })
+
+        let button = UIButton(type: .custom)
+        button.backgroundColor = UIColor(white: 1, alpha: 0.8)
+        button.setTitle("🌐", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 5
+        view.addSubview(button)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        button.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
+        button.topAnchor.constraint(equalTo: view.topAnchor, constant: 25).isActive = true
+        button.widthAnchor.constraint(equalToConstant: 30)
+        button.heightAnchor.constraint(equalToConstant: 30)
+        button.addTarget(self, action: #selector(buttonTapped(button:)), for: .touchUpInside)
+    }
+
+    @IBAction func buttonTapped(button: UIButton) {
+        mapView.mapType = mapView.mapType == .standard ? .satellite : .standard
     }
     
     override func viewDidAppear(_ animated: Bool) {
