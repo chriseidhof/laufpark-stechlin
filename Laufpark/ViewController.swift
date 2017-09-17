@@ -103,6 +103,7 @@ final class Button {
 
 class MapView {
     let view: MKMapView
+    var disposables: [Any] = []
     init() {
         view = MKMapView()
 
@@ -110,6 +111,14 @@ class MapView {
         view.showsScale = true
         view.showsUserLocation = true
         view.mapType = .standard
+    }
+
+    var mapType: I<MKMapType> {
+        let t = Var<MKMapType>(view.mapType)
+        disposables.append(view.observe(\.mapType, options: .new, changeHandler: { m, _ in
+            t.set(m.mapType)
+        }))
+        return t.i
     }
 }
 
@@ -180,8 +189,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
             let elevations = profile.map { $0.elevation }
             return CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
         }
-        trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack)
         
+        let darkMode = mapView.mapType == .standard
+        trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
         toggleMapButton = Button(type: .custom, title: I(constant: "🌍"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
     }
     
@@ -210,7 +220,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let height: CGFloat = 120
         blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
         let bottomConstraint = blurredView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        disposables.append(if_(hasSelection, then: I<CGFloat>(constant: 0), else: I(constant: height)).observe { newOffset in
+        disposables.append(if_(hasSelection, then: 0, else: height).observe { newOffset in
             bottomConstraint.constant = newOffset
             UIView.animate(withDuration: 0.2) {
                 self.view.layoutIfNeeded()
@@ -297,8 +307,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let isSelected: I<Bool> = selection.map { $0 == line }
         let shouldHighlight: I<Bool> = !hasSelection || isSelected
         let strokeColor: I<UIColor> = I(constant: lines[line]!.uiColor)
-        let alpha: I<CGFloat> = if_(shouldHighlight, then: I(constant: 1), else: I(constant: 0.5))
-        let lineWidth: I<CGFloat> = if_(shouldHighlight, then: I(constant: 3), else: I(constant: 0.5))
+        let alpha: I<CGFloat> = if_(shouldHighlight, then: 1, else: 0.5)
+        let lineWidth: I<CGFloat> = if_(shouldHighlight, then: 3, else: 0.5)
         return PolygonRenderer(polygon: line, strokeColor: strokeColor, alpha: alpha, lineWidth: lineWidth)
     }
 }

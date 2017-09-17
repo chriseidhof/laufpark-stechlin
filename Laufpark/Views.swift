@@ -24,15 +24,14 @@ final class TrackInfoView {
     }
     private var _pannedLocation: Var<CGFloat> = Var(0)
     
-    init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, track: I<Track?>) {
-        lineView = ILineView(position: position, points: points, pointsRect: pointsRect)
-        let darkMode = true
-        let blurredViewForeground: UIColor = darkMode ? .white : .black
+    init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, track: I<Track?>, darkMode: I<Bool>) {
+        let blurredViewForeground: I<UIColor> = if_(darkMode, then: I(constant: .white), else: I(constant: .black))
+        lineView = ILineView(position: position, points: points, pointsRect: pointsRect, strokeColor: blurredViewForeground)
+
         
         // Lineview
         lineView.lineView.heightAnchor.constraint(equalToConstant: 100).isActive = true
         lineView.lineView.backgroundColor = .clear
-        lineView.lineView.strokeColor = blurredViewForeground
         lineView.lineView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
         
         // Track information
@@ -48,12 +47,21 @@ final class TrackInfoView {
         trackInfo.spacing = 10
         for s in trackInfoLabels {
             s.backgroundColor = .clear
-            s.textColor = blurredViewForeground
         }
+        disposables.append(blurredViewForeground.observe { color in
+            trackInfoLabels.forEach { l in
+                l.textColor = color
+            }
+        })
         
-        let blurredView = UIVisualEffectView(effect: UIBlurEffect(style: darkMode ? .dark : .light))
+        let blurEffect = if_(darkMode, then: UIBlurEffect(style: .dark), else: UIBlurEffect(style: .light))
+        let blurredView = UIVisualEffectView(effect: nil)
+        disposables.append(blurEffect.observe { effect in
+            UIView.animate(withDuration: 0.2) {
+                blurredView.effect = effect
+            }
+        })
         blurredView.translatesAutoresizingMaskIntoConstraints = false
-        
         
         let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.lineView])
         blurredView.addSubview(stackView)
@@ -114,10 +122,11 @@ extension CLLocationCoordinate2D: Equatable {
 final class ILineView {
     let lineView = LineView()
     var disposables: [Any] = []
-    init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>) {
-        disposables.append(lineView.bind(keyPath: \LineView.position, position))
-        disposables.append(lineView.bind(keyPath: \LineView.points, points))
-        disposables.append(lineView.bind(keyPath: \LineView.pointsRect, pointsRect))
+    init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, strokeColor: I<UIColor>) {
+        disposables.append(lineView.bind(keyPath: \.position, position))
+        disposables.append(lineView.bind(keyPath: \.points, points))
+        disposables.append(lineView.bind(keyPath: \.pointsRect, pointsRect))
+        disposables.append(lineView.bind(keyPath: \.strokeColor, strokeColor))
     }
 }
 

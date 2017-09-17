@@ -369,6 +369,10 @@ public func if_<A: Equatable>(_ condition: I<Bool>, then l: I<A>, else r: I<A>) 
     return condition.flatMap { $0 ? l : r }
 }
 
+public func if_<A: Equatable>(_ condition: I<Bool>, then l: A, else r: A) -> I<A> {
+    return condition.map { $0 ? l : r }
+}
+
 public func &&(l: I<Bool>, r: I<Bool>) -> I<Bool> {
     return l.zip2(r, { $0 && $1 })
 }
@@ -383,6 +387,10 @@ public prefix func !(l: I<Bool>) -> I<Bool> {
 
 public func ==<A>(l: I<A>, r: I<A>) -> I<Bool> where A: Equatable {
     return l.zip2(r, ==)
+}
+
+public func ==<A>(l: I<A>, r: A) -> I<Bool> where A: Equatable {
+    return l.map { $0 == r }
 }
 
 enum IList<A>: Equatable where A: Equatable {
