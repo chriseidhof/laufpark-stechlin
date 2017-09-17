@@ -84,21 +84,35 @@ extension UIView {
     }
 }
 
-final class Button {
-    let button: UIButton
+final class ViewBox<V: UIView> {
+    let view: V
     var disposables: [Disposable] = []
-    init(type: UIButtonType, title: I<String>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) {
-        button = UIButton(type: type)
-        disposables.append(button.bind(keyPath: \.backgroundColor, backgroundColor.map { $0 }))
-        button.backgroundColor = UIColor(white: 1, alpha: 0.8)
-        disposables.append(title.observe {
-            self.button.setTitle($0, for: .normal)
-        })
-        disposables.append(titleColor.observe {
-            self.button.setTitleColor($0, for: .normal)
-        })
-        button.layer.cornerRadius = 5
+    init(_ view: V = V()) {
+        self.view = view
     }
+
+    func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A>) where A: Equatable {
+        disposables.append(view.bind(keyPath: to, value))
+    }
+
+    func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A?>) where A: Equatable {
+        disposables.append(view.bind(keyPath: to, value.map { $0 }))
+    }
+
+    func observe<A>(value: I<A>, onChange: @escaping (V,A) -> ()) {
+        disposables.append(value.observe { newValue in
+            onChange(self.view,newValue) // ownership?
+        })
+    }
+}
+
+func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) -> ViewBox<UIButton> {
+    let result = ViewBox<UIButton>(UIButton(type: type))
+    result.bind(backgroundColor, to: \.backgroundColor)
+    result.observe(value: title, onChange: { $0.setTitle($1, for: .normal) })
+    result.observe(value: titleColor, onChange: { $0.setTitleColor($1, for: .normal)})
+    result.view.layer.cornerRadius = 5
+    return result
 }
 
 class MapView {
@@ -139,7 +153,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var locationManager: CLLocationManager?
     var trackInfoView: TrackInfoView!
     
-    var toggleMapButton: Button!
+    var toggleMapButton: ViewBox<UIButton>!
 
     var selectedTrack: I<Track?> {
         return selection.map {
@@ -192,7 +206,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         
         let darkMode = mapView.mapType == .standard
         trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
-        toggleMapButton = Button(type: .custom, title: I(constant: "🌍"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
+        toggleMapButton = button(type: .custom, title: I(constant: "🌍"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -248,7 +262,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             }
         })
 
-        let buttonView = toggleMapButton.button
+        let buttonView = toggleMapButton.view
         view.addSubview(buttonView)
         buttonView.translatesAutoresizingMaskIntoConstraints = false
         buttonView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
