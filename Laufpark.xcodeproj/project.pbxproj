@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8306185B1F6E765300F70583 /* Views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8306185A1F6E765300F70583 /* Views.swift */; };
 		83099ADF1F630FC100D3EBB8 /* LineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83099ADE1F630FC100D3EBB8 /* LineView.swift */; };
 		83099AEC1F63CD7900D3EBB8 /* wabe beige-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE51F63CD2700D3EBB8 /* wabe beige-strecke 0.gpx */; };
 		83099AED1F63CD7900D3EBB8 /* wabe blau-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE41F63CD2700D3EBB8 /* wabe blau-strecke 0.gpx */; };
@@ -120,6 +121,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8306185A1F6E765300F70583 /* Views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views.swift; sourceTree = "<group>"; };
 		83099ADE1F630FC100D3EBB8 /* LineView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineView.swift; sourceTree = "<group>"; };
 		83099AE01F63CD2600D3EBB8 /* wabe hellbraun-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellbraun-strecke 0.gpx"; sourceTree = "<group>"; };
 		83099AE11F63CD2600D3EBB8 /* wabe tuerkis-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 0.gpx"; sourceTree = "<group>"; };
@@ -342,6 +344,7 @@
 				8340DF9A1F61B1F8002176C6 /* Assets.xcassets */,
 				8340DF9F1F61B1F8002176C6 /* Info.plist */,
 				83099ADE1F630FC100D3EBB8 /* LineView.swift */,
+				8306185A1F6E765300F70583 /* Views.swift */,
 			);
 			path = Laufpark;
 			sourceTree = "<group>";
@@ -617,6 +620,7 @@
 			files = (
 				8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */,
 				83099ADF1F630FC100D3EBB8 /* LineView.swift in Sources */,
+				8306185B1F6E765300F70583 /* Views.swift in Sources */,
 				8340DF961F61B1F8002176C6 /* ViewController.swift in Sources */,
 				83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */,
 				8340DF941F61B1F8002176C6 /* AppDelegate.swift in Sources */,
@@ -756,7 +760,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = SL7736T2Z4;
 				INFOPLIST_FILE = Laufpark/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Laufpark;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -772,7 +776,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = SL7736T2Z4;
 				INFOPLIST_FILE = Laufpark/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Laufpark;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -793,7 +797,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Incremental/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Incremental;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
@@ -817,7 +821,7 @@
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				INFOPLIST_FILE = Incremental/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Incremental;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
