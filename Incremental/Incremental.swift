@@ -247,7 +247,7 @@ public final class I<A>: AnyI, Node {
     
     /// Returns `self`
     @discardableResult
-    fileprivate func write(_ value: A) -> I<A> {
+    func write(_ value: A) -> I<A> {
         assert(!constant)
         if let existing = self.value, eq(existing, value) { return self }
         
@@ -362,18 +362,6 @@ public final class I<A>: AnyI, Node {
         var newValue = value!
         transform(&newValue)
         write(newValue)
-    }
-}
-
-// Could this be in a conditional block? Only works for Foundation w/ ObjC runtime
-extension NSObjectProtocol where Self: NSObject {
-    public subscript<Value>(_ keyPath: KeyPath<Self, Value>) -> I<Value> where Value: Equatable {
-        let i: I<Value> = I(value: self[keyPath: keyPath])
-        let observation = observe(keyPath) { (obj, change) in
-            i.write(obj[keyPath: keyPath])
-        }
-        i.strongReferences.add(observation)
-        return i
     }
 }
 

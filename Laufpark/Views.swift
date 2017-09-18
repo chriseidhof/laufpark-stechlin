@@ -11,7 +11,7 @@ import Incremental
 import MapKit
 
 final class TrackInfoView {
-    private var lineView: ViewBox<LineView>
+    private var lineView: IBox<LineView>
     var view: UIView! = nil
     let totalAscent = UILabel()
     let totalDistance = UILabel()
@@ -89,34 +89,27 @@ final class TrackInfoView {
     }
 }
 
-final class ViewBox<V: UIView> {
-    let view: V
-    var disposables: [Any] = []
-    init(_ view: V = V()) {
-        self.view = view
-    }
-    
-    func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A>) {
-        disposables.append(view.bind(keyPath: to, value))
-    }
-    
-    func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A?>) where A: Equatable {
-        disposables.append(view.bind(keyPath: to, value.map { $0 }))
-    }
-    
-    func observe<A>(value: I<A>, onChange: @escaping (V,A) -> ()) {
-        disposables.append(value.observe { newValue in
-            onChange(self.view,newValue) // ownership?
-        })
-    }
-    
-    subscript<A>(keyPath: KeyPath<V,A>) -> I<A> where A: Equatable {
-        return view[keyPath]
+
+extension UIView {
+    func addConstraintsToSizeToParent(spacing: CGFloat = 0) {
+        guard let view = superview else { fatalError() }
+        let top = topAnchor.constraint(equalTo: view.topAnchor)
+        let bottom = bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        let left = leftAnchor.constraint(equalTo: view.leftAnchor)
+        let right = rightAnchor.constraint(equalTo: view.rightAnchor)
+        view.addConstraints([top,bottom,left,right])
+        if spacing != 0 {
+            top.constant = spacing
+            left.constant = spacing
+            right.constant = -spacing
+            bottom.constant = -spacing
+        }
     }
 }
 
-func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) -> ViewBox<UIButton> {
-    let result = ViewBox<UIButton>(UIButton(type: type))
+
+func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) -> IBox<UIButton> {
+    let result = IBox<UIButton>(UIButton(type: type))
     result.bind(backgroundColor, to: \.backgroundColor)
     result.observe(value: title, onChange: { $0.setTitle($1, for: .normal) })
     result.observe(value: titleColor, onChange: { $0.setTitleColor($1, for: .normal)})
@@ -124,8 +117,8 @@ func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<U
     return result
 }
 
-func buildMapView() -> ViewBox<MKMapView> {
-    let box = ViewBox<MKMapView>()
+func buildMapView() -> IBox<MKMapView> {
+    let box = IBox<MKMapView>()
     let view = box.view
     view.showsCompass = true
     view.showsScale = true
@@ -164,8 +157,8 @@ extension CLLocationCoordinate2D: Equatable {
     }
 }
 
-func buildLineView(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, strokeColor: I<UIColor>) -> ViewBox<LineView> {
-    let box = ViewBox<LineView>()
+func buildLineView(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, strokeColor: I<UIColor>) -> IBox<LineView> {
+    let box = IBox<LineView>()
     box.bind(position, to: \LineView.position)
     box.bind(points, to: \.points)
     box.bind(pointsRect, to: \.pointsRect)

@@ -10,24 +10,6 @@ import UIKit
 import MapKit
 import Incremental
 
-extension NSObjectProtocol {
-    /// One-way binding
-    func bind<Value>(keyPath: ReferenceWritableKeyPath<Self, Value>, _ i: I<Value>) -> Disposable {
-        return i.observe {
-            self[keyPath: keyPath] = $0
-        }
-    }
-}
-
-
-extension Comparable {
-    func clamped(to: ClosedRange<Self>) -> Self {
-        if self < to.lowerBound { return to.lowerBound }
-        if self > to.upperBound { return to.upperBound }
-        return self
-    }
-}
-
 struct State: Equatable {
     let tracks: [Track]
     
@@ -49,43 +31,8 @@ struct State: Equatable {
     }
 }
 
-func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
-    return { l, r in
-        switch (l,r) {
-        case (nil,nil): return true
-        case let (x?, y?): return f(x,y)
-        default: return false
-        }
-    }
-}
-
-func time(name: StaticString = #function, line: Int = #line, _ f: () -> ()) {
-    let startTime = DispatchTime.now()
-    f()
-    let endTime = DispatchTime.now()
-    let diff = (endTime.uptimeNanoseconds - startTime.uptimeNanoseconds) / 1_000_000
-    print("\(name) (line \(line)): \(diff)")
-}
-
-extension UIView {
-    func addConstraintsToSizeToParent(spacing: CGFloat = 0) {
-        guard let view = superview else { fatalError() }
-        let top = topAnchor.constraint(equalTo: view.topAnchor)
-        let bottom = bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        let left = leftAnchor.constraint(equalTo: view.leftAnchor)
-        let right = rightAnchor.constraint(equalTo: view.rightAnchor)
-        view.addConstraints([top,bottom,left,right])
-        if spacing != 0 {
-            top.constant = spacing
-            left.constant = spacing
-            right.constant = -spacing
-            bottom.constant = -spacing
-        }
-    }
-}
-
 class ViewController: UIViewController, MKMapViewDelegate {
-    let mapView: ViewBox<MKMapView> = buildMapView()
+    let mapView: IBox<MKMapView> = buildMapView()
     var lines: [MKPolygon:Color] = [:]
     var renderers: [MKPolygon: PolygonRenderer] = [:]
     var trackForPolygon: [MKPolygon:Track] = [:]
@@ -101,7 +48,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var locationManager: CLLocationManager?
     var trackInfoView: TrackInfoView!
     
-    var toggleMapButton: ViewBox<UIButton>!
+    var toggleMapButton: IBox<UIButton>!
 
     var selectedTrack: I<Track?> {
         return selection.map {
