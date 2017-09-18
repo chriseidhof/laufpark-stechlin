@@ -365,6 +365,18 @@ public final class I<A>: AnyI, Node {
     }
 }
 
+// Could this be in a conditional block? Only works for Foundation w/ ObjC runtime
+extension NSObjectProtocol where Self: NSObject {
+    public subscript<Value>(_ keyPath: KeyPath<Self, Value>) -> I<Value> where Value: Equatable {
+        let i: I<Value> = I(value: self[keyPath: keyPath])
+        let observation = observe(keyPath) { (obj, change) in
+            i.write(obj[keyPath: keyPath])
+        }
+        i.strongReferences.add(observation)
+        return i
+    }
+}
+
 public func if_<A: Equatable>(_ condition: I<Bool>, then l: I<A>, else r: I<A>) -> I<A> {
     return condition.flatMap { $0 ? l : r }
 }

@@ -111,12 +111,7 @@ final class ViewBox<V: UIView> {
     }
     
     subscript<A>(keyPath: KeyPath<V,A>) -> I<A> where A: Equatable {
-        let t = Var<A>(view[keyPath: keyPath]) // todo lifetime should be tied to I's lifetime
-        disposables.append(view.observe(keyPath, options: .new, changeHandler: { m, _ in
-            t.set(m[keyPath: keyPath])
-        }))
-        return t.i
-        
+        return view[keyPath]
     }
 }
 
