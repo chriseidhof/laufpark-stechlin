@@ -30,9 +30,9 @@ final class TrackInfoView {
 
         
         // Lineview
-        lineView.view.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        lineView.view.backgroundColor = .clear
-        lineView.view.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
+        lineView.unbox.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        lineView.unbox.backgroundColor = .clear
+        lineView.unbox.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
         
         // Track information
         let trackInfoLabels = [
@@ -63,7 +63,7 @@ final class TrackInfoView {
         })
         blurredView.translatesAutoresizingMaskIntoConstraints = false
         
-        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.view])
+        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.unbox])
         blurredView.addSubview(stackView)
         stackView.axis = .vertical
         stackView.addConstraintsToSizeToParent(spacing: 10)
@@ -83,8 +83,8 @@ final class TrackInfoView {
     }
     
     @objc func linePanned(sender: UIPanGestureRecognizer) {
-        let normalizedLocation = (sender.location(in: lineView.view).x /
-            lineView.view.bounds.size.width).clamped(to: 0.0...1.0)
+        let normalizedLocation = (sender.location(in: lineView.unbox).x /
+            lineView.unbox.bounds.size.width).clamped(to: 0.0...1.0)
         _pannedLocation.write(normalizedLocation)
     }
 }
@@ -113,13 +113,13 @@ func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<U
     result.bind(backgroundColor, to: \.backgroundColor)
     result.observe(value: title, onChange: { $0.setTitle($1, for: .normal) })
     result.observe(value: titleColor, onChange: { $0.setTitleColor($1, for: .normal)})
-    result.view.layer.cornerRadius = 5
+    result.unbox.layer.cornerRadius = 5
     return result
 }
 
 func buildMapView() -> IBox<MKMapView> {
     let box = IBox<MKMapView>()
-    let view = box.view
+    let view = box.unbox
     view.showsCompass = true
     view.showsScale = true
     view.showsUserLocation = true
@@ -127,28 +127,19 @@ func buildMapView() -> IBox<MKMapView> {
     return box
 }
 
-final class PolygonRenderer {
-    let renderer: MKPolygonRenderer
-    var disposables: [Disposable] = []
-    
-    init(polygon: MKPolygon, strokeColor: I<UIColor>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) {
-        renderer = MKPolygonRenderer(polygon: polygon)
-        disposables.append(renderer.bind(keyPath: \.strokeColor, strokeColor.map { $0 }))
-        disposables.append(renderer.bind(keyPath: \.alpha, alpha))
-        disposables.append(renderer.bind(keyPath: \.lineWidth, lineWidth))
-    }
+func polygonRenderer(polygon: MKPolygon, strokeColor: I<UIColor>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) -> IBox<MKPolygonRenderer> {
+    let renderer = MKPolygonRenderer(polygon: polygon)
+    let box = IBox(renderer)
+    box.bind(strokeColor, to: \.strokeColor)
+    box.bind(alpha, to : \.alpha)
+    box.bind(lineWidth, to: \.lineWidth)
+    return box
 }
 
-final class PointAnnotation {
-    let annotation: MKPointAnnotation
-    let disposable: Any
-    init(_ location: I<CLLocationCoordinate2D>) {
-        let annotation = MKPointAnnotation()
-        self.annotation = annotation
-        disposable = location.observe {
-            annotation.coordinate = $0
-        }
-    }
+func annotation(location: I<CLLocationCoordinate2D>) -> IBox<MKPointAnnotation> {
+    let result = IBox(MKPointAnnotation())
+    result.bind(location, to: \.coordinate)
+    return result
 }
 
 extension CLLocationCoordinate2D: Equatable {

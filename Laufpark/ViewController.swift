@@ -34,9 +34,9 @@ struct State: Equatable {
 class ViewController: UIViewController, MKMapViewDelegate {
     let mapView: IBox<MKMapView> = buildMapView()
     var lines: [MKPolygon:Color] = [:]
-    var renderers: [MKPolygon: PolygonRenderer] = [:]
+    var renderers: [MKPolygon: IBox<MKPolygonRenderer>] = [:]
     var trackForPolygon: [MKPolygon:Track] = [:]
-    var draggedPointAnnotation: PointAnnotation!
+    var draggedPointAnnotation: IBox<MKPointAnnotation>!
     var draggedLocation: I<(distance: Double, location: CLLocation)?>!
     
     let state: Input<State>
@@ -77,7 +77,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             $0?.location.coordinate ?? CLLocationCoordinate2D()
         }
         
-        draggedPointAnnotation = PointAnnotation(draggedPoint)
+        draggedPointAnnotation = annotation(location: draggedPoint)
         
         let position: I<CGFloat?> = draggedLocation.map {
             ($0?.distance).map { CGFloat($0) }
@@ -109,16 +109,16 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
-        view.addSubview(mapView.view)
-        mapView.view.translatesAutoresizingMaskIntoConstraints = false
-        mapView.view.addConstraintsToSizeToParent()
+        view.addSubview(mapView.unbox)
+        mapView.unbox.translatesAutoresizingMaskIntoConstraints = false
+        mapView.unbox.addConstraintsToSizeToParent()
         
         // MapView
-        mapView.view.delegate = self
+        mapView.unbox.delegate = self
         disposables.append(state.i.map { $0.tracks }.observe {
             $0.forEach { track in
                 let line = track.line
-                self.mapView.view.add(line)
+                self.mapView.unbox.add(line)
                 self.lines[line] = track.color
                 self.trackForPolygon[line] = track
             }
@@ -142,7 +142,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         view.backgroundColor = .white
         
 
-        mapView.view.addAnnotation(draggedPointAnnotation.annotation)
+        mapView.unbox.addAnnotation(draggedPointAnnotation.unbox)
         
         disposables.append(trackInfoView.pannedLocation.observe { loc in
             self.state.change { $0.trackPosition = loc }
@@ -152,12 +152,12 @@ class ViewController: UIViewController, MKMapViewDelegate {
         self.disposables.append(draggedLocation.observe { x in
             guard let (_, location) = x else { return }
             // todo subtract the height of the trackInfo box (if selected)
-            if !self.mapView.view.annotations(in: self.mapView.view.visibleMapRect).contains(self.draggedPointAnnotation.annotation) {
-                self.mapView.view.setCenter(location.coordinate, animated: true)
+            if !self.mapView.unbox.annotations(in: self.mapView.unbox.visibleMapRect).contains(self.draggedPointAnnotation.unbox) {
+                self.mapView.unbox.setCenter(location.coordinate, animated: true)
             }
         })
 
-        let buttonView = toggleMapButton.view
+        let buttonView = toggleMapButton.unbox
         view.addSubview(buttonView)
         buttonView.translatesAutoresizingMaskIntoConstraints = false
         buttonView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
@@ -166,12 +166,12 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
 
     @IBAction func buttonTapped(button: UIButton) {
-        mapView.view.mapType = mapView.view.mapType == .standard ? .hybrid : .standard
+        mapView.unbox.mapType = mapView.unbox.mapType == .standard ? .hybrid : .standard
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        mapView.view.setVisibleMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)), edgePadding: UIEdgeInsetsMake(10, 10, 10, 10), animated: true)
-        mapView.view.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
+        mapView.unbox.setVisibleMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)), edgePadding: UIEdgeInsetsMake(10, 10, 10, 10), animated: true)
+        mapView.unbox.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
         
         if CLLocationManager.authorizationStatus() == .notDetermined {
             locationManager = CLLocationManager()
@@ -181,10 +181,10 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     
     @objc func mapTapped(sender: UITapGestureRecognizer) {
-        let point = sender.location(ofTouch: 0, in: mapView.view)
-        let mapPoint = MKMapPointForCoordinate(mapView.view.convert(point, toCoordinateFrom: mapView.view))
+        let point = sender.location(ofTouch: 0, in: mapView.unbox)
+        let mapPoint = MKMapPointForCoordinate(mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox))
         let possibilities = lines.keys.filter { line in
-            let renderer = renderers[line]!.renderer
+            let renderer = renderers[line]!.unbox
             let point = renderer.point(for: mapPoint)
             return renderer.path.contains(point)
         }
@@ -202,21 +202,21 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         if let line = overlay as? MKPolygon {
-            if let renderer = renderers[line] { return renderer.renderer }
+            if let renderer = renderers[line] { return renderer.unbox }
             let renderer = buildRenderer(line)
             renderers[line] = renderer
-            return renderer.renderer
+            return renderer.unbox
         }
         return MKOverlayRenderer()
     }
     
-    func buildRenderer(_ line: MKPolygon) -> PolygonRenderer {
-        let isSelected: I<Bool> = selection.map { $0 == line }
-        let shouldHighlight: I<Bool> = !hasSelection || isSelected
-        let strokeColor: I<UIColor> = I(constant: lines[line]!.uiColor)
-        let alpha: I<CGFloat> = if_(shouldHighlight, then: 1, else: 0.5)
-        let lineWidth: I<CGFloat> = if_(shouldHighlight, then: 3, else: 0.5)
-        return PolygonRenderer(polygon: line, strokeColor: strokeColor, alpha: alpha, lineWidth: lineWidth)
+    func buildRenderer(_ line: MKPolygon) -> IBox<MKPolygonRenderer> {
+        let isSelected = selection.map { $0 == line }
+        let shouldHighlight = !hasSelection || isSelected
+        return polygonRenderer(polygon: line,
+                               strokeColor: I(constant: lines[line]!.uiColor),
+                               alpha: if_(shouldHighlight, then: 1, else: 0.5),
+                               lineWidth: if_(shouldHighlight, then: 3, else: 0.5))
     }
 }
 

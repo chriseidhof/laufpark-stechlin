@@ -22,28 +22,28 @@ extension NSObjectProtocol where Self: NSObject {
 }
 
 public final class IBox<V: NSObject> {
-    public let view: V
+    public let unbox: V
     var disposables: [Any] = []
-    public init(_ view: V = V()) {
-        self.view = view
+    public init(_ object: V = V()) {
+        self.unbox = object
     }
     
     public func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A>) {
-        disposables.append(view.bind(keyPath: to, value))
+        disposables.append(unbox.bind(keyPath: to, value))
     }
     
     public func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A?>) where A: Equatable {
-        disposables.append(view.bind(keyPath: to, value.map { $0 }))
+        disposables.append(unbox.bind(keyPath: to, value.map { $0 }))
     }
     
     public func observe<A>(value: I<A>, onChange: @escaping (V,A) -> ()) {
         disposables.append(value.observe { newValue in
-            onChange(self.view,newValue) // ownership?
+            onChange(self.unbox,newValue) // ownership?
         })
     }
     
     public subscript<A>(keyPath: KeyPath<V,A>) -> I<A> where A: Equatable {
-        return view[keyPath]
+        return unbox[keyPath]
     }
 }
 
