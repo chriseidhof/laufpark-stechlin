@@ -92,7 +92,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var draggedPointAnnotation: PointAnnotation!
     var draggedLocation: I<(distance: Double, location: CLLocation)?>!
     
-    let state: Var<State>
+    let state: Input<State>
     let selection: I<MKPolygon?>
     let hasSelection: I<Bool>
 
@@ -111,7 +111,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     init(tracks: [Track]) {
-        state = Var(State(tracks: tracks))
+        state = Input(State(tracks: tracks))
         selection = state.i.map { $0.selection }
         hasSelection = state.i.map { $0.selection != nil }
 

@@ -176,14 +176,14 @@ protocol AnyI: class {
     var strongReferences: Register<Any> { get set }
 }
 
-public final class Var<A> {
+public final class Input<A> {
     public let i: I<A>
     
     public init(_ value: A, eq: @escaping (A,A) -> Bool) {
         i = I(value: value, eq: eq)
     }
     
-    public func set(_ newValue: A) {
+    public func write(_ newValue: A) {
         i.write(newValue)
     }
     
@@ -191,10 +191,10 @@ public final class Var<A> {
         var copy = i.value!
         by(&copy)
         i.write(copy)
-    }
+    }    
 }
 
-public extension Var where A: Equatable {
+public extension Input where A: Equatable {
     public convenience init(_ value: A) {
         self.init(value, eq: ==)
     }

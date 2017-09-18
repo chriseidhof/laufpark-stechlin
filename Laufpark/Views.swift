@@ -22,7 +22,7 @@ final class TrackInfoView {
     var pannedLocation: I<CGFloat> {
         return _pannedLocation.i
     }
-    private var _pannedLocation: Var<CGFloat> = Var(0)
+    private var _pannedLocation: Input<CGFloat> = Input(0)
     
     init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, track: I<Track?>, darkMode: I<Bool>) {
         let blurredViewForeground: I<UIColor> = if_(darkMode, then: I(constant: .white), else: I(constant: .black))
@@ -85,7 +85,7 @@ final class TrackInfoView {
     @objc func linePanned(sender: UIPanGestureRecognizer) {
         let normalizedLocation = (sender.location(in: lineView.view).x /
             lineView.view.bounds.size.width).clamped(to: 0.0...1.0)
-        _pannedLocation.set(normalizedLocation)
+        _pannedLocation.write(normalizedLocation)
     }
 }
 
