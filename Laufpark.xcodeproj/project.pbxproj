@@ -97,6 +97,7 @@
 		83B2A2701F692CFA00A6D9F9 /* Incremental.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83B2A2751F692D0D00A6D9F9 /* Incremental.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824F1F63052D004070DA /* Incremental.swift */; };
 		83FC93D31F7147250034E3B2 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D21F7147250034E3B2 /* Helpers.swift */; };
+		83FC93D51F7154050034E3B2 /* IncrementalStdLib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -218,6 +219,7 @@
 		83B2A26A1F692CFA00A6D9F9 /* Incremental.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Incremental.h; sourceTree = "<group>"; };
 		83B2A26B1F692CFA00A6D9F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83FC93D21F7147250034E3B2 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
+		83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalStdLib.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -432,6 +434,7 @@
 				83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */,
 				83B2A26A1F692CFA00A6D9F9 /* Incremental.h */,
 				83B2A26B1F692CFA00A6D9F9 /* Info.plist */,
+				83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */,
 			);
 			path = Incremental;
 			sourceTree = "<group>";
@@ -643,6 +646,7 @@
 			files = (
 				83354DA01F6FE9A900F3C33A /* Incremental+NSObject.swift in Sources */,
 				83FC93D31F7147250034E3B2 /* Helpers.swift in Sources */,
+				83FC93D51F7154050034E3B2 /* IncrementalStdLib.swift in Sources */,
 				83B2A2751F692D0D00A6D9F9 /* Incremental.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

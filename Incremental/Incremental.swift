@@ -8,7 +8,7 @@ final class Queue {
     var fired: [AnyI] = []
     var processing: Bool = false
     
-    func enqueue(_ edges: [Edge]){        
+    func enqueue<S: Sequence>(_ edges: S) where S.Element: Edge {
         self.edges.append(contentsOf: edges.map { ($0, $0.height) })
         self.edges.sort { $0.1 < $1.1 }
     }
@@ -59,8 +59,6 @@ final class Observer: Edge {
     }
 }
 
-
-
 class Reader: Node, Edge {
     let read: () -> Node
     var height: Height {
@@ -81,10 +79,6 @@ class Reader: Node, Edge {
     }
 }
 
-protocol AnyI: class {
-    var firedAlready: Bool { get set }
-    var strongReferences: Register<Any> { get set }
-}
 
 public final class Input<A> {
     public let i: I<A>
@@ -111,14 +105,13 @@ public extension Input where A: Equatable {
 }
 
 
-extension I where A: Equatable {
-    convenience init(value: A) {
-        self.init(value: value, eq: ==)
-    }
+protocol AnyI: class {
+    var firedAlready: Bool { get set }
+    var strongReferences: Register<Any> { get set }
 }
 
 public final class I<A>: AnyI, Node {
-    fileprivate(set) public var value: A! // todo this will not be public!
+    internal(set) public var value: A! // todo this will not be public!
     var observers = Register<Observer>()
     var readers: Register<Reader> = Register()
     var height: Height {
@@ -164,8 +157,8 @@ public final class I<A>: AnyI, Node {
         self.value = value
         guard !firedAlready else { return self }
         firedAlready = true
-        Queue.shared.enqueue(Array(readers.values))
-        Queue.shared.enqueue(Array(observers.values))
+        Queue.shared.enqueue(readers.values)
+        Queue.shared.enqueue(observers.values)
         Queue.shared.fired(self)
         Queue.shared.process()
         return self
@@ -191,53 +184,14 @@ public final class I<A>: AnyI, Node {
         target.strongReferences.add(disposable)
         return reader
     }
-    
-    func connect<B>(result: I<B>, _ transform: @escaping (A) -> B) {
+
+    public func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B) -> I<B> {
+        let result = I<B>(eq: eq)
         read(target: result) { value in
             result.write(transform(value))
         }
-    }
-    
-    public func map<B: Equatable>(_ transform: @escaping (A) -> B) -> I<B> {
-        let result = I<B>(eq: ==)
-        connect(result: result, transform)
         return result
     }
-    
-    // convenience for optionals
-    public func map<B: Equatable>(_ transform: @escaping (A) -> B?) -> I<B?> {
-        let result = I<B?>(eq: ==)
-        connect(result: result, transform)
-        return result
-    }
-    
-    // convenience for arrays
-    public func map<B: Equatable>(_ transform: @escaping (A) -> [B]) -> I<[B]> {
-        let result = I<[B]>(eq: ==)
-        connect(result: result, transform)
-        return result
-    }
-
-    // convenience for other types
-    public func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B) -> I<B> {
-        let result = I<B>(eq: eq)
-        connect(result: result, transform)
-        return result
-    }
-
-//    // convenience for other types
-//    func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B?) -> I<B?> {
-//        let result = I<B?>(eq: {
-//            switch ($0, $1) {
-//            case (nil,nil): return true
-//            case let (x?, y?): return eq(x,y)
-//            default: return false
-//            }
-//        })
-//        connect(result: result, transform)
-//        return result
-//    }
-
     
     public func flatMap<B: Equatable>(_ transform: @escaping (A) -> I<B>) -> I<B> {
         let result = I<B>(eq: ==)
@@ -255,6 +209,14 @@ public final class I<A>: AnyI, Node {
         return result
     }
     
+    func mutate(_ transform: (inout A) -> ()) {
+        var newValue = value!
+        transform(&newValue)
+        write(newValue)
+    }
+}
+
+extension I {
     public func zip2<B: Equatable,C: Equatable>(_ other: I<B>, _ with: @escaping (A,B) -> C) -> I<C> {
         return flatMap { value in other.map { with(value, $0) } }
     }
@@ -267,72 +229,24 @@ public final class I<A>: AnyI, Node {
         }
     }
     
+    // convenience for equatable
+    public func map<B: Equatable>(_ transform: @escaping (A) -> B) -> I<B> {
+        return map(eq: ==, transform)
+    }
     
-    func mutate(_ transform: (inout A) -> ()) {
-        var newValue = value!
-        transform(&newValue)
-        write(newValue)
+    // convenience for optionals
+    public func map<B: Equatable>(_ transform: @escaping (A) -> B?) -> I<B?> {
+        return map(eq: ==, transform)
+    }
+    
+    // convenience for arrays
+    public func map<B: Equatable>(_ transform: @escaping (A) -> [B]) -> I<[B]> {
+        return map(eq: ==, transform)
     }
 }
 
-public func if_<A: Equatable>(_ condition: I<Bool>, then l: I<A>, else r: I<A>) -> I<A> {
-    return condition.flatMap { $0 ? l : r }
-}
-
-public func if_<A: Equatable>(_ condition: I<Bool>, then l: A, else r: A) -> I<A> {
-    return condition.map { $0 ? l : r }
-}
-
-public func &&(l: I<Bool>, r: I<Bool>) -> I<Bool> {
-    return l.zip2(r, { $0 && $1 })
-}
-
-public func ||(l: I<Bool>, r: I<Bool>) -> I<Bool> {
-    return l.zip2(r, { $0 || $1 })
-}
-
-public prefix func !(l: I<Bool>) -> I<Bool> {
-    return l.map { !$0 }
-}
-
-public func ==<A>(l: I<A>, r: I<A>) -> I<Bool> where A: Equatable {
-    return l.zip2(r, ==)
-}
-
-public func ==<A>(l: I<A>, r: A) -> I<Bool> where A: Equatable {
-    return l.map { $0 == r }
-}
-
-enum IList<A>: Equatable where A: Equatable {
-    case empty
-    case cons(A, I<IList<A>>)
-    
-    mutating func append(_ value: A) {
-        switch self {
-        case .empty: self = .cons(value, I(value: .empty))
-        case .cons(_, let tail): tail.value.append(value)
-        }
-    }
-    
-    func reduceH<B>(destination: I<B>, initial: B, combine: @escaping (A,B) -> B) -> Node {
-        switch self {
-        case .empty:
-            destination.write(initial)
-            return destination
-        case let .cons(value, tail):
-            let intermediate = combine(value, initial)
-            return tail.read(target: destination) { newTail in
-                newTail.reduceH(destination: destination, initial: intermediate, combine: combine)
-            }
-        }
-    }
-}
-
-extension IList {
-    static func ==(l: IList<A>, r: IList<A>) -> Bool {
-        switch (l, r) {
-        case (.empty, .empty): return true
-        default: return false
-        }
+extension I where A: Equatable {
+    convenience init(value: A) {
+        self.init(value: value, eq: ==)
     }
 }
