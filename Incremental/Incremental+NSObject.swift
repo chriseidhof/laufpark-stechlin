@@ -21,19 +21,23 @@ extension NSObjectProtocol where Self: NSObject {
     }
 }
 
-public final class IBox<V: NSObject> {
-    public let unbox: V
+public final class IBox<V> {
+    public private(set) var unbox: V
     var disposables: [Any] = []
-    public init(_ object: V = V()) {
+    public init(_ object: V) {
         self.unbox = object
     }
     
-    public func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A>) {
-        disposables.append(unbox.bind(keyPath: to, value))
+    public func bind<A>(_ value: I<A>, to: WritableKeyPath<V,A>) {
+        disposables.append(value.observe { [unowned self] in
+            self.unbox[keyPath: to] = $0
+        })
     }
     
-    public func bind<A>(_ value: I<A>, to: ReferenceWritableKeyPath<V,A?>) where A: Equatable {
-        disposables.append(unbox.bind(keyPath: to, value.map { $0 }))
+    public func bind<A>(_ value: I<A>, to: WritableKeyPath<V,A?>) where A: Equatable {
+        disposables.append(value.observe { [unowned self] in
+            self.unbox[keyPath: to] = $0
+        })
     }
     
     public func observe<A>(value: I<A>, onChange: @escaping (V,A) -> ()) {
@@ -42,12 +46,14 @@ public final class IBox<V: NSObject> {
         })
     }
     
+}
+extension IBox where V: NSObject {
     public subscript<A>(keyPath: KeyPath<V,A>) -> I<A> where A: Equatable {
         return unbox[keyPath]
     }
 }
 
-extension NSObjectProtocol {
+extension NSObjectProtocol where Self: NSObject {
     /// One-way binding
     public func bind<Value>(keyPath: ReferenceWritableKeyPath<Self, Value>, _ i: I<Value>) -> Disposable {
         return i.observe {

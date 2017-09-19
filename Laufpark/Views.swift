@@ -118,7 +118,7 @@ func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<U
 }
 
 func buildMapView() -> IBox<MKMapView> {
-    let box = IBox<MKMapView>()
+    let box = IBox(MKMapView())
     let view = box.unbox
     view.showsCompass = true
     view.showsScale = true
@@ -149,7 +149,7 @@ extension CLLocationCoordinate2D: Equatable {
 }
 
 func buildLineView(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, strokeColor: I<UIColor>) -> IBox<LineView> {
-    let box = IBox<LineView>()
+    let box = IBox(LineView())
     box.bind(position, to: \LineView.position)
     box.bind(points, to: \.points)
     box.bind(pointsRect, to: \.pointsRect)

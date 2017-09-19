@@ -426,9 +426,9 @@
 			isa = PBXGroup;
 			children = (
 				83B0824F1F63052D004070DA /* Incremental.swift */,
+				83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */,
 				83B2A26A1F692CFA00A6D9F9 /* Incremental.h */,
 				83B2A26B1F692CFA00A6D9F9 /* Info.plist */,
-				83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */,
 			);
 			path = Incremental;
 			sourceTree = "<group>";
