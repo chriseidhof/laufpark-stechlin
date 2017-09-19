@@ -1,87 +1,6 @@
 import Foundation
 
-// TODO: it could be a lot faster (especially for n = small) to use an array
-struct Register<A> {
-    typealias Token = Int
-    private var items: [Token:A] = [:]
-    private let freshNumber: () -> Int
-    init() {
-        var iterator = (0...).makeIterator()
-        freshNumber = { iterator.next()! }
-    }
-    
-    @discardableResult
-    mutating func add(_ value: A) -> Token {
-        let token = freshNumber()
-        items[token] = value
-        return token
-    }
-    
-    mutating func remove(_ token: Token) {
-        items[token] = nil
-    }
-    
-    subscript(token: Token) -> A? {
-        return items[token]
-    }
-    
-    var values: AnySequence<A> {
-        return AnySequence(items.values)
-    }
-    
-    mutating func removeAll() {
-        items = [:]
-    }
-    
-    var keys: AnySequence<Token> {
-        return AnySequence(items.keys)
-    }
-}
-
-public final class Disposable {
-    private let dispose: () -> ()
-    init(dispose: @escaping () -> ()) {
-        self.dispose = dispose
-    }
-    
-    deinit {
-        self.dispose()
-    }
-}
-
-struct Height: CustomStringConvertible, Comparable {
-    var value: Int
-    
-    init(_ value: Int = 0) {
-        self.value = value
-    }
-    
-    static let zero = Height(0)
-    static let minusOne = Height(-1) // observers
-    
-    mutating func join(_ other: Height) {
-        value = max(value, other.value)
-    }
-    
-    func incremented() -> Height {
-        return Height(value + 1)
-    }
-    
-    var description: String {
-        return "Height(\(value))"
-    }
-    
-    static func <(lhs: Height, rhs: Height) -> Bool {
-        return lhs.value < rhs.value
-    }
-    
-    static func ==(lhs: Height, rhs: Height) -> Bool {
-        return lhs.value == rhs.value
-    }
-}
-
-
-// This class is not thread-safe
+// This class is (by design) not thread-safe
 final class Queue {
     static let shared = Queue()
     var edges: [(Edge, Height)] = []
@@ -100,7 +19,6 @@ final class Queue {
     
     func process() {
         guard !processing else { return }
-//        var count = 0
         processing = true
         while let (edge, _) = edges.popLast() {
             guard !processed.contains(where: { $0 === edge }) else {
@@ -108,7 +26,6 @@ final class Queue {
             }
             processed.append(edge)
             edge.fire()
-//            count += 1
         }
         
         // cleanup
@@ -118,18 +35,11 @@ final class Queue {
         fired = []
         processed = []
         processing = false
-//        print("processed \(count) edges")
     }
 }
 
 protocol Node {
     var height: Height { get }
-}
-
-extension Array where Element == Height {
-    var lub: Height {
-        return reduce(into: .zero, { $0.join($1) })
-    }
 }
 
 protocol Edge: class, Node {
