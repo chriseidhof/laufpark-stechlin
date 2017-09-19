@@ -88,7 +88,7 @@ struct Height: CustomStringConvertible, Comparable {
 }
 
 extension Sequence where Element == Height {
-    var lub: Height {
+    var leastUpperBound: Height {
         return reduce(into: .zero, { $0.join($1) })
     }
 }

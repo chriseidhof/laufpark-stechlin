@@ -115,7 +115,7 @@ public final class I<A>: AnyI, Node {
     var observers = Register<Observer>()
     var readers: Register<Reader> = Register()
     var height: Height {
-        return readers.values.map { $0.height }.lub.incremented()
+        return readers.values.map { $0.height }.leastUpperBound.incremented()
     }
     var firedAlready: Bool = false
     var strongReferences: Register<Any> = Register()
