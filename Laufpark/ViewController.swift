@@ -232,8 +232,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let shouldHighlight = !hasSelection || isSelected
         return polygonRenderer(polygon: line,
                                strokeColor: I(constant: lines[line]!.uiColor),
-                               alpha: if_(shouldHighlight, then: 1, else: 0.5),
-                               lineWidth: if_(shouldHighlight, then: 3, else: 0.5))
+                               alpha: if_(shouldHighlight, then: I(constant: 1.0), else: if_(darkMode, then: 0.5, else: 1.0)),
+                               lineWidth: if_(shouldHighlight, then: I(constant: 3.0), else: if_(darkMode, then: 0.5, else: 1.0)))
     }
 }
 
