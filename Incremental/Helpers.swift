@@ -85,6 +85,10 @@ struct Height: CustomStringConvertible, Comparable {
     static func ==(lhs: Height, rhs: Height) -> Bool {
         return lhs.value == rhs.value
     }
+    
+    static func +(lhs: Height, rhs: Height) -> Height {
+        return Height(lhs.value + rhs.value)
+    }
 }
 
 extension Sequence where Element == Height {

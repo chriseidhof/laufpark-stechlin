@@ -13,6 +13,11 @@ final class Queue {
         self.edges.sort { $0.1 < $1.1 }
     }
     
+    func enqueue<S: Sequence>(_ edges: S) where S.Element == Edge {
+        self.edges.append(contentsOf: edges.map { ($0, $0.height) })
+        self.edges.sort { $0.1 < $1.1 }
+    }
+    
     func fired(_ source: AnyI) {
         fired.append(source)
     }
@@ -59,7 +64,11 @@ final class Observer: Edge {
     }
 }
 
-class Reader: Node, Edge {
+protocol Reader: Edge {
+    var invalidated: Bool { get set }
+}
+
+class AnyReader: Reader {
     let read: () -> Node
     var height: Height {
         return target.height.incremented()
@@ -70,12 +79,68 @@ class Reader: Node, Edge {
         self.read = read
         target = read()
     }
-    
+
     func fire() {
         if invalidated {
             return
         }
         target = read()
+    }
+}
+
+// We don't need MapReader and FlatMapReader, but could express everything in terms of AnyReader. Not sure what is better: less concepts, or more (and duplicated) but clearer code.
+final class MapReader: Reader {
+    let read: () -> ()
+    unowned var target: AnyI
+    var invalidated: Bool = false
+
+    init<A,B>(source: I<A>, transform: @escaping (A) -> B, target: I<B>) {
+        read = { [unowned target] in
+            target.write(transform(source.value))
+        }
+        read()
+        self.target = target
+    }
+    var height: Height {
+        return target.height.incremented()
+    }
+    func fire() {
+        if invalidated {
+            return // todo dry
+        }
+        read()
+        
+    }
+}
+
+final class FlatMapReader: Reader {
+    var read: (() -> ())!
+    unowned var target: AnyI
+    var invalidated: Bool = false
+    var sourceNode: AnyI!
+    var token: Register<Any>.Token? = nil
+    var disposable: Any?
+    
+    init<A,B>(source: I<A>, transform: @escaping (A) -> I<B>, target: I<B>) {
+        self.target = target
+        read = { [unowned target] in
+            self.disposable = nil
+            let newSourceNode = transform(source.value)
+            self.disposable = newSourceNode.addReader(MapReader(source: newSourceNode, transform: { $0 }, target: target))
+            target.write(newSourceNode.value)
+            self.sourceNode = newSourceNode // todo should this be a strong reference?
+        }
+        read()
+    }
+    var height: Height {
+        return sourceNode.height.incremented()
+    }
+    func fire() {
+        if invalidated {
+            return // todo dry
+        }
+        read()
+        
     }
 }
 
@@ -95,7 +160,11 @@ public final class Input<A> {
         var copy = i.value!
         by(&copy)
         i.write(copy)
-    }    
+    }
+    
+    public subscript<B: Equatable>(keyPath: KeyPath<A,B>) -> I<B> {
+        return i.map { $0[keyPath: keyPath] }
+    }
 }
 
 public extension Input where A: Equatable {
@@ -108,6 +177,7 @@ public extension Input where A: Equatable {
 protocol AnyI: class {
     var firedAlready: Bool { get set }
     var strongReferences: Register<Any> { get set }
+    var height: Height { get }
 }
 
 public final class I<A>: AnyI, Node {
@@ -157,55 +227,51 @@ public final class I<A>: AnyI, Node {
         self.value = value
         guard !firedAlready else { return self }
         firedAlready = true
-        Queue.shared.enqueue(readers.values)
+        let r: [Edge] = Array(readers.values)
+        Queue.shared.enqueue(r)
         Queue.shared.enqueue(observers.values)
         Queue.shared.fired(self)
         Queue.shared.process()
         return self
     }
     
-    func read(_ read: @escaping (A) -> Node) -> (Reader, Disposable) {
-        let reader = Reader(read: {
-            read(self.value)
-        })
-        if constant {
-            return (reader, Disposable { })
-        }
+    func addReader(_ reader: Reader) -> Disposable {
         let token = readers.add(reader)
-        return (reader, Disposable {
+        return Disposable {
             self.readers[token]?.invalidated = true
             self.readers.remove(token)
-        })
+        }
     }
     
     @discardableResult
-    func read(target: AnyI, _ read: @escaping (A) -> Node) -> Reader {
-        let (reader, disposable) = self.read(read)
+    func read(target: AnyI, _ read: @escaping (A) -> Node) -> AnyReader {
+        let reader = AnyReader { read(self.value) }
+        guard !constant else {
+            return reader
+        }
+        let disposable = addReader(reader)
         target.strongReferences.add(disposable)
         return reader
     }
 
     public func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B) -> I<B> {
-        let result = I<B>(eq: eq)
-        read(target: result) { value in
-            result.write(transform(value))
+        guard !constant else {
+            return I<B>(constant: transform(self.value))
         }
+        
+        let result = I<B>(eq: eq)
+        let reader = MapReader(source: self, transform: transform, target: result)
+        result.strongReferences.add(addReader(reader))
         return result
     }
     
     public func flatMap<B: Equatable>(_ transform: @escaping (A) -> I<B>) -> I<B> {
-        let result = I<B>(eq: ==)
-        var previous: Disposable?
-        // todo: we might be able to avoid this closure by having a custom "flatMap" reader
-        read(target: result) { value in
-            previous = nil
-            let (reader, disposable) = transform(value).read { value2 in
-                result.write(value2)
-            }
-            let token = result.strongReferences.add(disposable)
-            previous = Disposable { result.strongReferences.remove(token) }
-            return reader
+        guard !constant else {
+            return transform(self.value)
         }
+        let result = I<B>(eq: ==)
+        let reader = FlatMapReader(source: self, transform: transform, target: result)
+        result.strongReferences.add(addReader(reader))
         return result
     }
     

@@ -10,12 +10,25 @@ import UIKit
 import Incremental
 import MapKit
 
+func label(text: I<String?>, textColor: I<UIColor>) -> IBox<UILabel> {
+    let result = IBox(UILabel(frame: .zero))
+    result.bind(text, to: \.text)
+    result.observe(value: textColor, onChange: { $0.textColor = $1 }) // doesn't work with bind because textColor is an IOU
+    return result
+}
+
+extension UIActivityIndicatorView {
+    var animating: Bool {
+        get { return isAnimating }
+        set {
+            if newValue { self.startAnimating() }
+            else { self.stopAnimating() }
+        }
+    }
+}
 final class TrackInfoView {
     private var lineView: IBox<LineView>
     var view: UIView! = nil
-    let totalAscent = UILabel()
-    let totalDistance = UILabel()
-    let name = UILabel()
     var disposables: [Any] = []
     
     // 0...1.0
@@ -34,25 +47,23 @@ final class TrackInfoView {
         lineView.unbox.backgroundColor = .clear
         lineView.unbox.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
         
-        // Track information
-        let trackInfoLabels = [
-            name,
-            totalDistance,
-            totalAscent
-        ]
-        let trackInfo = UIStackView(arrangedSubviews: trackInfoLabels)
-        trackInfo.axis = .horizontal
-        trackInfo.distribution = .equalCentering
-        trackInfo.heightAnchor.constraint(equalToConstant: 20)
-        trackInfo.spacing = 10
-        for s in trackInfoLabels {
-            s.backgroundColor = .clear
+        let formatter = MKDistanceFormatter()
+        let formattedDistance = track.map { track in
+            track.map { formatter.string(fromDistance: $0.distance) }
         }
-        disposables.append(blurredViewForeground.observe { color in
-            trackInfoLabels.forEach { l in
-                l.textColor = color
-            }
-        })
+        let formattedAscent = track.map { track in
+            track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
+        }
+        let name = label(text: track.map { $0?.name }, textColor: blurredViewForeground)
+        let totalDistance = label(text: formattedDistance, textColor: blurredViewForeground)
+        let totalAscent = label(text: formattedAscent, textColor: blurredViewForeground)
+        // Track information
+        let trackInfo = IBox<UIStackView>(arrangedSubviews: [name, totalDistance, totalAscent])
+        trackInfo.unbox.axis = .horizontal
+        trackInfo.unbox.distribution = .equalCentering
+        trackInfo.unbox.heightAnchor.constraint(equalToConstant: 20)
+        trackInfo.unbox.spacing = 10
+        disposables.append(trackInfo) // need to keep a reference
         
         let blurEffect = if_(darkMode, then: UIBlurEffect(style: .dark), else: UIBlurEffect(style: .light))
         let blurredView = UIVisualEffectView(effect: nil)
@@ -63,21 +74,11 @@ final class TrackInfoView {
         })
         blurredView.translatesAutoresizingMaskIntoConstraints = false
         
-        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView.unbox])
-        blurredView.addSubview(stackView)
+        let stackView = UIStackView(arrangedSubviews: [trackInfo.unbox, lineView.unbox])
+        blurredView.contentView.addSubview(stackView)
         stackView.axis = .vertical
         stackView.addConstraintsToSizeToParent(spacing: 10)
         stackView.translatesAutoresizingMaskIntoConstraints = false
-        
-        disposables.append(name.bind(keyPath: \UILabel.text, track.map { $0?.name }))
-        
-        let formatter = MKDistanceFormatter()
-        disposables.append(totalDistance.bind(keyPath: \.text, track.map { track in
-            track.map { formatter.string(fromDistance: $0.distance) }
-        }))
-        disposables.append(totalAscent.bind(keyPath: \.text, track.map { track in
-            track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
-        }))
         
         view = blurredView
     }

@@ -28,10 +28,23 @@ extension Color {
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var window: UIWindow?
+    var mapViewController: ViewController?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
-        
+        mapViewController = ViewController()
+        window?.rootViewController = mapViewController
+        window?.makeKeyAndVisible()
+        DispatchQueue(label: "Track Loading").async {
+            let tracks = self.loadTracks()
+            DispatchQueue.main.async {
+                self.mapViewController?.setTracks(tracks)
+            }
+        }
+        return true
+    }
+    
+    func loadTracks() -> [Track] {
         let definitions: [(Color, Int)] = [
             (.red, 4),
             (.turquoise, 5),
@@ -50,17 +63,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             (.pink, 4),
             (.lightPink, 6)
         ]
-        let allTracks: [[Track]] = definitions.map { (color, count) in
-            let trackNames: [(Int, String)] = (0...count).map { ($0, "wabe \(color.name)-strecke \($0)") }
-            return trackNames.map { numberAndName -> Track in
-                let reader = TrackReader(url: Bundle.main.url(forResource: numberAndName.1, withExtension: "gpx")!)!
-                return Track(color: color, number: numberAndName.0, name: reader.name, points: reader.points)
+        var allTracks: [[Track]] = []
+        time {
+            allTracks = definitions.map { (color, count) in
+                let trackNames: [(Int, String)] = (0...count).map { ($0, "wabe \(color.name)-strecke \($0)") }
+                return trackNames.map { numberAndName -> Track in
+                    let reader = TrackReader(url: Bundle.main.url(forResource: numberAndName.1, withExtension: "gpx")!)!
+                    return Track(color: color, number: numberAndName.0, name: reader.name, points: reader.points)
+                }
             }
         }
-        let tracks: [Track] = Array(allTracks.joined())        
-        window?.rootViewController = ViewController(tracks: tracks)
-        window?.makeKeyAndVisible()
-        return true
+        return Array(allTracks.joined())
     }
 }
 

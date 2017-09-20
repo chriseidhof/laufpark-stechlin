@@ -11,7 +11,8 @@ import MapKit
 import Incremental
 
 struct State: Equatable {
-    let tracks: [Track]
+    var tracks: [Track]
+    var loading: Bool { return tracks.isEmpty }
     
     var selection: MKPolygon? {
         didSet {
@@ -27,7 +28,7 @@ struct State: Equatable {
     }
     
     static func ==(lhs: State, rhs: State) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks
     }
 }
 
@@ -38,17 +39,17 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var trackForPolygon: [MKPolygon:Track] = [:]
     var draggedPointAnnotation: IBox<MKPointAnnotation>!
     var draggedLocation: I<(distance: Double, location: CLLocation)?>!
+    var rootView: IBox<UIView>!
     
     let state: Input<State>
     let selection: I<MKPolygon?>
     let hasSelection: I<Bool>
 
     var disposables: [Any] = []
-    let darkMode = true
     var locationManager: CLLocationManager?
     var trackInfoView: TrackInfoView!
-    
     var toggleMapButton: IBox<UIButton>!
+    let darkMode: I<Bool>
 
     var selectedTrack: I<Track?> {
         return selection.map {
@@ -57,10 +58,11 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    init(tracks: [Track]) {
-        state = Input(State(tracks: tracks))
+    init() {
+        state = Input(State(tracks: []))
         selection = state.i.map { $0.selection }
         hasSelection = state.i.map { $0.selection != nil }
+        darkMode = mapView[\.mapType] == .standard
 
         super.init(nibName: nil, bundle: nil)
 
@@ -99,9 +101,12 @@ class ViewController: UIViewController, MKMapViewDelegate {
             return CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
         }
         
-        let darkMode = mapView[\.mapType] == .standard
         trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
         toggleMapButton = button(type: .custom, title: I(constant: "🌍"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
+    }
+    
+    func setTracks(_ t: [Track]) {
+        state.change { $0.tracks = t }
     }
     
     required init?(coder aDecoder: NSCoder) {
@@ -109,7 +114,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
-        view.addSubview(mapView.unbox)
+        rootView = IBox(view!)
+        rootView.addSubview(mapView)
         mapView.unbox.translatesAutoresizingMaskIntoConstraints = false
         mapView.unbox.addConstraintsToSizeToParent()
         
@@ -118,9 +124,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
         disposables.append(state.i.map { $0.tracks }.observe {
             $0.forEach { track in
                 let line = track.line
-                self.mapView.unbox.add(line)
                 self.lines[line] = track.color
                 self.trackForPolygon[line] = track
+                self.mapView.unbox.add(line)
             }
         })
         
@@ -156,6 +162,17 @@ class ViewController: UIViewController, MKMapViewDelegate {
                 self.mapView.unbox.setCenter(location.coordinate, animated: true)
             }
         })
+        
+        let loadingIndicator = IBox(UIActivityIndicatorView(activityIndicatorStyle: .gray))
+        rootView.addSubview(loadingIndicator)
+        loadingIndicator.unbox.hidesWhenStopped = true
+        loadingIndicator.unbox.translatesAutoresizingMaskIntoConstraints = false
+        loadingIndicator.unbox.centerXAnchor.constraint(equalTo: rootView.unbox.centerXAnchor).isActive = true
+        loadingIndicator.unbox.centerYAnchor.constraint(equalTo: rootView.unbox.centerYAnchor).isActive = true
+
+        let isLoading = state.i.map { $0.loading }
+        loadingIndicator.bind(darkMode.map { $0 ? .gray : .white }, to: \.activityIndicatorViewStyle)
+        loadingIndicator.bind(isLoading, to: \.animating)
 
         let buttonView = toggleMapButton.unbox
         view.addSubview(buttonView)
