@@ -41,6 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.mapViewController?.setTracks(tracks)
             }
         }
+        application.applicationSupportsShakeToEdit = true
         return true
     }
     

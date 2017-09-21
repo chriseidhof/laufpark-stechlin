@@ -118,6 +118,16 @@ func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<U
     return result
 }
 
+func button(type: UIButtonType = .custom, titleImage: I<UIImage>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) -> IBox<UIButton> {
+    let result = IBox<UIButton>(UIButton(type: type))
+    result.unbox.imageEdgeInsets = UIEdgeInsetsMake(3,3,3,3)
+    result.bind(backgroundColor, to: \.backgroundColor)
+    result.observe(value: titleImage, onChange: { $0.setImage($1, for: .normal) })
+    result.observe(value: titleColor, onChange: { $0.setTitleColor($1, for: .normal)})
+    result.unbox.layer.cornerRadius = 5
+    return result
+}
+
 func buildMapView() -> IBox<MKMapView> {
     let box = IBox(MKMapView())
     let view = box.unbox
@@ -125,15 +135,18 @@ func buildMapView() -> IBox<MKMapView> {
     view.showsScale = true
     view.showsUserLocation = true
     view.mapType = .standard
+    view.isRotateEnabled = false
+    view.isPitchEnabled = false
     return box
 }
 
-func polygonRenderer(polygon: MKPolygon, strokeColor: I<UIColor>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) -> IBox<MKPolygonRenderer> {
+func polygonRenderer(polygon: MKPolygon, strokeColor: I<UIColor>, fillColor: I<UIColor?>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) -> IBox<MKPolygonRenderer> {
     let renderer = MKPolygonRenderer(polygon: polygon)
     let box = IBox(renderer)
     box.bind(strokeColor, to: \.strokeColor)
     box.bind(alpha, to : \.alpha)
     box.bind(lineWidth, to: \.lineWidth)
+    box.bind(fillColor, to: \.fillColor)
     return box
 }
 

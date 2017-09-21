@@ -47,7 +47,7 @@ struct Register<A> {
 
 public final class Disposable {
     private let dispose: () -> ()
-    init(dispose: @escaping () -> ()) {
+    public init(dispose: @escaping () -> ()) {
         self.dispose = dispose
     }
     

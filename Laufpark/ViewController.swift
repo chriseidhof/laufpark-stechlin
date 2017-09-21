@@ -50,6 +50,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var trackInfoView: TrackInfoView!
     var toggleMapButton: IBox<UIButton>!
     let darkMode: I<Bool>
+    var timer: Disposable?
 
     var selectedTrack: I<Track?> {
         return selection.map {
@@ -102,7 +103,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         
         trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
-        toggleMapButton = button(type: .custom, title: I(constant: "🌍"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
+        toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
     }
     
     func setTracks(_ t: [Track]) {
@@ -181,13 +182,16 @@ class ViewController: UIViewController, MKMapViewDelegate {
         buttonView.topAnchor.constraint(equalTo: view.topAnchor, constant: 25).isActive = true
         buttonView.addTarget(self, action: #selector(buttonTapped(button:)), for: .touchUpInside)
     }
-
     @IBAction func buttonTapped(button: UIButton) {
         mapView.unbox.mapType = mapView.unbox.mapType == .standard ? .hybrid : .standard
     }
     
-    override func viewDidAppear(_ animated: Bool) {
+    func resetMapRect() {
         mapView.unbox.setVisibleMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)), edgePadding: UIEdgeInsetsMake(10, 10, 10, 10), animated: true)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        resetMapRect()
         mapView.unbox.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
         
         if CLLocationManager.authorizationStatus() == .notDetermined {
@@ -216,6 +220,11 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
     }
 
+    override func motionEnded(_ motion: UIEventSubtype, with event: UIEvent?) {
+        guard motion == .motionShake else { return }
+        resetMapRect()
+        
+    }
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         if let line = overlay as? MKPolygon {
@@ -230,10 +239,13 @@ class ViewController: UIViewController, MKMapViewDelegate {
     func buildRenderer(_ line: MKPolygon) -> IBox<MKPolygonRenderer> {
         let isSelected = selection.map { $0 == line }
         let shouldHighlight = !hasSelection || isSelected
+        let lineColor = lines[line]!.uiColor
+        let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.2), else: lineColor.withAlphaComponent(0.1))
         return polygonRenderer(polygon: line,
-                               strokeColor: I(constant: lines[line]!.uiColor),
+                               strokeColor: I(constant: lineColor),
+                               fillColor: fillColor.map { $0 },
                                alpha: if_(shouldHighlight, then: I(constant: 1.0), else: if_(darkMode, then: 0.5, else: 1.0)),
-                               lineWidth: if_(shouldHighlight, then: I(constant: 3.0), else: if_(darkMode, then: 0.5, else: 1.0)))
+                               lineWidth: if_(shouldHighlight, then: I(constant: 3.0), else: if_(darkMode, then: 1.0, else: 1.0)))
     }
 }
 

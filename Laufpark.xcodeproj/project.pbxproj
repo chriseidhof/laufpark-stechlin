@@ -96,6 +96,8 @@
 		83B2A26F1F692CFA00A6D9F9 /* Incremental.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; };
 		83B2A2701F692CFA00A6D9F9 /* Incremental.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83B2A2751F692D0D00A6D9F9 /* Incremental.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824F1F63052D004070DA /* Incremental.swift */; };
+		83B998291F72753E007200D2 /* map.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B998281F7274C7007200D2 /* map.png */; };
+		83B9982B1F7275B6007200D2 /* map@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B9982A1F7275B2007200D2 /* map@2x.png */; };
 		83FC93D31F7147250034E3B2 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D21F7147250034E3B2 /* Helpers.swift */; };
 		83FC93D51F7154050034E3B2 /* IncrementalStdLib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */; };
 /* End PBXBuildFile section */
@@ -218,6 +220,8 @@
 		83B2A2681F692CFA00A6D9F9 /* Incremental.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Incremental.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83B2A26A1F692CFA00A6D9F9 /* Incremental.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Incremental.h; sourceTree = "<group>"; };
 		83B2A26B1F692CFA00A6D9F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		83B998281F7274C7007200D2 /* map.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = map.png; sourceTree = "<group>"; };
+		83B9982A1F7275B2007200D2 /* map@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map@2x.png"; sourceTree = "<group>"; };
 		83FC93D21F7147250034E3B2 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalStdLib.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -344,6 +348,8 @@
 		8340DF921F61B1F8002176C6 /* Laufpark */ = {
 			isa = PBXGroup;
 			children = (
+				83B998281F7274C7007200D2 /* map.png */,
+				83B9982A1F7275B2007200D2 /* map@2x.png */,
 				8340DFA91F61B22D002176C6 /* gpx */,
 				8340DF931F61B1F8002176C6 /* AppDelegate.swift */,
 				8340DF951F61B1F8002176C6 /* ViewController.swift */,
@@ -597,6 +603,7 @@
 				8340790D1F626B2300BC7C98 /* wabe gruen-strecke 1.gpx in Resources */,
 				8340793C1F626EC600BC7C98 /* wabe blau-strecke 1.gpx in Resources */,
 				8340794D1F626EC600BC7C98 /* wabe hellbraun-strecke 2.gpx in Resources */,
+				83B998291F72753E007200D2 /* map.png in Resources */,
 				834079431F626EC600BC7C98 /* wabe gelb-strecke 1.gpx in Resources */,
 				8340790E1F626B2300BC7C98 /* wabe gruen-strecke 2.gpx in Resources */,
 				834079111F626B2300BC7C98 /* wabe lila-strecke 1.gpx in Resources */,
@@ -607,6 +614,7 @@
 				8340790B1F626B2300BC7C98 /* wabe beige-strecke 1.gpx in Resources */,
 				8340790C1F626B2300BC7C98 /* wabe beige-strecke 2.gpx in Resources */,
 				8340794C1F626EC600BC7C98 /* wabe hellbraun-strecke 1.gpx in Resources */,
+				83B9982B1F7275B6007200D2 /* map@2x.png in Resources */,
 				834079171F626B2300BC7C98 /* wabe violett-strecke 4.gpx in Resources */,
 				834079521F626EC600BC7C98 /* wabe pink-strecke 1.gpx in Resources */,
 				834079451F626EC600BC7C98 /* wabe gelb-strecke 3.gpx in Resources */,
@@ -776,7 +784,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = SL7736T2Z4;
 				INFOPLIST_FILE = Laufpark/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Laufpark;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -792,7 +800,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = SL7736T2Z4;
 				INFOPLIST_FILE = Laufpark/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Laufpark;
 				PRODUCT_NAME = "$(TARGET_NAME)";

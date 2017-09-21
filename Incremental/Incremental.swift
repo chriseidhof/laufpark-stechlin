@@ -198,7 +198,7 @@ public final class I<A>: AnyI, Node {
         self.constant = false
     }
 
-    fileprivate init(eq: @escaping (A,A) -> Bool) {
+    init(eq: @escaping (A,A) -> Bool) {
         self.eq = eq
         self.constant = false
     }
@@ -312,6 +312,9 @@ extension I {
 }
 
 extension I where A: Equatable {
+    convenience init() {
+        self.init(eq: ==)
+    }
     convenience init(value: A) {
         self.init(value: value, eq: ==)
     }
