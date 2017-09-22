@@ -14,9 +14,6 @@ let disposable2 = result.flatMap(eq: ==, { $0.latest }).observe {
 //}
 
 arr.change(.insert(4, at: 3))
-arr.change(.insert(5, at: 2))
-
 condition.write { $0 > 1 }
-//condition.write { $0 % 2 == 0 }
-arr.change(.insert(6, at: 0))
-//condition.write { $0 > 1 }
+arr.change(.insert(6, at: 3))
+// why is 6 in there twice?!

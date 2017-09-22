@@ -174,7 +174,7 @@ public extension Input where A: Equatable {
 }
 
 
-protocol AnyI: class {
+protocol AnyI: class, Node {
     var firedAlready: Bool { get set }
     var strongReferences: Register<Any> { get set }
     var height: Height { get }
@@ -190,7 +190,7 @@ public final class I<A>: AnyI, Node {
     var firedAlready: Bool = false
     var strongReferences: Register<Any> = Register()
     var eq: (A,A) -> Bool
-    private let constant: Bool
+    private var constant: Bool
     
     init(value: A, eq: @escaping (A, A) -> Bool) {
         self.value = value
@@ -218,13 +218,10 @@ public final class I<A>: AnyI, Node {
         }
     }
     
-    /// Returns `self`
-    @discardableResult
-    func write(_ value: A) -> I<A> {
-        assert(!constant)
+    func _writeHelper(_ value: A) -> I<A> {
         if let existing = self.value, eq(existing, value) { return self }
-        
         self.value = value
+
         guard !firedAlready else { return self }
         firedAlready = true
         let r: [Edge] = Array(readers.values)
@@ -233,6 +230,19 @@ public final class I<A>: AnyI, Node {
         Queue.shared.fired(self)
         Queue.shared.process()
         return self
+    }
+    /// Returns `self`
+    @discardableResult
+    func write(_ value: A, file: StaticString = #file, line: UInt = #line) -> I<A> {
+        precondition(!constant, file: file, line: line)
+        return _writeHelper(value)
+    }
+
+    @discardableResult
+    func write(constant value: A, file: StaticString = #file, line: UInt = #line) -> I<A> {
+        assert(!constant, file: file, line: line)
+        self.constant = true // this node will never fire again
+        return _writeHelper(value)
     }
     
     func addReader(_ reader: Reader) -> Disposable {
@@ -252,6 +262,16 @@ public final class I<A>: AnyI, Node {
         let disposable = addReader(reader)
         target.strongReferences.add(disposable)
         return reader
+    }
+
+    @discardableResult
+    func read(_ read: @escaping (A) -> Node) -> (AnyReader, Disposable?) {
+        let reader = AnyReader { read(self.value) }
+        guard !constant else {
+            return (reader, nil)
+        }
+        let disposable = addReader(reader)
+        return (reader, disposable)
     }
 
     public func map<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> B) -> I<B> {

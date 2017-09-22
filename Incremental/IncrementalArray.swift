@@ -9,24 +9,25 @@
 import Foundation
 
 // todo shouldn't be public probably
-public func append<A>(_ value: A, to: I<IList<A>>) {
-    concat(.cons(value, I(value: .empty)), to: to)
+public func appendOnly<A>(_ value: A, to: I<IList<A>>) {
+    concatOnly(.cons(value, I(value: .empty)), to: to)
 }
 
-func concat<A>(_ value: IList<A>, to: I<IList<A>>) {
+// concat to an immutable list
+func concatOnly<A>(_ value: IList<A>, to: I<IList<A>>) {
+    if case .empty = value { return }
     switch to.value! {
     case .empty:
-        to.write(value)
+        to.write(constant: value)
     case .cons(_, let tail):
-        concat(value, to: tail)
+        concatOnly(value, to: tail)
     }
 }
 
 func tail<A>(_ source: I<IList<A>>) -> I<IList<A>> {
-    if case let .cons(_, t) = source.value! {
-        return tail(t)
-    } else {
-        return source
+    switch source.value! {
+    case .cons(_, let t): return tail(t)
+    case .empty: return self
     }
 }
 
@@ -164,7 +165,7 @@ public struct ArrayWithHistory<A: Equatable>: Equatable {
     }
 
     public mutating func change(_ change: ArrayChange<A>) {
-        append(change, to: changes)
+        appendOnly(change, to: changes)
     }
 
     public static func ==(lhs: ArrayWithHistory<A>, rhs: ArrayWithHistory<A>) -> Bool {
@@ -172,22 +173,21 @@ public struct ArrayWithHistory<A: Equatable>: Equatable {
     }
 }
 
-func filterH<A>(target: AnyI, changesOut: I<IList<ArrayChange<A>>>, changesIn: IList<ArrayChange<A>>, condition: @escaping (A) -> Bool, latest: [A]) -> Node {
+func filterH<A>(target: I<()>, changesOut: I<IList<ArrayChange<A>>>, changesIn: IList<ArrayChange<A>>, condition: @escaping (A) -> Bool, latest: [A]) -> Node {
     switch changesIn {
     case .empty:
-        return tail(changesOut).write(.empty)
+        return target.write(())
+        // return target // tail(changesOut) // todo no idea what to return here?!
     case .cons(let change, let remainder):
         switch change {
         case let .insert(element, at: index) where condition(element):
             print("got a valid insert: \(change)")
             let newIndex = latest.filteredIndex(for: index, condition)
-            let newChange = ArrayChange<A>.insert(element, at: newIndex)
-            append(newChange, to: changesOut)
+            appendOnly(.insert(element, at: newIndex), to: changesOut)
         case let .remove(at: index) where condition(latest[index]):
-            print("got a valid insert: \(change)")
+            print("got a valid remove: \(change)")
             let newIndex = latest.filteredIndex(for: index, condition)
-            let newChange = ArrayChange<A>.remove(at: newIndex)
-            append(newChange, to: changesOut)
+            appendOnly(.remove(at: newIndex), to: changesOut)
         default:
             print("skipping \(change)")
             ()
@@ -222,14 +222,22 @@ extension ArrayWithHistory {
         var previousCondition: (A) -> Bool = condition.value
         let result: I<ArrayWithHistory<A>> = I(value: ArrayWithHistory(unsafeLatestSnapshot.filter(previousCondition)))
         let resultChanges = result.value.changes
+        var previous: Disposable? = nil
         condition.read(target: result) { c in
+            previous = nil
             let filterChanges = self.unsafeLatestSnapshot.filterChanges(oldCondition: previousCondition, newCondition: c)
             previousCondition = c
-            concat(filterChanges, to: resultChanges)
+            concatOnly(filterChanges, to: resultChanges)
+            let target = I<()>(eq: { _, _ in true}) // phantom target
             // when a new change comes in, we need to check if it matches the new condition, if yes, propagate. we only are interested in *new* changes, that is, changes appended to tail
-            return tail(self.changes).read(target: result) { (newChanges: IList<ArrayChange<A>>) in
-                return filterH(target: result, changesOut: resultChanges, changesIn: newChanges, condition: c, latest: self.unsafeLatestSnapshot)
+            let (node,disposable) = tail(self.changes).read { (newChanges: IList<ArrayChange<A>>) in
+                return filterH(target: target, changesOut: resultChanges, changesIn: newChanges, condition: c, latest: self.unsafeLatestSnapshot)
             }
+            let token = result.strongReferences.add(disposable)
+            previous = Disposable {
+                result.strongReferences.remove(token)
+            }
+            return node
         }
         return result
     }
