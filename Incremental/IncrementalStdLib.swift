@@ -8,6 +8,8 @@
 
 import Foundation
 
+// idea make certain properties configurable from "the outside". We could make an "ExternalConfig" struct which reads from JSON (and is settable by the server).
+
 public func if_<A: Equatable>(_ condition: I<Bool>, then l: I<A>, else r: I<A>) -> I<A> {
     return condition.flatMap { $0 ? l : r }
 }
@@ -35,38 +37,3 @@ public func ==<A>(l: I<A>, r: I<A>) -> I<Bool> where A: Equatable {
 public func ==<A>(l: I<A>, r: A) -> I<Bool> where A: Equatable {
     return l.map { $0 == r }
 }
-
-enum IList<A>: Equatable where A: Equatable {
-    case empty
-    case cons(A, I<IList<A>>)
-    
-    mutating func append(_ value: A) {
-        switch self {
-        case .empty: self = .cons(value, I(value: .empty))
-        case .cons(_, let tail): tail.value.append(value)
-        }
-    }
-    
-    func reduceH<B>(destination: I<B>, initial: B, combine: @escaping (A,B) -> B) -> Node {
-        switch self {
-        case .empty:
-            destination.write(initial)
-            return destination
-        case let .cons(value, tail):
-            let intermediate = combine(value, initial)
-            return tail.read(target: destination) { newTail in
-                newTail.reduceH(destination: destination, initial: intermediate, combine: combine)
-            }
-        }
-    }
-}
-
-extension IList {
-    static func ==(l: IList<A>, r: IList<A>) -> Bool {
-        switch (l, r) {
-        case (.empty, .empty): return true
-        default: return false
-        }
-    }
-}
-

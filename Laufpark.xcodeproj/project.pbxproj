@@ -91,6 +91,7 @@
 		8340DFB01F61B40C002176C6 /* wabe rot-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA61F61B227002176C6 /* wabe rot-strecke 2.gpx */; };
 		8340DFB11F61B40C002176C6 /* wabe rot-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA51F61B227002176C6 /* wabe rot-strecke 3.gpx */; };
 		8340DFB21F61B40C002176C6 /* wabe rot-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */; };
+		837A8ABA1F72DACB00ED898C /* IncrementalArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837A8AB91F72DACB00ED898C /* IncrementalArray.swift */; };
 		83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824D1F6302DF004070DA /* Model+UIKit.swift */; };
 		83B2A26C1F692CFA00A6D9F9 /* Incremental.h in Headers */ = {isa = PBXBuildFile; fileRef = 83B2A26A1F692CFA00A6D9F9 /* Incremental.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83B2A26F1F692CFA00A6D9F9 /* Incremental.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; };
@@ -98,6 +99,14 @@
 		83B2A2751F692D0D00A6D9F9 /* Incremental.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824F1F63052D004070DA /* Incremental.swift */; };
 		83B998291F72753E007200D2 /* map.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B998281F7274C7007200D2 /* map.png */; };
 		83B9982B1F7275B6007200D2 /* map@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B9982A1F7275B2007200D2 /* map@2x.png */; };
+		83C0FB081F74F5280041A802 /* Incremental_Mac.h in Headers */ = {isa = PBXBuildFile; fileRef = 83C0FB061F74F5280041A802 /* Incremental_Mac.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		83C0FB0C1F74F53C0041A802 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D21F7147250034E3B2 /* Helpers.swift */; };
+		83C0FB0D1F74F53C0041A802 /* Incremental.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824F1F63052D004070DA /* Incremental.swift */; };
+		83C0FB0E1F74F53C0041A802 /* Incremental+NSObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */; };
+		83C0FB0F1F74F53C0041A802 /* Incremental.h in Headers */ = {isa = PBXBuildFile; fileRef = 83B2A26A1F692CFA00A6D9F9 /* Incremental.h */; };
+		83C0FB111F74F53C0041A802 /* IncrementalStdLib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */; };
+		83C0FB121F74F53C0041A802 /* IncrementalArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837A8AB91F72DACB00ED898C /* IncrementalArray.swift */; };
+		83C0FB141F74F5890041A802 /* Incremental+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C0FB131F74F5890041A802 /* Incremental+UIKit.swift */; };
 		83FC93D31F7147250034E3B2 /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D21F7147250034E3B2 /* Helpers.swift */; };
 		83FC93D51F7154050034E3B2 /* IncrementalStdLib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */; };
 /* End PBXBuildFile section */
@@ -214,6 +223,7 @@
 		8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rot-strecke 4.gpx"; sourceTree = "<group>"; };
 		8340DFAB1F61B2C5002176C6 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		8340DFAD1F61B2F6002176C6 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		837A8AB91F72DACB00ED898C /* IncrementalArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalArray.swift; sourceTree = "<group>"; };
 		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
 		83B0824F1F63052D004070DA /* Incremental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incremental.swift; sourceTree = "<group>"; };
 		83B082511F630835004070DA /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -222,6 +232,11 @@
 		83B2A26B1F692CFA00A6D9F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83B998281F7274C7007200D2 /* map.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = map.png; sourceTree = "<group>"; };
 		83B9982A1F7275B2007200D2 /* map@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "map@2x.png"; sourceTree = "<group>"; };
+		83C0FAFE1F74F5060041A802 /* Incremental copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Incremental copy-Info.plist"; path = "/Users/chris/Development/Swift/Laufpark/Incremental copy-Info.plist"; sourceTree = "<absolute>"; };
+		83C0FB041F74F5280041A802 /* Incremental_Mac.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Incremental_Mac.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		83C0FB061F74F5280041A802 /* Incremental_Mac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Incremental_Mac.h; sourceTree = "<group>"; };
+		83C0FB071F74F5280041A802 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		83C0FB131F74F5890041A802 /* Incremental+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+UIKit.swift"; sourceTree = "<group>"; };
 		83FC93D21F7147250034E3B2 /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalStdLib.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -237,6 +252,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		83B2A2641F692CFA00A6D9F9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83C0FB001F74F5280041A802 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -331,8 +353,10 @@
 				83B082511F630835004070DA /* MyPlayground.playground */,
 				8340DF921F61B1F8002176C6 /* Laufpark */,
 				83B2A2691F692CFA00A6D9F9 /* Incremental */,
+				83C0FB051F74F5280041A802 /* Incremental_Mac */,
 				8340DF911F61B1F8002176C6 /* Products */,
 				8340DFAA1F61B2C5002176C6 /* Frameworks */,
+				83C0FAFE1F74F5060041A802 /* Incremental copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
@@ -341,6 +365,7 @@
 			children = (
 				8340DF901F61B1F8002176C6 /* Laufpark.app */,
 				83B2A2681F692CFA00A6D9F9 /* Incremental.framework */,
+				83C0FB041F74F5280041A802 /* Incremental_Mac.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -441,8 +466,19 @@
 				83B2A26A1F692CFA00A6D9F9 /* Incremental.h */,
 				83B2A26B1F692CFA00A6D9F9 /* Info.plist */,
 				83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */,
+				837A8AB91F72DACB00ED898C /* IncrementalArray.swift */,
+				83C0FB131F74F5890041A802 /* Incremental+UIKit.swift */,
 			);
 			path = Incremental;
+			sourceTree = "<group>";
+		};
+		83C0FB051F74F5280041A802 /* Incremental_Mac */ = {
+			isa = PBXGroup;
+			children = (
+				83C0FB061F74F5280041A802 /* Incremental_Mac.h */,
+				83C0FB071F74F5280041A802 /* Info.plist */,
+			);
+			path = Incremental_Mac;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -453,6 +489,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				83B2A26C1F692CFA00A6D9F9 /* Incremental.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83C0FB011F74F5280041A802 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83C0FB081F74F5280041A802 /* Incremental_Mac.h in Headers */,
+				83C0FB0F1F74F53C0041A802 /* Incremental.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -496,6 +541,24 @@
 			productReference = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		83C0FB031F74F5280041A802 /* Incremental_Mac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 83C0FB091F74F5280041A802 /* Build configuration list for PBXNativeTarget "Incremental_Mac" */;
+			buildPhases = (
+				83C0FAFF1F74F5280041A802 /* Sources */,
+				83C0FB001F74F5280041A802 /* Frameworks */,
+				83C0FB011F74F5280041A802 /* Headers */,
+				83C0FB021F74F5280041A802 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Incremental_Mac;
+			productName = Incremental_Mac;
+			productReference = 83C0FB041F74F5280041A802 /* Incremental_Mac.framework */;
+			productType = "com.apple.product-type.framework";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -517,6 +580,10 @@
 					83B2A2671F692CFA00A6D9F9 = {
 						CreatedOnToolsVersion = 9.0;
 					};
+					83C0FB031F74F5280041A802 = {
+						CreatedOnToolsVersion = 9.0;
+						ProvisioningStyle = Automatic;
+					};
 				};
 			};
 			buildConfigurationList = 8340DF8B1F61B1F8002176C6 /* Build configuration list for PBXProject "Laufpark" */;
@@ -534,6 +601,7 @@
 			targets = (
 				8340DF8F1F61B1F8002176C6 /* Laufpark */,
 				83B2A2671F692CFA00A6D9F9 /* Incremental */,
+				83C0FB031F74F5280041A802 /* Incremental_Mac */,
 			);
 		};
 /* End PBXProject section */
@@ -631,6 +699,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		83C0FB021F74F5280041A802 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -654,8 +729,22 @@
 			files = (
 				83354DA01F6FE9A900F3C33A /* Incremental+NSObject.swift in Sources */,
 				83FC93D31F7147250034E3B2 /* Helpers.swift in Sources */,
+				837A8ABA1F72DACB00ED898C /* IncrementalArray.swift in Sources */,
+				83C0FB141F74F5890041A802 /* Incremental+UIKit.swift in Sources */,
 				83FC93D51F7154050034E3B2 /* IncrementalStdLib.swift in Sources */,
 				83B2A2751F692D0D00A6D9F9 /* Incremental.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83C0FAFF1F74F5280041A802 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				83C0FB0D1F74F53C0041A802 /* Incremental.swift in Sources */,
+				83C0FB0E1F74F53C0041A802 /* Incremental+NSObject.swift in Sources */,
+				83C0FB121F74F53C0041A802 /* IncrementalArray.swift in Sources */,
+				83C0FB111F74F53C0041A802 /* IncrementalStdLib.swift in Sources */,
+				83C0FB0C1F74F53C0041A802 /* Helpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -857,6 +946,60 @@
 			};
 			name = Release;
 		};
+		83C0FB0A1F74F5280041A802 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = SL7736T2Z4;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = Incremental_Mac/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.objcio.Incremental-Mac";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx10.13;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Debug;
+		};
+		83C0FB0B1F74F5280041A802 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = SL7736T2Z4;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				FRAMEWORK_VERSION = A;
+				INFOPLIST_FILE = Incremental_Mac/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				PRODUCT_BUNDLE_IDENTIFIER = "io.objcio.Incremental-Mac";
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SDKROOT = macosx10.13;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.0;
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -883,6 +1026,15 @@
 			buildConfigurations = (
 				83B2A2711F692CFA00A6D9F9 /* Debug */,
 				83B2A2721F692CFA00A6D9F9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		83C0FB091F74F5280041A802 /* Build configuration list for PBXNativeTarget "Incremental_Mac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83C0FB0A1F74F5280041A802 /* Debug */,
+				83C0FB0B1F74F5280041A802 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

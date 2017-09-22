@@ -265,11 +265,11 @@ public final class I<A>: AnyI, Node {
         return result
     }
     
-    public func flatMap<B: Equatable>(_ transform: @escaping (A) -> I<B>) -> I<B> {
+    public func flatMap<B>(eq: @escaping (B,B) -> Bool, _ transform: @escaping (A) -> I<B>) -> I<B> {
         guard !constant else {
             return transform(self.value)
         }
-        let result = I<B>(eq: ==)
+        let result = I<B>(eq: eq) // todo: could we somehow pull eq out of the transform's result?
         let reader = FlatMapReader(source: self, transform: transform, target: result)
         result.strongReferences.add(addReader(reader))
         return result
@@ -283,6 +283,10 @@ public final class I<A>: AnyI, Node {
 }
 
 extension I {
+    public func flatMap<B: Equatable>(_ transform: @escaping (A) -> I<B>) -> I<B> {
+        return flatMap(eq: ==, transform)
+    }
+
     public func zip2<B: Equatable,C: Equatable>(_ other: I<B>, _ with: @escaping (A,B) -> C) -> I<C> {
         return flatMap { value in other.map { with(value, $0) } }
     }
