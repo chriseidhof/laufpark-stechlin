@@ -15,7 +15,7 @@ extension IBox where V: UIView {
         unbox.addSubview(subview.unbox)
     }
     
-    public func bindSubviews(_ iArray: I<ArrayWithHistory<IBox<UIView>>>) {
+    public func bindSubviews<View: UIView>(_ iArray: I<ArrayWithHistory<IBox<View>>>) {
         
         disposables.append(iArray.observe { value in // todo owernship of self?
             assert(self.unbox.subviews.isEmpty)
@@ -37,7 +37,7 @@ extension IBox where V: UIView {
     }
 }
 
-extension IBox where V == UIStackView {
+extension IBox where V: UIStackView {
     public convenience init<S>(arrangedSubviews: [IBox<S>]) where S: UIView {
         let stackView = UIStackView(arrangedSubviews: arrangedSubviews.map { $0.unbox })
         self.init(stackView)
@@ -46,32 +46,29 @@ extension IBox where V == UIStackView {
 }
 
 extension IBox where V: UIStackView {
-    public func bindArrangedSubviews<Subview: UIView>(to: I<ArrayWithHistory<IBox<Subview>>>, animationDuration duration: TimeInterval = 0.2) {
-        // todo: this assumes that to never changes. this is true, but still: fix it.
-        to.observe { value in // todo ownership
-            self.disposables.append(value.observe(current: { initialArrangedSubviews in
-                assert(self.unbox.arrangedSubviews == [])
-                for v in initialArrangedSubviews {
-                    self.unbox.addArrangedSubview(v.unbox)
+    public func bindArrangedSubviews<Subview: UIView>(to value: ArrayWithHistory<IBox<Subview>>, animationDuration duration: TimeInterval = 0.2) {
+        self.disposables.append(value.observe(current: { initialArrangedSubviews in
+            assert(self.unbox.arrangedSubviews == [])
+            for v in initialArrangedSubviews {
+                self.unbox.addArrangedSubview(v.unbox)
+            }
+        }) {
+            switch $0 {
+            case let .insert(v, at: i):
+                v.unbox.isHidden = true
+                self.unbox.insertArrangedSubview(v.unbox, at: i)
+                UIView.animate(withDuration: duration) {
+                    v.unbox.isHidden = false
                 }
-            }) {
-                switch $0 {
-                case let .insert(v, at: i):
-                    v.unbox.isHidden = true
-                    self.unbox.insertArrangedSubview(v.unbox, at: i)
-                    UIView.animate(withDuration: duration) {
-                        v.unbox.isHidden = false
-                    }
-                case .remove(at: let i):
-                    let v = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i]
-                    UIView.animate(withDuration: duration, animations: {
-                        v.isHidden = true
-                    }, completion: { _ in
-                        self.unbox.removeArrangedSubview(v)
-                    })
-                }
-            })
-        }
+            case .remove(at: let i):
+                let v = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i]
+                UIView.animate(withDuration: duration, animations: {
+                    v.isHidden = true
+                }, completion: { _ in
+                    self.unbox.removeArrangedSubview(v)
+                })
+            }
+        })
     }
 }
 
@@ -122,15 +119,13 @@ extension TableVC where A: Equatable {
     }
 }
 
-public func tableViewController<A>(items: I<ArrayWithHistory<A>>, configure: @escaping (UITableViewCell, A) -> ()) -> IBox<UITableViewController> {
+public func tableViewController<A>(items value: ArrayWithHistory<A>, configure: @escaping (UITableViewCell, A) -> ()) -> IBox<UITableViewController> {
     let tableVC = TableVC([], configure: configure)
     let box = IBox<UITableViewController>(tableVC)
-    box.disposables.append(items.observe { value in // todo don't just observe once?
-        box.disposables.append(value.observe(current: {
-            tableVC.items = $0
-        }, handleChange: { change in
-            tableVC.apply(change)
-        }))
-    })
+    box.disposables.append(value.observe(current: {
+        tableVC.items = $0
+    }, handleChange: { change in
+        tableVC.apply(change)
+    }))
     return box
 }

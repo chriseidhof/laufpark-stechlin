@@ -20,7 +20,7 @@ func label(text: I<String>) -> IBox<UILabel> {
 
 
 let filtered = arr.filter(condition.i)
-let labels = filtered.map { $0.map { label(text: I(constant: "\($0)")) } }
+let labels = filtered.map { label(text: I(constant: "\($0)")) }
 
 let s = UIStackView(arrangedSubviews: [])
 let stackView = IBox(s)

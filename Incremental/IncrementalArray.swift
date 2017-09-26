@@ -233,13 +233,13 @@ extension ArrayWithHistory {
 }
 
 extension ArrayWithHistory {
-    public func filter(_ condition: I<(A) -> Bool>) -> I<ArrayWithHistory<A>> {
+    public func filter(_ condition: I<(A) -> Bool>) -> ArrayWithHistory<A> {
         // todo: the implementation of this is quite tricky, and I'm not sure if it's correct. it seems to work though. needs a solid test harness.
         var currentCondition: (A) -> Bool = condition.value
-        let result: I<ArrayWithHistory<A>> = I(value: ArrayWithHistory(unsafeLatestSnapshot.filter(currentCondition)))
-        let resultChanges = result.value.changes
+        let result = ArrayWithHistory(unsafeLatestSnapshot.filter(currentCondition))
+        let resultChanges = result.changes
         var previous: Disposable? = nil
-        condition.read(target: result) { c in
+        condition.read(target: resultChanges) { c in
             previous = nil
             let filterChanges = self.unsafeLatestSnapshot.filterChanges(oldCondition: currentCondition, newCondition: c)
             currentCondition = c
@@ -269,8 +269,8 @@ extension ArrayWithHistory {
             }
         }
 
-        tail(self.changes).read(target: result) { (newChanges: IList<ArrayChange<A>>) in
-            return filterH(target: result, changesOut: resultChanges, changesIn: newChanges, latest: self.unsafeLatestSnapshot)
+        tail(self.changes).read(target: resultChanges) { (newChanges: IList<ArrayChange<A>>) in
+            return filterH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: self.unsafeLatestSnapshot)
         }
         return result
     }
