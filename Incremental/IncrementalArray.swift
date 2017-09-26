@@ -242,7 +242,6 @@ extension ArrayWithHistory {
         condition.read(target: result) { c in
             previous = nil
             let filterChanges = self.unsafeLatestSnapshot.filterChanges(oldCondition: currentCondition, newCondition: c)
-            print("filter changes: \(filterChanges)")
             currentCondition = c
             concatOnly(filterChanges, to: resultChanges)
             return I(constant: ())
