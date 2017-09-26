@@ -12,6 +12,7 @@ enum Command<Message> {
 struct State: Reducer {
     private(set) var inputText: String? = nil
     private(set) var rate: Double? = nil
+    let targetCurrency = "USD"
     
     enum Message {
         case setInputText(String?)
@@ -30,7 +31,7 @@ struct State: Reducer {
                 let json = try? JSONSerialization.jsonObject(with: data, options: []),
                 let dict = json as? [String:Any],
                 let dataDict = dict["rates"] as? [String:Double] else { return nil }
-            self.rate = dataDict["USD"]
+            self.rate = dataDict[targetCurrency]
             return nil
         case .reload:
             return .loadData(url: ratesURL, message: Message.dataReceived)
@@ -50,7 +51,7 @@ struct State: Reducer {
     }
     
     var outputText: String {
-        return outputAmount.map { "\($0)" } ?? "..."
+        return outputAmount.map { "\(inputAmount!) EUR = \($0) \(targetCurrency)" } ?? "..."
     }
 }
 
@@ -174,7 +175,7 @@ func view(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIView
     let input = textField(text: state.map { $0.inputText ?? "" }, onChange: {
         send(.setInputText($0))
     })
-    let labelBgColor: I<UIColor> = state.map { $0.outputAmount == nil ? .red : .white }
+    let labelBgColor: I<UIColor> = state.map { $0.inputAmount == nil ? .red : .white }
     let outputLabel = label(text: state.map { $0.outputText }, backgroundColor: labelBgColor)
     let reload = button(text: I(constant: "Reload"), onTap: { send(.reload) })
     let stackView = IBox<UIStackView>(arrangedSubviews: [
@@ -188,6 +189,6 @@ func view(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIView
 }
 
 import PlaygroundSupport
-let driver = Driver<State>(initial: State(inputText: "100", rate: 1.2), view: view)
+let driver = Driver<State>(initial: State(inputText: "100", rate: nil), view: view)
 PlaygroundPage.current.liveView = driver.viewController
 //: [Next](@next)
