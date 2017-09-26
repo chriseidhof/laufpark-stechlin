@@ -21,9 +21,9 @@ extension NSObjectProtocol where Self: NSObject {
     }
 }
 
-public final class IBox<V> {
+public final class IBox<V>: Equatable {    
     public private(set) var unbox: V
-    var disposables: [Any] = []
+    public var disposables: [Any] = []
     
     public init(_ object: V) {
         self.unbox = object
@@ -45,6 +45,14 @@ public final class IBox<V> {
         disposables.append(value.observe { newValue in
             onChange(self.unbox,newValue) // ownership?
         })
+    }
+
+    public static func ==(lhs: IBox<V>, rhs: IBox<V>) -> Bool {
+        return lhs === rhs
+    }
+    
+    public func map<B>(_ transform: (V) -> B) -> IBox<B> {
+        return IBox<B>(transform(unbox))
     }
 }
 extension IBox where V: NSObject {

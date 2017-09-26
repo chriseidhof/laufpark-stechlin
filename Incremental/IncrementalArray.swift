@@ -27,7 +27,7 @@ func concatOnly<A>(_ value: IList<A>, to: I<IList<A>>) {
 func tail<A>(_ source: I<IList<A>>) -> I<IList<A>> {
     switch source.value! {
     case .cons(_, let t): return tail(t)
-    case .empty: return self
+    case .empty: return source
     }
 }
 
@@ -73,6 +73,15 @@ public indirect enum IList<A>: Equatable, CustomDebugStringConvertible where A: 
         result.strongReferences.add(node)
         return result
     }
+    
+    public func appendOnlyMap<B>(_ transform: @escaping (A) -> B) -> IList<B> {
+        switch self {
+        case .empty: return .empty
+        case let .cons(x, xs):
+            let result = xs.map { $0.appendOnlyMap(transform) }
+            return .cons(transform(x), result)
+        }
+    }
 
     public var debugDescription: String {
         var result: [A] = []
@@ -108,6 +117,15 @@ public enum ArrayChange<Element>: Equatable where Element: Equatable {
             return false
         }
     }
+    
+    public func map<B: Equatable>(_ transform: (Element) -> B) -> ArrayChange<B> {
+        switch self {
+        case let .insert(element, at: index):
+            return .insert(transform(element), at: index)
+        case .remove(at: let index):
+            return .remove(at: index)
+        }
+    }
 }
 
 extension Array where Element: Equatable {
@@ -139,17 +157,20 @@ extension Array {
 }
 
 extension Array where Element: Equatable {
-    func filterChanges(oldCondition: (Element) -> Bool, newCondition: (Element) -> Bool) -> IList<ArrayChange<Element>> {
+    public func filterChanges(oldCondition: (Element) -> Bool, newCondition: (Element) -> Bool) -> IList<ArrayChange<Element>> {
         // TODO: this is O(n^2) because of filteredIndex. Should be possible to make it O(n)
         var result: IList<ArrayChange<Element>> = .empty
+        var offset = 0
         for (element, index) in zip(self, self.indices) {
             let old = oldCondition(element)
             let new = newCondition(element)
             let newIndex = filteredIndex(for: index, oldCondition)
             if old && !new {
-                result.append(ArrayChange<Element>.remove(at: newIndex))
+                result.append(ArrayChange<Element>.remove(at: newIndex + offset))
+                offset -= 1
             } else if !old && new {
-                result.append(.insert(element, at: newIndex))
+                result.append(.insert(element, at: newIndex + offset))
+                offset += 1
             }
         }
         return result
@@ -157,14 +178,18 @@ extension Array where Element: Equatable {
 }
 
 public struct ArrayWithHistory<A: Equatable>: Equatable {
-    let initial: [A]
+    public let initial: [A]
     public let changes: I<IList<ArrayChange<A>>> // todo: this should be write-only
     public init(_ initial: [A]) {
         self.initial = initial
         self.changes = I(value: .empty)
     }
+    init(_ initial: [A], changes: I<IList<ArrayChange<A>>>) {
+        self.initial = initial
+        self.changes = changes
+    }
 
-    public mutating func change(_ change: ArrayChange<A>) {
+    public func change(_ change: ArrayChange<A>) {
         appendOnly(change, to: changes)
     }
 
@@ -173,32 +198,20 @@ public struct ArrayWithHistory<A: Equatable>: Equatable {
     }
 }
 
-func filterH<A>(target: I<()>, changesOut: I<IList<ArrayChange<A>>>, changesIn: IList<ArrayChange<A>>, condition: @escaping (A) -> Bool, latest: [A]) -> Node {
-    switch changesIn {
-    case .empty:
-        return target.write(())
-        // return target // tail(changesOut) // todo no idea what to return here?!
-    case .cons(let change, let remainder):
-        switch change {
-        case let .insert(element, at: index) where condition(element):
-            print("got a valid insert: \(change)")
-            let newIndex = latest.filteredIndex(for: index, condition)
-            appendOnly(.insert(element, at: newIndex), to: changesOut)
-        case let .remove(at: index) where condition(latest[index]):
-            print("got a valid remove: \(change)")
-            let newIndex = latest.filteredIndex(for: index, condition)
-            appendOnly(.remove(at: newIndex), to: changesOut)
-        default:
-            print("skipping \(change)")
-            ()
+extension ArrayWithHistory {
+    public func observe(current: ([A]) -> (), handleChange: @escaping (ArrayChange<A>) -> ()) -> Disposable {
+        current(self.unsafeLatestSnapshot)
+        let nEq: ((), ()) -> Bool = { _,_ in false }
+        let (_, disposable) = changes.read { c in
+            c.reduce(eq: nEq, initial: (), combine: { change, _ in
+                handleChange(change)
+                return ()
+            })
         }
-        let newLatest = latest.applying(change)
-        return remainder.read(target: target) { value in
-            return filterH(target: target, changesOut: changesOut, changesIn: value, condition: condition, latest: newLatest)
-        }
-
+        return disposable!
     }
 }
+
 extension ArrayWithHistory {
     var unsafeLatestSnapshot: [A] {
         var result: [A] = initial
@@ -217,30 +230,55 @@ extension ArrayWithHistory {
             }
         }
     }
+}
 
-    public func filter(condition: I<(A) -> Bool>) -> I<ArrayWithHistory<A>> {
-        var previousCondition: (A) -> Bool = condition.value
-        let result: I<ArrayWithHistory<A>> = I(value: ArrayWithHistory(unsafeLatestSnapshot.filter(previousCondition)))
+extension ArrayWithHistory {
+    public func filter(_ condition: I<(A) -> Bool>) -> I<ArrayWithHistory<A>> {
+        // todo: the implementation of this is quite tricky, and I'm not sure if it's correct. it seems to work though. needs a solid test harness.
+        var currentCondition: (A) -> Bool = condition.value
+        let result: I<ArrayWithHistory<A>> = I(value: ArrayWithHistory(unsafeLatestSnapshot.filter(currentCondition)))
         let resultChanges = result.value.changes
         var previous: Disposable? = nil
         condition.read(target: result) { c in
             previous = nil
-            let filterChanges = self.unsafeLatestSnapshot.filterChanges(oldCondition: previousCondition, newCondition: c)
-            previousCondition = c
+            let filterChanges = self.unsafeLatestSnapshot.filterChanges(oldCondition: currentCondition, newCondition: c)
+            print("filter changes: \(filterChanges)")
+            currentCondition = c
             concatOnly(filterChanges, to: resultChanges)
-            let target = I<()>(eq: { _, _ in true}) // phantom target
-            // when a new change comes in, we need to check if it matches the new condition, if yes, propagate. we only are interested in *new* changes, that is, changes appended to tail
-            let (node,disposable) = tail(self.changes).read { (newChanges: IList<ArrayChange<A>>) in
-                return filterH(target: target, changesOut: resultChanges, changesIn: newChanges, condition: c, latest: self.unsafeLatestSnapshot)
+            return I(constant: ())
+        }
+        func filterH(target: AnyI, changesOut: I<IList<ArrayChange<A>>>, changesIn: IList<ArrayChange<A>>, latest: [A]) -> Node {
+            switch changesIn {
+            case .empty:
+                return target
+            case .cons(let change, let remainder):
+                switch change {
+                case let .insert(element, at: index) where currentCondition(element):
+                    let newIndex = latest.filteredIndex(for: index, currentCondition)
+                    appendOnly(.insert(element, at: newIndex), to: changesOut)
+                case let .remove(at: index) where currentCondition(latest[index]):
+                    let newIndex = latest.filteredIndex(for: index, currentCondition)
+                    appendOnly(.remove(at: newIndex), to: changesOut)
+                default:
+                    ()
+                }
+                let newLatest = latest.applying(change)
+                return remainder.read(target: target) { value in
+                    return filterH(target: target, changesOut: changesOut, changesIn: value, latest: newLatest)
+                }
+                
             }
-            let token = result.strongReferences.add(disposable)
-            previous = Disposable {
-                result.strongReferences.remove(token)
-            }
-            return node
+        }
+
+        tail(self.changes).read(target: result) { (newChanges: IList<ArrayChange<A>>) in
+            return filterH(target: result, changesOut: resultChanges, changesIn: newChanges, latest: self.unsafeLatestSnapshot)
         }
         return result
     }
+    
+    public func map<B>(_ transform: @escaping (A) -> B) -> ArrayWithHistory<B> {
+        return ArrayWithHistory<B>(initial.map(transform), changes: changes.map { $0.appendOnlyMap { change in
+            change.map(transform)
+        }})
+    }
 }
-//
-//let sample = ArrayWithHistory<Int>([1,2,3])

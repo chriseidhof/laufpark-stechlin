@@ -223,10 +223,11 @@
 		8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rot-strecke 4.gpx"; sourceTree = "<group>"; };
 		8340DFAB1F61B2C5002176C6 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		8340DFAD1F61B2F6002176C6 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
+		834CE82B1F796D3500785B16 /* iOSPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = iOSPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		837A8AB91F72DACB00ED898C /* IncrementalArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalArray.swift; sourceTree = "<group>"; };
 		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
 		83B0824F1F63052D004070DA /* Incremental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incremental.swift; sourceTree = "<group>"; };
-		83B082511F630835004070DA /* MyPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MyPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		83B082511F630835004070DA /* MacPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MacPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		83B2A2681F692CFA00A6D9F9 /* Incremental.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Incremental.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83B2A26A1F692CFA00A6D9F9 /* Incremental.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Incremental.h; sourceTree = "<group>"; };
 		83B2A26B1F692CFA00A6D9F9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -350,7 +351,8 @@
 		8340DF871F61B1F8002176C6 = {
 			isa = PBXGroup;
 			children = (
-				83B082511F630835004070DA /* MyPlayground.playground */,
+				834CE82B1F796D3500785B16 /* iOSPlayground.playground */,
+				83B082511F630835004070DA /* MacPlayground.playground */,
 				8340DF921F61B1F8002176C6 /* Laufpark */,
 				83B2A2691F692CFA00A6D9F9 /* Incremental */,
 				83C0FB051F74F5280041A802 /* Incremental_Mac */,

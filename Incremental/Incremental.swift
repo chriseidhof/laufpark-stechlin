@@ -148,8 +148,12 @@ final class FlatMapReader: Reader {
 public final class Input<A> {
     public let i: I<A>
     
-    public init(_ value: A, eq: @escaping (A,A) -> Bool) {
-        i = I(value: value, eq: eq)
+    public init(eq: @escaping (A,A) -> Bool, _ value: A) {
+        i = I(eq: eq, value: value)
+    }
+    
+    public init(alwaysPropagate value: A) {
+        i = I(eq: { _, _ in false }, value: value)
     }
     
     public func write(_ newValue: A) {
@@ -169,7 +173,7 @@ public final class Input<A> {
 
 public extension Input where A: Equatable {
     public convenience init(_ value: A) {
-        self.init(value, eq: ==)
+        self.init(eq: ==, value)
     }
 }
 
@@ -192,7 +196,7 @@ public final class I<A>: AnyI, Node {
     var eq: (A,A) -> Bool
     private var constant: Bool
     
-    init(value: A, eq: @escaping (A, A) -> Bool) {
+    init(eq: @escaping (A, A) -> Bool, value: A) {
         self.value = value
         self.eq = eq
         self.constant = false
@@ -253,6 +257,8 @@ public final class I<A>: AnyI, Node {
         }
     }
     
+    /// The `target` strongly references the reader. If the target goes away, the reader will be removed as well.
+    /// The `read` needs to return a `Node`: this is the direct dependency of the read function (used to ultimately compute the topological order).
     @discardableResult
     func read(target: AnyI, _ read: @escaping (A) -> Node) -> AnyReader {
         let reader = AnyReader { read(self.value) }
@@ -340,6 +346,6 @@ extension I where A: Equatable {
         self.init(eq: ==)
     }
     convenience init(value: A) {
-        self.init(value: value, eq: ==)
+        self.init(eq: ==, value: value)
     }
 }
