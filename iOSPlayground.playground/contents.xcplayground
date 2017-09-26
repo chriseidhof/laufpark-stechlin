@@ -3,5 +3,6 @@
     <pages>
         <page name='Incremental Table Views'/>
         <page name='Incremental Stack Views'/>
+        <page name='Reducers'/>
     </pages>
 </playground>

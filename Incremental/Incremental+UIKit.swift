@@ -37,11 +37,40 @@ extension IBox where V: UIView {
     }
 }
 
-extension IBox where V: UIStackView {
+extension IBox where V == UIStackView {
     public convenience init<S>(arrangedSubviews: [IBox<S>]) where S: UIView {
         let stackView = UIStackView(arrangedSubviews: arrangedSubviews.map { $0.unbox })
         self.init(stackView)
         disposables.append(arrangedSubviews)
+    }
+    
+    public convenience init<S>(arrangedSubviews: ArrayWithHistory<IBox<S>>) where S: UIView {
+        let stackView = UIStackView(arrangedSubviews: [])
+        self.init(stackView)
+        self.bindArrangedSubviews(to: arrangedSubviews)
+    }
+
+}
+
+extension IBox where V: UIStackView {
+
+    func addArrangedSubview<View: UIView>(_ i: IBox<View>) {
+        disposables.append(i)
+        unbox.addArrangedSubview(i.unbox)
+    }
+    
+    func insertArrangedSubview<View: UIView>(_ subview: IBox<View>, at index: Int) {
+        disposables.append(subview)
+        unbox.insertArrangedSubview(subview.unbox, at: index)
+    }
+    
+    func removeArrangedSubview<V: UIView>(_ subview: V) {
+        guard let index = disposables.index(where: { ($0 as? IBox<V>)?.unbox === subview }) else {
+            assertionFailure("Can't find subview.")
+            return
+        }
+        disposables.remove(at: index)
+        unbox.removeArrangedSubview(subview)
     }
 }
 
@@ -50,22 +79,23 @@ extension IBox where V: UIStackView {
         self.disposables.append(value.observe(current: { initialArrangedSubviews in
             assert(self.unbox.arrangedSubviews == [])
             for v in initialArrangedSubviews {
-                self.unbox.addArrangedSubview(v.unbox)
+                self.addArrangedSubview(v)
             }
         }) {
             switch $0 {
             case let .insert(v, at: i):
                 v.unbox.isHidden = true
-                self.unbox.insertArrangedSubview(v.unbox, at: i)
+                self.insertArrangedSubview(v, at: i)
+                // todo also add v to disposables!
                 UIView.animate(withDuration: duration) {
                     v.unbox.isHidden = false
                 }
             case .remove(at: let i):
-                let v = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i]
+                let v: Subview = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i] as! Subview
                 UIView.animate(withDuration: duration, animations: {
                     v.isHidden = true
                 }, completion: { _ in
-                    self.unbox.removeArrangedSubview(v)
+                    self.removeArrangedSubview(v)
                 })
             }
         })

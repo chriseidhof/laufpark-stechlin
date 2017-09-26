@@ -51,8 +51,11 @@ public final class IBox<V>: Equatable {
         return lhs === rhs
     }
     
+    /// This also copies the `disposables`
     public func map<B>(_ transform: (V) -> B) -> IBox<B> {
-        return IBox<B>(transform(unbox))
+        let result = IBox<B>(transform(unbox))
+        result.disposables = self.disposables
+        return result
     }
 }
 extension IBox where V: NSObject {
