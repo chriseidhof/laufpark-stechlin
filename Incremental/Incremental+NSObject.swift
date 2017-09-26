@@ -54,7 +54,7 @@ public final class IBox<V>: Equatable {
     /// This also copies the `disposables`
     public func map<B>(_ transform: (V) -> B) -> IBox<B> {
         let result = IBox<B>(transform(unbox))
-        result.disposables = self.disposables
+        result.disposables.append(self)
         return result
     }
 }
