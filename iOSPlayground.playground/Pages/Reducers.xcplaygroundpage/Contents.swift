@@ -80,7 +80,17 @@ class Driver<S> where S: Equatable, S: Reducer {
     
     func send(_ message: S.Message) {
         self.state.change { x in
-            _ = x.send(message) // todo interpret command
+            if let command = x.send(message) {
+                switch command {
+                case let .loadData(url: url, message: transform):
+                    URLSession.shared.dataTask(with: url) { (data, _, _) in
+                        DispatchQueue.main.async { [weak self] in
+                            self?.send(transform(data))
+                        }
+                    }.resume()
+
+                }
+            }
         }
     }
     
@@ -125,29 +135,56 @@ func label(text: I<String>, backgroundColor: I<UIColor> = I(constant: .white)) -
     return label
 }
 
-func viewController(rootView: IBox<UIView>) -> IBox<UIViewController> {
+func button(text: I<String>, onTap: @escaping () -> ()) -> IBox<UIButton> {
+    let button = IBox(UIButton(type: .roundedRect))
+    button.observe(value: text, onChange: { b, t in b.setTitle(t, for: .normal)})
+    let ta = TargetAction(onTap)
+    button.unbox.addTarget(ta, action: #selector(TargetAction.action(_:)), for: .touchUpInside)
+    button.disposables.append(ta)
+    return button
+}
+
+typealias Constraint = (_ parent: UIView, _ child: UIView) -> NSLayoutConstraint
+
+func equalTop(parent: UIView, child: UIView) -> NSLayoutConstraint {
+    return parent.topAnchor.constraint(equalTo: child.topAnchor)
+}
+func equalLeading(parent: UIView, child: UIView) -> NSLayoutConstraint {
+    return parent.leadingAnchor.constraint(equalTo: child.leadingAnchor)
+}
+func equalTrailing(parent: UIView, child: UIView) -> NSLayoutConstraint {
+    return parent.trailingAnchor.constraint(equalTo: child.trailingAnchor)
+}
+
+
+func viewController(rootView: IBox<UIView>, constraints: [Constraint] = []) -> IBox<UIViewController> {
     let vc = UIViewController()
     let box = IBox(vc)
     vc.view.addSubview(rootView.unbox)
     vc.view.backgroundColor = .white
-    rootView.unbox.frame = vc.view.bounds
     box.disposables.append(rootView)
+    rootView.unbox.translatesAutoresizingMaskIntoConstraints = false
+    for c in constraints {
+        c(vc.view, rootView.unbox).isActive = true
+    }
     return box
 }
 
 func view(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIViewController> {
     let input = textField(text: state.map { $0.inputText ?? "" }, onChange: {
-        print("got change: \($0)")
         send(.setInputText($0))
     })
     let labelBgColor: I<UIColor> = state.map { $0.outputAmount == nil ? .red : .white }
     let outputLabel = label(text: state.map { $0.outputText }, backgroundColor: labelBgColor)
+    let reload = button(text: I(constant: "Reload"), onTap: { send(.reload) })
     let stackView = IBox<UIStackView>(arrangedSubviews: [
         input.map { $0 },
-        outputLabel.map { $0 }
+        outputLabel.map { $0 },
+        reload.map { $0 }
     ])
     stackView.unbox.axis = .vertical
-    return viewController(rootView: stackView.map { $0 })
+    stackView.unbox.spacing = 10
+    return viewController(rootView: stackView.map { $0 }, constraints: [equalTop, equalLeading, equalTrailing])
 }
 
 import PlaygroundSupport
