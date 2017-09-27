@@ -48,7 +48,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var disposables: [Any] = []
     var locationManager: CLLocationManager?
     var trackInfoView: TrackInfoView!
-    var toggleMapButton: IBox<UIButton>!
     let darkMode: I<Bool>
     var timer: Disposable?
 
@@ -103,9 +102,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         
         trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
-        toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
-            self.mapView.unbox.mapType = self.mapView.unbox.mapType == .standard ? .hybrid : .standard
-        })
     }
     
     func setTracks(_ t: [Track]) {
@@ -169,12 +165,11 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let isLoading = state[\.loading]
         let loadingIndicator = activityIndicator(style: darkMode.map { $0 ? .gray : .white }, animating: isLoading)
         rootView.addSubview(loadingIndicator, constraints: [centerX, centerY])
-
-        let buttonView = toggleMapButton.unbox
-        view.addSubview(buttonView)
-        buttonView.translatesAutoresizingMaskIntoConstraints = false
-        buttonView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
-        buttonView.topAnchor.constraint(equalTo: view.topAnchor, constant: 25).isActive = true
+        
+        let toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
+            self.mapView.unbox.mapType = self.mapView.unbox.mapType == .standard ? .hybrid : .standard
+        })
+        rootView.addSubview(toggleMapButton, constraints: [equalTop(offset: -25), equalRight(offset: 10)])
     }
     
     func resetMapRect() {
