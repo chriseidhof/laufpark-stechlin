@@ -9,6 +9,26 @@
 import Foundation
 import CoreLocation
 
+struct POI {
+    let location: CLLocationCoordinate2D
+    let name: String
+    
+    static let all: [POI] = [
+        POI(location: CLLocationCoordinate2D(latitude: 53.187240, longitude: 13.088585), name: "Gasthaus Haveleck"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.191610, longitude: 13.159954), name: "Jugendherberge Ravensbrück"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.179984, longitude: 12.899209), name: "Hotel & Ferienanlage Precise Resort Marina Wolfsbruch"),
+        POI(location: CLLocationCoordinate2D(latitude: 52.966637,longitude: 13.281789), name: "Pension Lindenhof"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.091639, longitude: 13.093251), name: "Gut Zernikow"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.031421, longitude: 13.30988), name: "Ziegeleipark Mildenberg"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.112691, longitude: 13.104139), name: "Hotel und Restaurant \"Zum Birkenhof\""),
+        POI(location: CLLocationCoordinate2D(latitude: 53.167976, longitude: 13.23558), name: "Campingpark Himmelpfort"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.115591, longitude: 12.889571), name: "Maritim Hafenhotel Reinsberg"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.175714, longitude: 13.232601), name: "Ferienwohnung in der Mühle Himmelpfort"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.115685, longitude: 13.25494), name: "Gut Boltenhof"),
+        POI(location: CLLocationCoordinate2D(latitude: 53.053821, longitude: 13.083495), name: "Werkshof Wolfsruh")
+    ]
+}
+
 enum Color {
     case red
     case turquoise

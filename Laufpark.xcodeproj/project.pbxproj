@@ -163,6 +163,7 @@
 		83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+NSObject.swift"; sourceTree = "<group>"; };
 		83354DA11F6FEA5700F3C33A /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		834004E41F7BA9EA0035984B /* Constraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constraints.swift; sourceTree = "<group>"; };
+		834004E61F7BB4930035984B /* Icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@3x.png"; sourceTree = "<group>"; };
 		834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 1.gpx"; sourceTree = "<group>"; };
 		834078E41F62679900BC7C98 /* wabe tuerkis-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 4.gpx"; sourceTree = "<group>"; };
 		834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 2.gpx"; sourceTree = "<group>"; };
@@ -393,6 +394,7 @@
 			children = (
 				83B998281F7274C7007200D2 /* map.png */,
 				83B9982A1F7275B2007200D2 /* map@2x.png */,
+				834004E61F7BB4930035984B /* Icon@3x.png */,
 				8340DFA91F61B22D002176C6 /* gpx */,
 				8340DF931F61B1F8002176C6 /* AppDelegate.swift */,
 				8340DF951F61B1F8002176C6 /* ViewController.swift */,

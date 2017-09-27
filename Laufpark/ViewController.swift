@@ -13,6 +13,7 @@ import Incremental
 struct State: Equatable {
     var tracks: [Track]
     var loading: Bool { return tracks.isEmpty }
+    var annotationsVisible: Bool = false
     
     var selection: MKPolygon? {
         didSet {
@@ -170,6 +171,25 @@ class ViewController: UIViewController, MKMapViewDelegate {
             self.mapView.unbox.mapType = self.mapView.unbox.mapType == .standard ? .hybrid : .standard
         })
         rootView.addSubview(toggleMapButton, constraints: [equalTop(offset: -25), equalRight(offset: 10)])
+        
+        let toggleAnnotation = button(type: .custom, title: I(constant: "i"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
+            self.state.change { $0.annotationsVisible = !$0.annotationsVisible }
+        })
+        rootView.addSubview(toggleAnnotation, constraints: [equalTop(offset: -55), equalRight(offset: 10)])
+        let annotations: [MKPointAnnotation] = POI.all.map { poi in
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = poi.location
+            annotation.title = poi.name
+            return annotation
+        }
+        disposables.append(state[\.annotationsVisible].observe { [unowned self] visible in
+            if visible {
+                annotations.forEach(self.mapView.unbox.addAnnotation)
+            } else {
+                annotations.forEach(self.mapView.unbox.removeAnnotation(_:))
+            }
+        })
+
     }
     
     func resetMapRect() {
@@ -220,6 +240,19 @@ class ViewController: UIViewController, MKMapViewDelegate {
             return renderer.unbox
         }
         return MKOverlayRenderer()
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        guard annotation is MKPointAnnotation else { return nil }
+        let result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
+        result.animatesDrop = true
+        if annotation === self.draggedPointAnnotation.unbox {
+            result.pinTintColor = .red
+        } else {
+            result.pinTintColor = .blue
+            result.canShowCallout = true
+        }
+        return result
     }
     
     func buildRenderer(_ line: MKPolygon) -> IBox<MKPolygonRenderer> {
