@@ -26,6 +26,7 @@
 		83354DA01F6FE9A900F3C33A /* Incremental+NSObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */; };
 		83354DA21F6FEA5700F3C33A /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83354DA11F6FEA5700F3C33A /* Helpers.swift */; };
 		834004E51F7BA9EA0035984B /* Constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834004E41F7BA9EA0035984B /* Constraints.swift */; };
+		834004E81F7BBDEE0035984B /* partner.png in Resources */ = {isa = PBXBuildFile; fileRef = 834004E71F7BBDB70035984B /* partner.png */; };
 		834078E91F62695600BC7C98 /* wabe tuerkis-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */; };
 		834078EA1F62695600BC7C98 /* wabe tuerkis-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */; };
 		834078EB1F62695600BC7C98 /* wabe tuerkis-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E61F62679900BC7C98 /* wabe tuerkis-strecke 3.gpx */; };
@@ -164,6 +165,7 @@
 		83354DA11F6FEA5700F3C33A /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		834004E41F7BA9EA0035984B /* Constraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constraints.swift; sourceTree = "<group>"; };
 		834004E61F7BB4930035984B /* Icon@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Icon@3x.png"; sourceTree = "<group>"; };
+		834004E71F7BBDB70035984B /* partner.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = partner.png; sourceTree = "<group>"; };
 		834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 1.gpx"; sourceTree = "<group>"; };
 		834078E41F62679900BC7C98 /* wabe tuerkis-strecke 4.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 4.gpx"; sourceTree = "<group>"; };
 		834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 2.gpx"; sourceTree = "<group>"; };
@@ -392,6 +394,7 @@
 		8340DF921F61B1F8002176C6 /* Laufpark */ = {
 			isa = PBXGroup;
 			children = (
+				834004E71F7BBDB70035984B /* partner.png */,
 				83B998281F7274C7007200D2 /* map.png */,
 				83B9982A1F7275B2007200D2 /* map@2x.png */,
 				834004E61F7BB4930035984B /* Icon@3x.png */,
@@ -685,6 +688,7 @@
 				83099AF41F63CD7900D3EBB8 /* wabe rosa-strecke 0.gpx in Resources */,
 				8340795A1F626EC600BC7C98 /* wabe rosa-strecke 5.gpx in Resources */,
 				83099AF01F63CD7900D3EBB8 /* wabe hellblau-strecke 0.gpx in Resources */,
+				834004E81F7BBDEE0035984B /* partner.png in Resources */,
 				834079101F626B2300BC7C98 /* wabe gruen-strecke 4.gpx in Resources */,
 				834079471F626EC600BC7C98 /* wabe grau-strecke 0.gpx in Resources */,
 				834079481F626EC600BC7C98 /* wabe hellblau-strecke 1.gpx in Resources */,

@@ -182,14 +182,14 @@ class ViewController: UIViewController, MKMapViewDelegate {
             annotation.title = poi.name
             return annotation
         }
+
         disposables.append(state[\.annotationsVisible].observe { [unowned self] visible in
             if visible {
-                annotations.forEach(self.mapView.unbox.addAnnotation)
+                self.mapView.unbox.addAnnotations(annotations)
             } else {
-                annotations.forEach(self.mapView.unbox.removeAnnotation(_:))
+                self.mapView.unbox.removeAnnotations(annotations)
             }
         })
-
     }
     
     func resetMapRect() {
@@ -244,15 +244,18 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         guard annotation is MKPointAnnotation else { return nil }
-        let result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
-        result.animatesDrop = true
         if annotation === self.draggedPointAnnotation.unbox {
+            let result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
             result.pinTintColor = .red
+            return result
         } else {
-            result.pinTintColor = .blue
+            let result = MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
+            result.image = UIImage(named: "partner")!
+            result.frame.size = CGSize(width: 32, height: 32)
+//            result.pinTintColor = .blue
             result.canShowCallout = true
+            return result
         }
-        return result
     }
     
     func buildRenderer(_ line: MKPolygon) -> IBox<MKPolygonRenderer> {
