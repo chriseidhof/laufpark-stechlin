@@ -29,7 +29,7 @@ struct State: Equatable {
     }
     
     static func ==(lhs: State, rhs: State) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.annotationsVisible == rhs.annotationsVisible
     }
 }
 
@@ -182,6 +182,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             annotation.title = poi.name
             return annotation
         }
+        disposables.append(state[\.annotationsVisible].observe { print($0) })
         disposables.append(state[\.annotationsVisible].observe { [unowned self] visible in
             if visible {
                 annotations.forEach(self.mapView.unbox.addAnnotation)
