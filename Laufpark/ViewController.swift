@@ -103,7 +103,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         
         trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
-        toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black))
+        toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
+            self.mapView.unbox.mapType = self.mapView.unbox.mapType == .standard ? .hybrid : .standard
+        })
     }
     
     func setTracks(_ t: [Track]) {
@@ -163,27 +165,16 @@ class ViewController: UIViewController, MKMapViewDelegate {
                 self.mapView.unbox.setCenter(location.coordinate, animated: true)
             }
         })
-        
-        let loadingIndicator = IBox(UIActivityIndicatorView(activityIndicatorStyle: .gray))
-        rootView.addSubview(loadingIndicator)
-        loadingIndicator.unbox.hidesWhenStopped = true
-        loadingIndicator.unbox.translatesAutoresizingMaskIntoConstraints = false
-        loadingIndicator.unbox.centerXAnchor.constraint(equalTo: rootView.unbox.centerXAnchor).isActive = true
-        loadingIndicator.unbox.centerYAnchor.constraint(equalTo: rootView.unbox.centerYAnchor).isActive = true
 
-        let isLoading = state.i.map { $0.loading }
-        loadingIndicator.bind(darkMode.map { $0 ? .gray : .white }, to: \.activityIndicatorViewStyle)
-        loadingIndicator.bind(isLoading, to: \.animating)
+        let isLoading = state[\.loading]
+        let loadingIndicator = activityIndicator(style: darkMode.map { $0 ? .gray : .white }, animating: isLoading)
+        rootView.addSubview(loadingIndicator, constraints: [centerX, centerY])
 
         let buttonView = toggleMapButton.unbox
         view.addSubview(buttonView)
         buttonView.translatesAutoresizingMaskIntoConstraints = false
         buttonView.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -10).isActive = true
         buttonView.topAnchor.constraint(equalTo: view.topAnchor, constant: 25).isActive = true
-        buttonView.addTarget(self, action: #selector(buttonTapped(button:)), for: .touchUpInside)
-    }
-    @IBAction func buttonTapped(button: UIButton) {
-        mapView.unbox.mapType = mapView.unbox.mapType == .standard ? .hybrid : .standard
     }
     
     func resetMapRect() {

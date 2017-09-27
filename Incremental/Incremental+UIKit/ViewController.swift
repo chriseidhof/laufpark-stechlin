@@ -20,6 +20,15 @@ public func equalTrailing(parent: UIView, child: UIView) -> NSLayoutConstraint {
     return parent.trailingAnchor.constraint(equalTo: child.trailingAnchor)
 }
 
+public func centerX(parent: UIView, child: UIView) -> NSLayoutConstraint {
+    return parent.centerXAnchor.constraint(equalTo: child.centerXAnchor)
+}
+
+public func centerY(parent: UIView, child: UIView) -> NSLayoutConstraint {
+    return parent.centerYAnchor.constraint(equalTo: child.centerYAnchor)
+}
+
+
 
 public func viewController<V: UIView>(rootView: IBox<V>, constraints: [Constraint] = []) -> IBox<UIViewController> {
     let vc = UIViewController()

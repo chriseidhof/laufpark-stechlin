@@ -10,9 +10,15 @@ import Foundation
 
 
 extension IBox where V: UIView {
-    public func addSubview<S>(_ subview: IBox<S>) where S: UIView {
+    public func addSubview<S>(_ subview: IBox<S>, constraints: [Constraint] = []) where S: UIView {
         disposables.append(subview)
         unbox.addSubview(subview.unbox)
+        if !constraints.isEmpty {
+            subview.unbox.translatesAutoresizingMaskIntoConstraints = false
+            for c in constraints {
+                c(unbox, subview.unbox).isActive = true
+            }
+        }
     }
     
     public func bindSubviews<View: UIView>(_ iArray: I<ArrayWithHistory<IBox<View>>>) {

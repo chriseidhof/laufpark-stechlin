@@ -34,13 +34,13 @@ final class TrackInfoView {
         let formatter = MKDistanceFormatter()
         let formattedDistance = track.map { track in
             track.map { formatter.string(fromDistance: $0.distance) }
-        }
+        } ?? ""
         let formattedAscent = track.map { track in
             track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
-        }
-        let name = label(text: track.map { $0?.name }, textColor: blurredViewForeground)
-        let totalDistance = label(text: formattedDistance, textColor: blurredViewForeground)
-        let totalAscent = label(text: formattedAscent, textColor: blurredViewForeground)
+        } ?? ""
+        let name = label(text: track.map { $0?.name ?? "" }, textColor: blurredViewForeground.map { $0 })
+        let totalDistance = label(text: formattedDistance, textColor: blurredViewForeground.map { $0 })
+        let totalAscent = label(text: formattedAscent, textColor: blurredViewForeground.map { $0 })
         // Track information
         let trackInfo = IBox<UIStackView>(arrangedSubviews: [name, totalDistance, totalAscent])
         trackInfo.unbox.axis = .horizontal
