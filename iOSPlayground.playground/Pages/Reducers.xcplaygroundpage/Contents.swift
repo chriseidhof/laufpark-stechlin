@@ -76,7 +76,9 @@ class Driver<S> where S: Equatable, S: Reducer {
     
     init(initial: S, view: (I<S>, @escaping (S.Message) -> ()) -> IBox<UIViewController>) {
         state = Input(initial)
-        rootViewController = view(state.i, send)
+        rootViewController = view(state.i, { [weak self] msg in
+            self?.send(msg)
+        })
     }
     
     func send(_ message: S.Message) {
@@ -97,95 +99,21 @@ class Driver<S> where S: Equatable, S: Reducer {
     
 }
 
-func stackView(arrangedSubviews: ArrayWithHistory<IBox<UIView>>) -> IBox<UIStackView> {
-    let result = IBox<UIStackView>(arrangedSubviews: arrangedSubviews)
-    return result
-}
-
-class TargetAction: NSObject {
-    let callback: () -> ()
-    init(_ callback: @escaping () -> ()) {
-        self.callback = callback
-    }
-    @objc func action(_ sender: AnyObject) {
-        callback()
-    }
-    deinit {
-        print("Deiniting TargetAction")
-    }
-}
-
-func textField(text: I<String>, onChange: @escaping (String?) -> ()) -> IBox<UITextField> {
-    let textField = UITextField()
-    let result = IBox(textField)
-    result.bind(text, to: \.text)
-    let ta = TargetAction {
-        onChange(textField.text)
-    }
-    textField.addTarget(ta, action: #selector(TargetAction.action(_:)), for: .editingChanged)
-    result.disposables.append(ta)
-    textField.backgroundColor = .lightGray
-    textField.frame = CGRect(x: 0, y: 0, width: 200, height: 30)
-    return result
-}
-
-func label(text: I<String>, backgroundColor: I<UIColor> = I(constant: .white)) -> IBox<UILabel> {
-    let label = IBox(UILabel())
-    label.bind(text, to: \.text)
-    label.bind(backgroundColor, to: \.backgroundColor)
-    return label
-}
-
-func button(text: I<String>, onTap: @escaping () -> ()) -> IBox<UIButton> {
-    let button = IBox(UIButton(type: .roundedRect))
-    button.observe(value: text, onChange: { b, t in b.setTitle(t, for: .normal)})
-    let ta = TargetAction(onTap)
-    button.unbox.addTarget(ta, action: #selector(TargetAction.action(_:)), for: .touchUpInside)
-    button.disposables.append(ta)
-    return button
-}
-
-typealias Constraint = (_ parent: UIView, _ child: UIView) -> NSLayoutConstraint
-
-func equalTop(parent: UIView, child: UIView) -> NSLayoutConstraint {
-    return parent.topAnchor.constraint(equalTo: child.topAnchor)
-}
-func equalLeading(parent: UIView, child: UIView) -> NSLayoutConstraint {
-    return parent.leadingAnchor.constraint(equalTo: child.leadingAnchor)
-}
-func equalTrailing(parent: UIView, child: UIView) -> NSLayoutConstraint {
-    return parent.trailingAnchor.constraint(equalTo: child.trailingAnchor)
-}
-
-
-func viewController(rootView: IBox<UIView>, constraints: [Constraint] = []) -> IBox<UIViewController> {
-    let vc = UIViewController()
-    let box = IBox(vc)
-    vc.view.addSubview(rootView.unbox)
-    vc.view.backgroundColor = .white
-    box.disposables.append(rootView)
-    rootView.unbox.translatesAutoresizingMaskIntoConstraints = false
-    for c in constraints {
-        c(vc.view, rootView.unbox).isActive = true
-    }
-    return box
-}
-
 func view(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIViewController> {
-    let input = textField(text: state.map { $0.inputText ?? "" }, onChange: {
+    let input = textField(text: state[\.inputText] ?? "", onChange: {
         send(.setInputText($0))
     })
-    let labelBgColor: I<UIColor> = state.map { $0.inputAmount == nil ? .red : .white }
-    let outputLabel = label(text: state.map { $0.outputText }, backgroundColor: labelBgColor)
-    let reload = button(text: I(constant: "Reload"), onTap: { send(.reload) })
-    let stackView = IBox<UIStackView>(arrangedSubviews: [
-        input.map { $0 },
-        outputLabel.map { $0 },
-        reload.map { $0 }
+    let inputSv = stackView(arrangedSubviews: [input.cast, label(text: I(constant: "EUR"), backgroundColor: I(constant: .white)).cast], axis: .horizontal)
+    let outputLabel = label(text: state[\.outputText],
+                                        backgroundColor: if_(state[\.inputAmount] == nil, then: .red, else: .white).map { $0 })
+    let reload = button(type: .roundedRect, title: I(constant: "Reload"), onTap: { send(.reload) })
+    let sv = stackView(arrangedSubviews: [
+        inputSv.cast,
+        outputLabel.cast,
+        reload.cast
     ])
-    stackView.unbox.axis = .vertical
-    stackView.unbox.spacing = 10
-    return viewController(rootView: stackView.map { $0 }, constraints: [equalTop, equalLeading, equalTrailing])
+    return viewController(rootView: sv,
+                          constraints: [equalTop, equalLeading, equalTrailing])
 }
 
 import PlaygroundSupport

@@ -58,6 +58,8 @@ public final class IBox<V>: Equatable {
         return result
     }
 }
+
+
 extension IBox where V: NSObject {
     public subscript<A>(keyPath: KeyPath<V,A>) -> I<A> where A: Equatable {
         get {

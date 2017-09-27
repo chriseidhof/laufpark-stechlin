@@ -325,6 +325,15 @@ extension I {
         }
     }
     
+    public subscript<R: Equatable>(keyPath: KeyPath<A,R>) -> I<R> {
+        return map { $0[keyPath: keyPath] }
+    }
+
+    // convenience for optionals
+    public subscript<R: Equatable>(keyPath: KeyPath<A,R?>) -> I<R?> {
+        return map(eq: ==, { $0[keyPath: keyPath] })
+    }
+
     // convenience for equatable
     public func map<B: Equatable>(_ transform: @escaping (A) -> B) -> I<B> {
         return map(eq: ==, transform)

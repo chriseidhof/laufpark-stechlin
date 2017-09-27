@@ -26,6 +26,10 @@ public func ||(l: I<Bool>, r: I<Bool>) -> I<Bool> {
     return l.zip2(r, { $0 || $1 })
 }
 
+public func ??<A: Equatable>(l: I<A?>, r: A) -> I<A> {
+    return l.map { $0 ?? r }
+}
+
 public prefix func !(l: I<Bool>) -> I<Bool> {
     return l.map { !$0 }
 }
@@ -35,5 +39,9 @@ public func ==<A>(l: I<A>, r: I<A>) -> I<Bool> where A: Equatable {
 }
 
 public func ==<A>(l: I<A>, r: A) -> I<Bool> where A: Equatable {
+    return l.map { $0 == r }
+}
+
+public func ==<A>(l: I<A?>, r: A?) -> I<Bool> where A: Equatable {
     return l.map { $0 == r }
 }

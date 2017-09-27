@@ -10,22 +10,6 @@ import UIKit
 import Incremental
 import MapKit
 
-func label(text: I<String?>, textColor: I<UIColor>) -> IBox<UILabel> {
-    let result = IBox(UILabel(frame: .zero))
-    result.bind(text, to: \.text)
-    result.observe(value: textColor, onChange: { $0.textColor = $1 }) // doesn't work with bind because textColor is an IOU
-    return result
-}
-
-extension UIActivityIndicatorView {
-    var animating: Bool {
-        get { return isAnimating }
-        set {
-            if newValue { self.startAnimating() }
-            else { self.stopAnimating() }
-        }
-    }
-}
 final class TrackInfoView {
     private var lineView: IBox<LineView>
     var view: UIView! = nil
@@ -109,24 +93,7 @@ extension UIView {
 }
 
 
-func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) -> IBox<UIButton> {
-    let result = IBox<UIButton>(UIButton(type: type))
-    result.bind(backgroundColor, to: \.backgroundColor)
-    result.observe(value: title, onChange: { $0.setTitle($1, for: .normal) })
-    result.observe(value: titleColor, onChange: { $0.setTitleColor($1, for: .normal)})
-    result.unbox.layer.cornerRadius = 5
-    return result
-}
 
-func button(type: UIButtonType = .custom, titleImage: I<UIImage>, backgroundColor: I<UIColor>, titleColor: I<UIColor>) -> IBox<UIButton> {
-    let result = IBox<UIButton>(UIButton(type: type))
-    result.unbox.imageEdgeInsets = UIEdgeInsetsMake(3,3,3,3)
-    result.bind(backgroundColor, to: \.backgroundColor)
-    result.observe(value: titleImage, onChange: { $0.setImage($1, for: .normal) })
-    result.observe(value: titleColor, onChange: { $0.setTitleColor($1, for: .normal)})
-    result.unbox.layer.cornerRadius = 5
-    return result
-}
 
 func buildMapView() -> IBox<MKMapView> {
     let box = IBox(MKMapView())
