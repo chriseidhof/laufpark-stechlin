@@ -182,7 +182,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
             annotation.title = poi.name
             return annotation
         }
-        disposables.append(state[\.annotationsVisible].observe { print($0) })
         disposables.append(state[\.annotationsVisible].observe { [unowned self] visible in
             if visible {
                 annotations.forEach(self.mapView.unbox.addAnnotation)
