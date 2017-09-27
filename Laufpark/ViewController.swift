@@ -164,7 +164,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
         let isLoading = state[\.loading]
         let loadingIndicator = activityIndicator(style: darkMode.map { $0 ? .gray : .white }, animating: isLoading)
-        rootView.addSubview(loadingIndicator, constraints: [centerX, centerY])
+        rootView.addSubview(loadingIndicator, constraints: [equalCenterX(), equalCenterY()])
         
         let toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
             self.mapView.unbox.mapType = self.mapView.unbox.mapType == .standard ? .hybrid : .standard

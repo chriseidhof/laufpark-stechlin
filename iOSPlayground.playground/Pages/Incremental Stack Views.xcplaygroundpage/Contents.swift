@@ -8,20 +8,9 @@ var str = "Hello, playground"
 let arr = ArrayWithHistory<Int>([1,2,3])
 let condition = Input<(Int) -> Bool>(alwaysPropagate: { _ in true })
 
-func label(text: I<String>, backgroundColor: I<UIColor>) -> IBox<UILabel> {
-    let label = UILabel()
-    let result = IBox(label)
-    result.bind(text, to: \.text)
-    result.bind(backgroundColor, to: \.backgroundColor)
-    label.translatesAutoresizingMaskIntoConstraints = false
-    label.heightAnchor.constraint(equalToConstant: 30).isActive = true
-    return result
-}
-
-
 let filtered = arr.filter(condition.i)
 let backgroundColor = Input(UIColor.white)
-let labels = filtered.map { label(text: I(constant: "\($0)"), backgroundColor: backgroundColor.i) }
+let labels = filtered.map { label(text: I(constant: "\($0)"), backgroundColor: backgroundColor.i.map { $0 }) }
 
 let s = UIStackView(arrangedSubviews: [])
 let stackView = IBox(s)

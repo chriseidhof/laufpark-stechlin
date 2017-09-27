@@ -113,7 +113,7 @@ func view(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIView
         reload.cast
     ])
     return viewController(rootView: sv,
-                          constraints: [equalTop, equalLeading, equalTrailing])
+                          constraints: [equalTop(), equalLeading(), equalTrailing()])
 }
 
 import PlaygroundSupport
