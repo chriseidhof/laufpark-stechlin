@@ -223,7 +223,7 @@ extension ArrayWithHistory {
     public func observe(current: ([A]) -> (), handleChange: @escaping (ArrayChange<A>) -> ()) -> Disposable {
         current(self.unsafeLatestSnapshot)
         let nEq: ((), ()) -> Bool = { _,_ in false }
-        let (_, disposable) = changes.read { c in
+        let (_, disposable) = tail(changes).read { c in
             c.reduce(eq: nEq, initial: (), combine: { change, _ in
                 handleChange(change)
                 return ()
