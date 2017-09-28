@@ -175,6 +175,27 @@ extension Array where Element: Equatable {
         }
         return result
     }
+
+    /// Returns the changes that need to be applied to get from self to self with `newSortOrder` applied.
+    public func sortChanges(newSortOrder: (Element, Element) -> Bool) -> IList<ArrayChange<Element>> {
+        var result: IList<ArrayChange<Element>> = .empty
+        var inserts: [(Element, Int)] = []
+        let newSorted = sorted(by: newSortOrder)
+        for (element, oldIndex) in zip(self, self.indices).reversed() {
+            // TODO calling index(of:) in each iteration is inefficient. we could use binary search here,
+            // or provide an even more efficient implementation for elements that are hashable
+            let newIndex = newSorted.index(of: element)!
+            if oldIndex != newIndex {
+                result.append(.remove(at: oldIndex))
+                inserts.append((element, newIndex))
+            }
+        }
+        let sortedInserts = inserts.sorted { $0.1 < $1.1 }
+        for (element, newIndex) in sortedInserts {
+            result.append(.insert(element, at: newIndex))
+        }
+        return result
+    }
 }
 
 public struct ArrayWithHistory<A: Equatable>: Equatable {
@@ -238,7 +259,7 @@ extension ArrayWithHistory {
         var currentCondition: (A) -> Bool = condition.value
         let result = ArrayWithHistory(unsafeLatestSnapshot.filter(currentCondition))
         let resultChanges = result.changes
-        var previous: Disposable? = nil
+        var previous: Disposable? = nil // TODO this is unused, should it be?
         condition.read(target: resultChanges) { c in
             previous = nil
             let filterChanges = self.unsafeLatestSnapshot.filterChanges(oldCondition: currentCondition, newCondition: c)
@@ -274,7 +295,47 @@ extension ArrayWithHistory {
         }
         return result
     }
+
+    public func sort(by areInIncreasingOrder: I<(A, A) -> Bool>) -> ArrayWithHistory<A> {
+        var currentSortOrder: (A, A) -> Bool = areInIncreasingOrder.value
+        let result = ArrayWithHistory(unsafeLatestSnapshot.sorted(by: currentSortOrder))
+        let resultChanges = result.changes
+        areInIncreasingOrder.read(target: resultChanges) { order in
+            let sortChanges = result.unsafeLatestSnapshot.sortChanges(newSortOrder: order)
+            currentSortOrder = order
+            concatOnly(sortChanges, to: resultChanges)
+            return I(constant: ())
+        }
+        func sortH(target: AnyI, changesOut: I<IList<ArrayChange<A>>>, changesIn: IList<ArrayChange<A>>, latest: [A]) -> Node {
+            switch changesIn {
+            case .empty:
+                return target
+            case .cons(let change, let remainder):
+                let newLatest = latest.applying(change)
+                switch change {
+                case let .insert(element, _):
+                    // TODO this is inefficient, since we're sorting the original array each time to look up the index of the new element
+                    let newIndex = newLatest.sorted(by: currentSortOrder).index(of: element)!
+                    appendOnly(.insert(element, at: newIndex), to: changesOut)
+                case let .remove(at: index):
+                    let element = latest[index]
+                    // TODO this is inefficient, since we're sorting the original array each time to look up the index of the new element
+                    let newIndex = latest.sorted(by: currentSortOrder).index(of: element)!
+                    appendOnly(.remove(at: newIndex), to: changesOut)
+                }
+                return remainder.read(target: target) { value in
+                    return sortH(target: target, changesOut: changesOut, changesIn: value, latest: newLatest)
+                }
+            }
+        }
+        
+        tail(self.changes).read(target: resultChanges) { (newChanges: IList<ArrayChange<A>>) in
+            return sortH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: self.unsafeLatestSnapshot)
+        }
+        return result
+    }
     
+
     public func map<B>(_ transform: @escaping (A) -> B) -> ArrayWithHistory<B> {
         return ArrayWithHistory<B>(initial.map(transform), changes: changes.map { $0.appendOnlyMap { change in
             change.map(transform)
