@@ -2,8 +2,9 @@
 <playground version='6.0' target-platform='ios'>
     <pages>
         <page name='Incremental Examples'/>
-        <page name='Incremental Table Views'/>
         <page name='Incremental Stack Views'/>
+        <page name='Incremental Table Views'/>
         <page name='Reducers'/>
+        <page name='Sort'/>
     </pages>
 </playground>
