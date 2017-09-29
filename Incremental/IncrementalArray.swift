@@ -290,8 +290,9 @@ extension ArrayWithHistory {
             }
         }
         
+        let currentValue = unsafeLatestSnapshot
         tail(self.changes).read(target: resultChanges) { (newChanges: IList<ArrayChange<A>>) in
-            return filterH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: self.initial)
+            return filterH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: currentValue)
         }
         return result
     }
@@ -329,8 +330,9 @@ extension ArrayWithHistory {
             }
         }
         
+        let currentValue = unsafeLatestSnapshot
         tail(self.changes).read(target: resultChanges) { (newChanges: IList<ArrayChange<A>>) in
-            return sortH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: self.initial)
+            return sortH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: currentValue)
         }
         return result
     }
