@@ -6,9 +6,10 @@ var str = "Hello, playground"
 
 let arr = ArrayWithHistory(["one", "two", "three", "four"])
 let condition = Input<(String) -> Bool>(alwaysPropagate: { _ in true })
-let filtered = arr.filter(condition.i)
+let sortOrder: Input<(String, String) -> Bool> = Input(alwaysPropagate: <)
+let filteredAndSorted = arr.filter(condition.i).sort(by: sortOrder.i)
 
-let s = tableViewController(items: filtered, configure: { cell, text in
+let s = tableViewController(items: filteredAndSorted, configure: { cell, text in
     cell.textLabel?.text = text
 })
 

@@ -272,9 +272,10 @@ extension ArrayWithHistory {
             case .empty:
                 return target
             case .cons(let change, let remainder):
+                let newLatest = latest.applying(change)
                 switch change {
                 case let .insert(element, at: index) where currentCondition(element):
-                    let newIndex = latest.filteredIndex(for: index, currentCondition)
+                    let newIndex = newLatest.filteredIndex(for: index, currentCondition)
                     appendOnly(.insert(element, at: newIndex), to: changesOut)
                 case let .remove(at: index) where currentCondition(latest[index]):
                     let newIndex = latest.filteredIndex(for: index, currentCondition)
@@ -282,20 +283,19 @@ extension ArrayWithHistory {
                 default:
                     ()
                 }
-                let newLatest = latest.applying(change)
                 return remainder.read(target: target) { value in
                     return filterH(target: target, changesOut: changesOut, changesIn: value, latest: newLatest)
                 }
                 
             }
         }
-
+        
         tail(self.changes).read(target: resultChanges) { (newChanges: IList<ArrayChange<A>>) in
-            return filterH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: self.unsafeLatestSnapshot)
+            return filterH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: self.initial)
         }
         return result
     }
-
+    
     public func sort(by areInIncreasingOrder: I<(A, A) -> Bool>) -> ArrayWithHistory<A> {
         var currentSortOrder: (A, A) -> Bool = areInIncreasingOrder.value
         let result = ArrayWithHistory(unsafeLatestSnapshot.sorted(by: currentSortOrder))
@@ -330,15 +330,16 @@ extension ArrayWithHistory {
         }
         
         tail(self.changes).read(target: resultChanges) { (newChanges: IList<ArrayChange<A>>) in
-            return sortH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: self.unsafeLatestSnapshot)
+            return sortH(target: resultChanges, changesOut: resultChanges, changesIn: newChanges, latest: self.initial)
         }
         return result
     }
     
-
+    
     public func map<B>(_ transform: @escaping (A) -> B) -> ArrayWithHistory<B> {
         return ArrayWithHistory<B>(initial.map(transform), changes: changes.map { $0.appendOnlyMap { change in
             change.map(transform)
         }})
     }
 }
+
