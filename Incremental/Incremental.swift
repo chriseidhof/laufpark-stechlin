@@ -358,3 +358,9 @@ extension I where A: Equatable {
         self.init(eq: ==, value: value)
     }
 }
+
+extension I: Equatable {
+    public static func ==(lhs: I, rhs: I) -> Bool {
+        return lhs === rhs
+    }
+}
