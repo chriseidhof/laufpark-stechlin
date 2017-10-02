@@ -12,7 +12,12 @@ public typealias Constraint = (_ parent: UIView, _ child: UIView) -> NSLayoutCon
 
 public func equalTop(offset: CGFloat = 0) -> Constraint {
     return { parent, child in
-        parent.topAnchor.constraint(equalTo: child.topAnchor, constant: offset)
+        // todo not sure if this is a good idea
+        if #available(iOS 11.0, *) {
+            return parent.safeAreaLayoutGuide.topAnchor.constraint(equalTo: child.topAnchor, constant: offset)
+        } else {
+            return parent.topAnchor.constraint(equalTo: child.topAnchor, constant: offset)
+        }
     }
 }
 
