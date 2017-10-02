@@ -345,3 +345,16 @@ extension ArrayWithHistory {
     }
 }
 
+public func flatten<A>(_ array: [I<A>]) -> ArrayWithHistory<A> {
+    let initial = array.flatMap { $0.value }
+    let result = ArrayWithHistory(initial)
+    for (x, idx) in zip(array, array.indices) {
+        x.read(target: result.changes) { change in
+            appendOnly(.remove(at: idx), to: result.changes)
+            appendOnly(.insert(change, at: idx), to: result.changes)
+            return result.changes
+        }
+    }
+    return result
+}
+
