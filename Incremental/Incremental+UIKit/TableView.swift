@@ -11,10 +11,12 @@ import Foundation
 final class TableVC<A>: UITableViewController {
     var items: [A] = []
     let configure: (UITableViewCell,A) -> ()
+    let didSelect: ((A) -> ())?
     
-    init(_ items: [A], configure: @escaping (UITableViewCell,A) -> ()) {
+    init(_ items: [A], didSelect: ((A) -> ())? = nil, configure: @escaping (UITableViewCell,A) -> ()) {
         self.items = items
         self.configure = configure
+        self.didSelect = didSelect
         super.init(style: .plain)
     }
     
@@ -27,7 +29,7 @@ final class TableVC<A>: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        
+        didSelect?(items[indexPath.row])
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -55,13 +57,23 @@ extension TableVC where A: Equatable {
     }
 }
 
-public func tableViewController<A>(items value: ArrayWithHistory<A>, configure: @escaping (UITableViewCell, A) -> ()) -> IBox<UITableViewController> {
-    let tableVC = TableVC([], configure: configure)
+public func tableViewController<A>(items value: ArrayWithHistory<A>, didSelect: ((A) -> ())? = nil, configure: @escaping (UITableViewCell, A) -> ()) -> IBox<UITableViewController> {
+    let tableVC = TableVC([], didSelect: didSelect, configure: configure)
     let box = IBox<UITableViewController>(tableVC)
     box.disposables.append(value.observe(current: {
         tableVC.items = $0
     }, handleChange: { change in
         tableVC.apply(change)
     }))
+    return box
+}
+
+public func tableViewController<A>(items value: I<[A]>, didSelect: ((A) -> ())? = nil,  configure: @escaping (UITableViewCell, A) -> ()) -> IBox<UITableViewController> {
+    let tableVC = TableVC([], didSelect: didSelect, configure: configure)
+    let box = IBox<UITableViewController>(tableVC)
+    box.disposables.append(value.observe {
+        tableVC.items = $0
+        tableVC.tableView.reloadData()
+    })
     return box
 }
