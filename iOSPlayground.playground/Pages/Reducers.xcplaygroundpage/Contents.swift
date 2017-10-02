@@ -12,12 +12,18 @@ enum Command<Message> {
 struct State: Reducer {
     private(set) var inputText: String? = nil
     private(set) var rate: Double? = nil
-    let targetCurrency = "USD"
+    private(set) var rates: [String: Double] = [:]
+    private(set) var targetCurrency: String? = nil
+    
+    var currencies: [String] {
+        return Array(rates.keys)
+    }
     
     enum Message {
         case setInputText(String?)
         case dataReceived(Data?)
         case reload
+        case selected(currency: String)
     }
     
     
@@ -31,10 +37,13 @@ struct State: Reducer {
                 let json = try? JSONSerialization.jsonObject(with: data, options: []),
                 let dict = json as? [String:Any],
                 let dataDict = dict["rates"] as? [String:Double] else { return nil }
-            self.rate = dataDict[targetCurrency]
+            self.rates = dataDict
             return nil
         case .reload:
             return .loadData(url: ratesURL, message: Message.dataReceived)
+        case .selected(currency: let c):
+            targetCurrency = c
+            return nil
         }
     }
     
@@ -46,18 +55,18 @@ struct State: Reducer {
     }
     
     var outputAmount: Double? {
-        guard let input = inputAmount, let rate = rate else { return  nil }
+        guard let input = inputAmount, let c = targetCurrency, let rate = rates[c] else { return nil }
         return input * rate
     }
     
     var outputText: String {
-        return outputAmount.map { "\(inputAmount!) EUR = \($0) \(targetCurrency)" } ?? "..."
+        return outputAmount.map { "\(inputAmount!) EUR = \($0) \(targetCurrency!)" } ?? "..."
     }
 }
 
 extension State: Equatable {
     static func ==(lhs: State, rhs: State) -> Bool {
-        return lhs.inputText == rhs.inputText && lhs.rate == rhs.rate
+        return lhs.inputText == rhs.inputText && lhs.rate == rhs.rate && lhs.rates == rhs.rates && lhs.targetCurrency == rhs.targetCurrency
     }
 }
 
@@ -95,28 +104,47 @@ class Driver<S> where S: Equatable, S: Reducer {
                 }
             }
         }
-    }
-    
+    }    
 }
 
-func view(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIViewController> {
+func conversionView(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIViewController> {
     let input = textField(text: state[\.inputText] ?? "", onChange: {
         send(.setInputText($0))
     })
     let inputSv = stackView(arrangedSubviews: [input.cast, label(text: I(constant: "EUR"), backgroundColor: I(constant: .white)).cast], axis: .horizontal)
     let outputLabel = label(text: state[\.outputText],
                                         backgroundColor: if_(state[\.inputAmount] == nil, then: .red, else: .white).map { $0 })
-    let reload = button(type: .roundedRect, title: I(constant: "Reload"), onTap: { send(.reload) })
     let sv = stackView(arrangedSubviews: [
         inputSv.cast,
         outputLabel.cast,
-        reload.cast
     ])
     return viewController(rootView: sv,
                           constraints: [equalTop(), equalLeading(), equalTrailing()])
 }
 
+func view(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIViewController> {
+    let currencies = state.map { $0.currencies }
+    let table = tableViewController(items: currencies, didSelect: {
+        send(.selected(currency: $0))
+    }) { cell, currency in
+        cell.textLabel?.text = currency
+    }.map { $0 as UIViewController }
+    let loading = activityIndicator(style: I(constant: .gray), animating: I(constant: true))
+    let empty = viewController(rootView: loading, constraints: [equalCenterX(), equalCenterY()])
+    let rootView = if_(currencies.map { $0.isEmpty}, then: empty, else: table)
+    let vcs = flatten([rootView])
+    let nc = navigationController(vcs)
+    nc.disposables.append(state[\.targetCurrency].observe { selection in
+        if selection != nil {
+            // todo this isn't really how we should do it
+            vcs.change(.insert(conversionView(state: state, send: send), at: 1))
+        }
+    })
+    return nc.map { $0 }
+}
+
 import PlaygroundSupport
-let driver = Driver<State>(initial: State(inputText: "100", rate: nil), view: view)
+let driver = Driver<State>(initial: State(inputText: "100", rate: nil, rates: [:], targetCurrency: nil), view: view)
+driver.send(.reload)
 PlaygroundPage.current.liveView = driver.viewController
 //: [Next](@next)
