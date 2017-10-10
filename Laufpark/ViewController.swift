@@ -37,8 +37,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var lines: [MKPolygon: Color] = [:]
     var renderers: [MKPolygon: MKPolygonRenderer] = [:]
     var trackForPolygon: [MKPolygon: Track] = [:]
-//    var draggedPointAnnotation: IBox<MKPointAnnotation>!
-//    var draggedLocation: I<(distance: Double, location: CLLocation)?>!
     var loadingIndicator: UIActivityIndicatorView!
     
     var state: State {
@@ -85,25 +83,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
         state = State(tracks: [])
 
         super.init(nibName: nil, bundle: nil)
-
-//        draggedLocation = state.i.map(eq: lift(==), { [weak self] state in
-//            guard let s = state.selection,
-//                let track = self?.trackForPolygon[s],
-//                let location = state.trackPosition else { return nil }
-//            let distance = Double(location) * track.distance
-//            guard let point = track.point(at: distance) else { return nil }
-//            return (distance: distance, location: point)
-//        })
-
-//        let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
-//            $0?.location.coordinate ?? CLLocationCoordinate2D()
-//        }
-        
-//        draggedPointAnnotation = annotation(location: draggedPoint)
-        
-//        let position: I<CGFloat?> = draggedLocation.map {
-//            ($0?.distance).map { CGFloat($0) }
-//        }
     }
     
     func setTracks(_ t: [Track]) {
@@ -136,21 +115,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
         ])
 
 
-//        mapView.unbox.addAnnotation(draggedPointAnnotation.unbox)
-        
-//        disposables.append(trackInfoView.pannedLocation.observe { loc in
-//            self.state.change { $0.trackPosition = loc }
-//        })
-
-
-//        self.disposables.append(draggedLocation.observe { x in
-//            guard let (_, location) = x else { return }
-//            // todo subtract the height of the trackInfo box (if selected)
-//            if !self.mapView.unbox.annotations(in: self.mapView.unbox.visibleMapRect).contains(self.draggedPointAnnotation.unbox) {
-//                self.mapView.unbox.setCenter(location.coordinate, animated: true)
-//            }
-//        })
-
         loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.startAnimating()
@@ -160,30 +124,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
             loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
         ])
-
-//        let toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
-//            self.mapView.unbox.mapType = self.mapView.unbox.mapType == .standard ? .hybrid : .standard
-//        })
-//        rootView.addSubview(toggleMapButton, constraints: [equalTop(offset: -25), equalRight(offset: 10)])
-        
-//        let toggleAnnotation = button(type: .custom, title: I(constant: "i"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
-//            self.state.change { $0.annotationsVisible = !$0.annotationsVisible }
-//        })
-//        rootView.addSubview(toggleAnnotation, constraints: [equalTop(offset: -55), equalRight(offset: 10)])
-//        let annotations: [MKPointAnnotation] = POI.all.map { poi in
-//            let annotation = MKPointAnnotation()
-//            annotation.coordinate = poi.location
-//            annotation.title = poi.name
-//            return annotation
-//        }
-
-//        disposables.append(state[\.annotationsVisible].observe { [unowned self] visible in
-//            if visible {
-//                self.mapView.unbox.addAnnotations(annotations)
-//            } else {
-//                self.mapView.unbox.removeAnnotations(annotations)
-//            }
-//        })
     }
     
     func resetMapRect() {
@@ -230,23 +170,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         renderers[line] = renderer
         return renderer
     }
-    
-//    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-//        guard annotation is MKPointAnnotation else { return nil }
-////        if annotation === self.draggedPointAnnotation.unbox {
-////            let result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
-////            result.pinTintColor = .red
-////            return result
-////        } else {
-//            let result = MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
-//            result.image = UIImage(named: "partner")!
-//            result.frame.size = CGSize(width: 32, height: 32)
-////            result.pinTintColor = .blue
-//            result.canShowCallout = true
-//            return result
-////        }
-//    }
-    
+        
     func buildRenderer(_ line: MKPolygon) -> MKPolygonRenderer {
         let isSelected = state.selection == line
         let renderer = MKPolygonRenderer(polygon: line)
