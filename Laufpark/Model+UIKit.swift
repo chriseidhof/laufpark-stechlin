@@ -56,7 +56,7 @@ extension Color {
 }
 
 extension Track {
-    var line: MKPolygon {
+    var polygon: MKPolygon {
         var coordinates = self.coordinates.map { $0.coordinate.clLocationCoordinate }
         let result = MKPolygon(coordinates: &coordinates, count: coordinates.count)
         return result

@@ -35,9 +35,8 @@ struct State: Equatable {
 
 class ViewController: UIViewController, MKMapViewDelegate {
     let mapView: IBox<MKMapView> = buildMapView()
-    var lines: [MKPolygon:Color] = [:]
-    var renderers: [MKPolygon: IBox<MKPolygonRenderer>] = [:]
-    var trackForPolygon: [MKPolygon:Track] = [:]
+    var tracks: [MKPolygon:Track] = [:]
+    
     var draggedPointAnnotation: IBox<MKPointAnnotation>!
     var draggedLocation: I<(distance: Double, location: CLLocation)?>!
     var rootView: IBox<UIView>!
@@ -50,12 +49,11 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var locationManager: CLLocationManager?
     var trackInfoView: TrackInfoView!
     let darkMode: I<Bool>
-    var timer: Disposable?
 
     var selectedTrack: I<Track?> {
         return selection.map {
             guard let p = $0 else { return nil }
-            return self.trackForPolygon[p]
+            return self.tracks[p]
         }
     }
     
@@ -69,7 +67,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
         draggedLocation = state.i.map(eq: lift(==), { [weak self] state in
             guard let s = state.selection,
-                let track = self?.trackForPolygon[s],
+                let track = self?.tracks[s],
                 let location = state.trackPosition else { return nil }
             let distance = Double(location) * track.distance
             guard let point = track.point(at: distance) else { return nil }
@@ -123,10 +121,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
         mapView.unbox.delegate = self
         disposables.append(state.i.map { $0.tracks }.observe {
             $0.forEach { track in
-                let line = track.line
-                self.lines[line] = track.color
-                self.trackForPolygon[line] = track
-                self.mapView.unbox.add(line)
+                let polygon = track.polygon
+                self.tracks[polygon] = track
+                self.mapView.unbox.add(polygon)
             }
         })
         
@@ -210,8 +207,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     @objc func mapTapped(sender: UITapGestureRecognizer) {
         let point = sender.location(ofTouch: 0, in: mapView.unbox)
         let mapPoint = MKMapPointForCoordinate(mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox))
-        let possibilities = lines.keys.filter { line in
-            let renderer = renderers[line]!.unbox
+        let possibilities = tracks.keys.filter { polygon in
+            let renderer = mapView.unbox.renderer(for: polygon) as! MKPolygonRenderer
             let point = renderer.point(for: mapPoint)
             return renderer.path.contains(point)
         }
@@ -233,10 +230,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        if let line = overlay as? MKPolygon {
-            if let renderer = renderers[line] { return renderer.unbox }
-            let renderer = buildRenderer(line)
-            renderers[line] = renderer
+        if let polygon = overlay as? MKPolygon {
+            let renderer = buildRenderer(polygon)
+            self.mapView.disposables.append(renderer)
             return renderer.unbox
         }
         return MKOverlayRenderer()
@@ -270,12 +266,12 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    func buildRenderer(_ line: MKPolygon) -> IBox<MKPolygonRenderer> {
-        let isSelected = selection.map { $0 == line }
+    func buildRenderer(_ polygon: MKPolygon) -> IBox<MKPolygonRenderer> {
+        let isSelected = selection.map { $0 == polygon }
         let shouldHighlight = !hasSelection || isSelected
-        let lineColor = lines[line]!.uiColor
+        let lineColor = tracks[polygon]!.color.uiColor
         let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.2), else: lineColor.withAlphaComponent(0.1))
-        return polygonRenderer(polygon: line,
+        return polygonRenderer(polygon: polygon,
                                strokeColor: I(constant: lineColor),
                                fillColor: fillColor.map { $0 },
                                alpha: if_(shouldHighlight, then: I(constant: 1.0), else: if_(darkMode, then: 0.5, else: 1.0)),
