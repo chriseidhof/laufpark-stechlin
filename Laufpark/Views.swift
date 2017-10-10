@@ -15,7 +15,7 @@ protocol TrackInfoViewDelegate: class {
 }
 
 final class TrackInfoView: UIView {
-    private var lineView = buildLineView(position: nil, points: [], pointsRect: .zero, strokeColor: .black)
+    private var lineView = buildLineView(position: nil, points: [], strokeColor: .black)
     private var nameLabel = UILabel()
     private var distanceLabel = UILabel()
     private var ascentLabel = UILabel()
@@ -36,11 +36,7 @@ final class TrackInfoView: UIView {
     
     func updateLineView() {
         let profile = track.map { $0.elevationProfile } ?? []
-        let points = profile.map { CGPoint(x: $0.distance, y: $0.elevation) }
-        let elevations = profile.map { $0.elevation }
-        let rect = profile.isEmpty ? .zero : CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
-        lineView.points = points
-        lineView.pointsRect = rect
+        lineView.points = profile.map { LineView.Point(x: $0.distance, y: $0.elevation) }
     }
     
     func updateTrackInfo() {
@@ -148,11 +144,10 @@ extension CLLocationCoordinate2D: Equatable {
     }
 }
 
-func buildLineView(position: CGFloat?, points: [CGPoint], pointsRect: CGRect, strokeColor: UIColor) -> LineView {
+func buildLineView(position: CGFloat?, points: [LineView.Point], strokeColor: UIColor) -> LineView {
     let view = LineView()
     view.position = position
     view.points = points
-    view.pointsRect = pointsRect
     view.strokeColor = strokeColor
     return view
 }
