@@ -18,7 +18,10 @@ struct State: Equatable {
             trackPosition = nil
         }
     }
+ 
     var trackPosition: CGFloat? // 0...1
+    
+    var hasSelection: Bool { return selection != nil }
     
     init(tracks: [Track]) {
         selection = nil
@@ -67,10 +70,10 @@ class ViewController: UIViewController, MKMapViewDelegate, TrackInfoViewDelegate
             }
             for polygon in polygons.keys {
                 guard let renderer = mapView.renderer(for: polygon) as? MKPolygonRenderer else { continue }
-                configureRenderer(renderer, with: polygon, selected: false)
+                renderer.configure(color: polygons[polygon]!.color.uiColor, selected: false)
             }
-            if let newSelection = state.selection, let renderer = mapView.renderer(for: newSelection) as? MKPolygonRenderer {
-                configureRenderer(renderer, with: newSelection, selected: true)
+            if let selectedPolygon = state.selection, let renderer = mapView.renderer(for: selectedPolygon) as? MKPolygonRenderer {
+                renderer.configure(color: polygons[selectedPolygon]!.color.uiColor, selected: true)
             }
             trackInfoView.track = state.selection.flatMap { polygons[$0] }
         }
@@ -167,29 +170,26 @@ class ViewController: UIViewController, MKMapViewDelegate, TrackInfoViewDelegate
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         guard let polygon = overlay as? MKPolygon else { return MKOverlayRenderer() }
         if let renderer = mapView.renderer(for: overlay) { return renderer }
-        let renderer = buildRenderer(polygon)
+        let renderer = MKPolygonRenderer(polygon: polygon)
+        let isSelected = state.selection == polygon
+        renderer.configure(color: polygons[polygon]!.color.uiColor, selected: isSelected || !state.hasSelection)
         return renderer
     }
         
-    func buildRenderer(_ polygon: MKPolygon) -> MKPolygonRenderer {
-        let isSelected = state.selection == polygon
-        let renderer = MKPolygonRenderer(polygon: polygon)
-        configureRenderer(renderer, with: polygon, selected: isSelected)
-        return renderer
-    }
-    
-    func configureRenderer(_ renderer: MKPolygonRenderer, with polygon: MKPolygon, selected: Bool) {
-        let lineColor = polygons[polygon]!.color.uiColor
-        let fillColor = selected ? lineColor.withAlphaComponent(0.2) : lineColor.withAlphaComponent(0.1)
-        renderer.strokeColor = lineColor
-        renderer.fillColor = fillColor
-        let highlighted = state.selection == nil || selected
-        renderer.lineWidth = highlighted ? 3 : 1
-        renderer.alpha = 1
-    }
-    
     func changedPosition(to position: CGFloat?) {
         state.trackPosition = position
     }
 }
+
+
+
+
+extension MKPolygonRenderer {
+    func configure(color: UIColor, selected: Bool) {
+        strokeColor = color
+        fillColor = selected ? color.withAlphaComponent(0.2) : color.withAlphaComponent(0.1)
+        lineWidth = selected ? 3 : 1
+    }
+}
+
 
