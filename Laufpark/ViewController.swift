@@ -12,7 +12,6 @@ import MapKit
 struct State: Equatable {
     var tracks: [Track]
     var loading: Bool { return tracks.isEmpty }
-    var annotationsVisible: Bool = false
     
     var selection: MKPolygon? {
         didSet {
@@ -28,7 +27,7 @@ struct State: Equatable {
     }
     
     static func ==(lhs: State, rhs: State) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.annotationsVisible == rhs.annotationsVisible
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks
     }
 }
 
