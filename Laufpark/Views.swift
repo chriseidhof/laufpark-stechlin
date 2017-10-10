@@ -95,16 +95,15 @@ extension UIView {
 
 
 
-func buildMapView() -> IBox<MKMapView> {
-    let box = IBox(MKMapView())
-    let view = box.unbox
+func buildMapView() -> MKMapView {
+    let view = MKMapView()
     view.showsCompass = true
     view.showsScale = true
     view.showsUserLocation = true
     view.mapType = .standard
     view.isRotateEnabled = false
     view.isPitchEnabled = false
-    return box
+    return view
 }
 
 func polygonRenderer(polygon: MKPolygon, strokeColor: I<UIColor>, fillColor: I<UIColor?>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) -> IBox<MKPolygonRenderer> {
