@@ -36,8 +36,10 @@ struct State: Equatable {
 
 final class ViewController: UIViewController {
     private let mapView: MKMapView = buildMapView()
-    private var loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
-    private var trackInfoView = TrackInfoView()
+    private let positionAnnotation = MKPointAnnotation()
+    private let trackInfoView = TrackInfoView()
+    private let loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+    
     private var trackInfoConstraint: NSLayoutConstraint!
 
     private var state: State = State(tracks: []) {
@@ -65,10 +67,11 @@ final class ViewController: UIViewController {
         view.backgroundColor = .white
 
         // Configuration
+        mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
+        mapView.addAnnotation(positionAnnotation)
         trackInfoView.delegate = self
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.startAnimating()
-        mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
 
         // Layout
         view.addSubview(mapView)
@@ -126,7 +129,7 @@ final class ViewController: UIViewController {
             }
             for polygon in polygons.keys {
                 guard let renderer = mapView.renderer(for: polygon) as? MKPolygonRenderer else { continue }
-                renderer.configure(color: polygons[polygon]!.color.uiColor, selected: false)
+                renderer.configure(color: polygons[polygon]!.color.uiColor, selected: !state.hasSelection)
             }
             if let selectedPolygon = state.selection, let renderer = mapView.renderer(for: selectedPolygon) as? MKPolygonRenderer {
                 renderer.configure(color: polygons[selectedPolygon]!.color.uiColor, selected: true)
@@ -135,6 +138,14 @@ final class ViewController: UIViewController {
         }
         if state.trackPosition != old.trackPosition {
             trackInfoView.position = state.trackPosition
+            if let position = state.trackPosition, let selection = state.selection, let track = polygons[selection] {
+                let distance = Double(position) * track.distance
+                if let point = track.point(at: distance) {
+                    positionAnnotation.coordinate = point.coordinate
+                }
+            } else {
+                positionAnnotation.coordinate = CLLocationCoordinate2D()
+            }
         }
     }
 
@@ -181,6 +192,13 @@ extension ViewController: MKMapViewDelegate {
         let isSelected = state.selection == polygon
         renderer.configure(color: polygons[polygon]!.color.uiColor, selected: isSelected || !state.hasSelection)
         return renderer
+    }
+    
+    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        guard let pointAnnotation = annotation as? MKPointAnnotation, pointAnnotation == positionAnnotation else { return nil }
+        let result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
+        result.pinTintColor = .red
+        return result
     }
 }
 
