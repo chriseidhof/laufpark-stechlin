@@ -22,24 +22,26 @@ final class LineView: UIView {
     var strokeColor: UIColor = .black { didSet { setNeedsDisplay() }}
     var position: CGFloat? = nil { didSet { setNeedsDisplay() }}
     var positionColor: UIColor = .red { didSet { setNeedsDisplay() }}
-    
-    var pointsRect: CGRect {
+    var horizontalTick: CGFloat? = 5000 { didSet { setNeedsDisplay() } }
+    var tickColor: UIColor = UIColor.gray.withAlphaComponent(0.3) { didSet { setNeedsDisplay() } }
+    var points: [Point] = [] {
+        didSet {
+            updatePointsRect()
+            setNeedsDisplay()
+        }
+    }
+
+    private var pointsRect: CGRect = .zero
+  
+    private func updatePointsRect() {
         var  (minY, maxY, maxX): (CGFloat, CGFloat, CGFloat) = (100000, 0, 0)
         for p in points {
             minY = min(minY, CGFloat(p.y))
             maxY = max(maxY, CGFloat(p.y))
             maxX = max(maxX, CGFloat(p.x))
         }
-
-        return CGRect(x: 0, y: minY, width: maxX.rounded(.up), height: maxY-minY)
-
+        pointsRect = CGRect(x: 0, y: minY, width: maxX.rounded(.up), height: maxY-minY)
     }
-    var points: [Point] = [] {
-        didSet { setNeedsDisplay() }
-    }
-    
-    var horizontalTick: CGFloat? = 5000 { didSet { setNeedsDisplay() } }
-    var tickColor: UIColor = UIColor.gray.withAlphaComponent(0.3) { didSet { setNeedsDisplay() } }
     
     override var frame: CGRect {
         get {
@@ -50,8 +52,6 @@ final class LineView: UIView {
             setNeedsDisplay()
         }
     }
-    
-    
     
     override func draw(_ rect: CGRect) {
         guard !self.points.isEmpty else { return }
