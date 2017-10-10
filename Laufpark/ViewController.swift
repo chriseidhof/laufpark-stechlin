@@ -34,7 +34,6 @@ struct State: Equatable {
 
 struct PolygonData {
     let track: Track
-    var renderer: MKPolygonRenderer?
 }
 
 class ViewController: UIViewController, MKMapViewDelegate {
@@ -62,7 +61,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             mapView.removeOverlays(mapView.overlays)
             for track in state.tracks {
                 let line = track.line
-                polygons[line] = PolygonData(track: track, renderer: nil)
+                polygons[line] = PolygonData(track: track)
                 mapView.add(line)
             }
         }
@@ -71,11 +70,11 @@ class ViewController: UIViewController, MKMapViewDelegate {
             UIView.animate(withDuration: 0.2) {
                 self.view.layoutIfNeeded()
             }
-            for (line, data) in polygons {
-                guard let renderer = data.renderer else { continue }
+            for line in polygons.keys {
+                guard let renderer = mapView.renderer(for: line) as? MKPolygonRenderer else { continue }
                 configureRenderer(renderer, with: line, selected: false)
             }
-            if let newSelection = state.selection, let renderer = polygons[newSelection]?.renderer {
+            if let newSelection = state.selection, let renderer = mapView.renderer(for: newSelection) as? MKPolygonRenderer {
                 configureRenderer(renderer, with: newSelection, selected: true)
             }
             trackInfoView.track = state.selection.flatMap { polygons[$0]?.track }
@@ -148,7 +147,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let point = sender.location(ofTouch: 0, in: mapView)
         let mapPoint = MKMapPointForCoordinate(mapView.convert(point, toCoordinateFrom: mapView))
         let possibilities = polygons.keys.filter { line in
-            guard let renderer = polygons[line]?.renderer else { return false }
+            guard let renderer = mapView.renderer(for: line) as? MKPolygonRenderer else { return false }
             let point = renderer.point(for: mapPoint)
             return renderer.path.contains(point)
         }
@@ -168,9 +167,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         guard let line = overlay as? MKPolygon else { return MKOverlayRenderer() }
-        if let renderer = polygons[line]?.renderer { return renderer }
+        if let renderer = mapView.renderer(for: overlay) { return renderer }
         let renderer = buildRenderer(line)
-        polygons[line]?.renderer = renderer
         return renderer
     }
         
