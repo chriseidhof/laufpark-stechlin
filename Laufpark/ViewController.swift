@@ -20,6 +20,11 @@ struct State: Equatable {
             trackPosition = nil
         }
     }
+
+    var hasSelection: Bool {
+        return selection != nil
+    }
+
     var trackPosition: CGFloat? // 0...1
     
     init(tracks: [Track]) {
@@ -41,7 +46,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var rootView: IBox<UIView>!
     
     let state: Input<State>
-    let hasSelection: I<Bool>
 
     var disposables: [Any] = []
     var locationManager: CLLocationManager?
@@ -50,7 +54,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
     init() {
         state = Input(State(tracks: []))
-        hasSelection = state.i.map { $0.selection != nil }
         darkMode = mapView[\.mapType] == .standard
 
         super.init(nibName: nil, bundle: nil)
@@ -102,7 +105,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
         
         // MapView
         mapView.unbox.delegate = self
-        disposables.append(state.i.map { $0.tracks }.observe {
+        disposables.append(state.i.map { $0.tracks }.observe { [unowned self] in
+            self.mapView.unbox.removeOverlays(self.mapView.unbox.overlays)
             $0.forEach { track in
                 let polygon = track.polygon
                 self.tracks[polygon] = track
@@ -115,7 +119,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let height: CGFloat = 120
         blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
         let bottomConstraint = blurredView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        disposables.append(if_(hasSelection, then: 0, else: height).observe { newOffset in
+        disposables.append(if_(state.i[\.hasSelection], then: 0, else: height).observe { newOffset in
             bottomConstraint.constant = newOffset
             UIView.animate(withDuration: 0.2) {
                 self.view.layoutIfNeeded()
@@ -255,7 +259,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     func buildRenderer(_ polygon: MKPolygon) -> IBox<MKPolygonRenderer> {
         let track = tracks[polygon]!
         let isSelected = state.i[\.selection].map { $0 == track }
-        let shouldHighlight = !hasSelection || isSelected
+        let shouldHighlight = !state.i[\.hasSelection] || isSelected
         let lineColor = tracks[polygon]!.color.uiColor
         let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.2), else: lineColor.withAlphaComponent(0.1))
         return polygonRenderer(polygon: polygon,
