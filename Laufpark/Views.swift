@@ -10,67 +10,80 @@ import UIKit
 import Incremental
 import MapKit
 
-final class TrackInfoView {
-    private var lineView: IBox<LineView>
-    var view: UIView! = nil
-    var disposables: [Any] = []
-    
-    // 0...1.0
-    var pannedLocation: I<CGFloat> {
-        return _pannedLocation.i
+final class TrackInfoView: UIView {
+    private var lineView = buildLineView(position: nil, points: [], pointsRect: .zero, strokeColor: .black)
+    private var nameLabel = UILabel()
+    private var distanceLabel = UILabel()
+    private var ascentLabel = UILabel()
+    var track: Track? {
+        didSet {
+            updateLineView()
+            updateTrackInfo()
+        }
     }
-    private var _pannedLocation: Input<CGFloat> = Input(0)
+    var position: CGFloat? {
+        didSet {
+            lineView.position = position
+        }
+    }
     
-    init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, track: I<Track?>, darkMode: I<Bool>) {
-        let blurredViewForeground: I<UIColor> = if_(darkMode, then: I(constant: .white), else: I(constant: .black))
-        self.lineView = buildLineView(position: position, points: points, pointsRect: pointsRect, strokeColor: blurredViewForeground)
-
+    func updateLineView() {
+        let profile = track.map { $0.elevationProfile } ?? []
+        let points = profile.map { CGPoint(x: $0.distance, y: $0.elevation) }
+        let elevations = profile.map { $0.elevation }
+        let rect = profile.isEmpty ? .zero : CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
+        lineView.points = points
+        lineView.pointsRect = rect
+    }
+    
+    func updateTrackInfo() {
+        let formatter = MKDistanceFormatter()
+        let formattedDistance = track.map { formatter.string(fromDistance: $0.distance) } ?? ""
+        let formattedAscent = track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" } ?? ""
+        nameLabel.text = track?.name ?? ""
+        distanceLabel.text = formattedDistance
+        ascentLabel.text = formattedAscent
+    }
+    
+    init() {
+        super.init(frame: .zero)
         
         // Lineview
-        lineView.unbox.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        lineView.unbox.backgroundColor = .clear
-        lineView.unbox.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
+        lineView.backgroundColor = .clear
+        lineView.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
         
-        let formatter = MKDistanceFormatter()
-        let formattedDistance = track.map { track in
-            track.map { formatter.string(fromDistance: $0.distance) }
-        } ?? ""
-        let formattedAscent = track.map { track in
-            track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
-        } ?? ""
-        let name = label(text: track.map { $0?.name ?? "" }, textColor: blurredViewForeground.map { $0 })
-        let totalDistance = label(text: formattedDistance, textColor: blurredViewForeground.map { $0 })
-        let totalAscent = label(text: formattedAscent, textColor: blurredViewForeground.map { $0 })
         // Track information
-        let trackInfo = IBox<UIStackView>(arrangedSubviews: [name, totalDistance, totalAscent])
-        trackInfo.unbox.axis = .horizontal
-        trackInfo.unbox.distribution = .equalCentering
-        trackInfo.unbox.heightAnchor.constraint(equalToConstant: 20)
-        trackInfo.unbox.spacing = 10
-        disposables.append(trackInfo) // need to keep a reference
+        nameLabel.translatesAutoresizingMaskIntoConstraints = false
+        distanceLabel.translatesAutoresizingMaskIntoConstraints = false
+        ascentLabel.translatesAutoresizingMaskIntoConstraints = false
+        let trackInfo = UIStackView(arrangedSubviews: [nameLabel, distanceLabel, ascentLabel])
+        trackInfo.axis = .horizontal
+        trackInfo.distribution = .equalCentering
+        trackInfo.spacing = 10
         
-        let blurEffect = if_(darkMode, then: UIBlurEffect(style: .dark), else: UIBlurEffect(style: .light))
         let blurredView = UIVisualEffectView(effect: nil)
-        disposables.append(blurEffect.observe { effect in
-            UIView.animate(withDuration: 0.2) {
-                blurredView.effect = effect
-            }
-        })
         blurredView.translatesAutoresizingMaskIntoConstraints = false
+        blurredView.effect = UIBlurEffect(style: .light)
         
-        let stackView = UIStackView(arrangedSubviews: [trackInfo.unbox, lineView.unbox])
-        blurredView.contentView.addSubview(stackView)
-        stackView.axis = .vertical
-        stackView.addConstraintsToSizeToParent(spacing: 10)
+        let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView])
         stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .vertical
+        stackView.spacing = 5
         
-        view = blurredView
+        blurredView.contentView.addSubview(stackView)
+        stackView.addConstraintsToSizeToParent(spacing: 10)
+
+        addSubview(blurredView)
+        blurredView.addConstraintsToSizeToParent()
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     @objc func linePanned(sender: UIPanGestureRecognizer) {
-        let normalizedLocation = (sender.location(in: lineView.unbox).x /
-            lineView.unbox.bounds.size.width).clamped(to: 0.0...1.0)
-        _pannedLocation.write(normalizedLocation)
+        let normalizedLocation = (sender.location(in: lineView).x / lineView.bounds.size.width).clamped(to: 0.0...1.0)
+        lineView.position = normalizedLocation
     }
 }
 
@@ -128,11 +141,11 @@ extension CLLocationCoordinate2D: Equatable {
     }
 }
 
-func buildLineView(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, strokeColor: I<UIColor>) -> IBox<LineView> {
-    let box = IBox(LineView())
-    box.bind(position, to: \LineView.position)
-    box.bind(points, to: \.points)
-    box.bind(pointsRect, to: \.pointsRect)
-    box.bind(strokeColor, to: \.strokeColor)
-    return box
+func buildLineView(position: CGFloat?, points: [CGPoint], pointsRect: CGRect, strokeColor: UIColor) -> LineView {
+    let view = LineView()
+    view.position = position
+    view.points = points
+    view.pointsRect = pointsRect
+    view.strokeColor = strokeColor
+    return view
 }

@@ -43,49 +43,46 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     var state: State {
         didSet {
-            if state.loading {
-                loadingIndicator.startAnimating()
-            } else {
-                loadingIndicator.stopAnimating()
-            }
-            if state.tracks != oldValue.tracks {
-                mapView.removeOverlays(mapView.overlays)
-                for track in state.tracks {
-                    let line = track.line
-                    lines[line] = track.color
-                    trackForPolygon[line] = track
-                    mapView.add(line)
-                }
-            }
-            if state.selection != oldValue.selection {
-                for (line, renderer) in renderers {
-                    configureRenderer(renderer, with: line, selected: false)
-                }
-                if let newSelection = state.selection, let renderer = renderers[newSelection] {
-                    configureRenderer(renderer, with: newSelection, selected: true)
-                }
-            }
+            update(old: oldValue)
         }
     }
 
-//    var disposables: [Any] = []
     var locationManager: CLLocationManager?
-//    var trackInfoView: TrackInfoView!
-//    let darkMode: I<Bool>
-//    var timer: Disposable?
+    var trackInfoView: TrackInfoView = TrackInfoView()
+    var trackInfoConstraint: NSLayoutConstraint!
 
-//    var selectedTrack: I<Track?> {
-//        return selection.map {
-//            guard let p = $0 else { return nil }
-//            return self.trackForPolygon[p]
-//        }
-//    }
+    func update(old: State) {
+        if state.loading {
+            loadingIndicator.startAnimating()
+        } else {
+            loadingIndicator.stopAnimating()
+        }
+        if state.tracks != old.tracks {
+            mapView.removeOverlays(mapView.overlays)
+            for track in state.tracks {
+                let line = track.line
+                lines[line] = track.color
+                trackForPolygon[line] = track
+                mapView.add(line)
+            }
+        }
+        if state.selection != old.selection {
+            self.trackInfoConstraint.isActive = self.state.selection != nil
+            UIView.animate(withDuration: 0.2) {
+                self.view.layoutIfNeeded()
+            }
+            for (line, renderer) in renderers {
+                configureRenderer(renderer, with: line, selected: false)
+            }
+            if let newSelection = state.selection, let renderer = renderers[newSelection] {
+                configureRenderer(renderer, with: newSelection, selected: true)
+            }
+            trackInfoView.track = state.selection.flatMap { trackForPolygon[$0] }
+        }
+    }
     
     init() {
         state = State(tracks: [])
-//        selection = state.i.map { $0.selection }
-//        hasSelection = state.i.map { $0.selection != nil }
-//        darkMode = mapView[\.mapType] == .standard
 
         super.init(nibName: nil, bundle: nil)
 
@@ -107,24 +104,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
 //        let position: I<CGFloat?> = draggedLocation.map {
 //            ($0?.distance).map { CGFloat($0) }
 //        }
-        
-//        let elevations = selectedTrack.map(eq: { _, _ in false }) { track in
-//            track?.elevationProfile
-//        }
-        
-//        let points: I<[CGPoint]> = elevations.map(eq: ==) { ele in
-//            ele.map { profile in
-//                profile.map { CGPoint(x: $0.distance, y: $0.elevation) }
-//            } ?? []
-//        }
-        
-//        let rect: I<CGRect> = elevations.map { profile in
-//            guard let profile = profile else { return .zero }
-//            let elevations = profile.map { $0.elevation }
-//            return CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
-//        }
-        
-//        trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
     }
     
     func setTracks(_ t: [Track]) {
@@ -136,38 +115,26 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
+        view.backgroundColor = .white
+        
         view.addSubview(mapView)
         mapView.translatesAutoresizingMaskIntoConstraints = false
         mapView.addConstraintsToSizeToParent()
-        
-        // MapView
         mapView.delegate = self
-//        disposables.append(state.i.map { $0.tracks }.observe {
-//            $0.forEach { track in
-//                let line = track.line
-//                self.lines[line] = track.color
-//                self.trackForPolygon[line] = track
-//                self.mapView.unbox.add(line)
-//            }
-//        })
         
-//        let blurredView = trackInfoView.view!
-//        view.addSubview(blurredView)
-//        let height: CGFloat = 120
-//        blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
-//        let bottomConstraint = blurredView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-//        disposables.append(if_(hasSelection, then: 0, else: height).observe { newOffset in
-//            bottomConstraint.constant = newOffset
-//            UIView.animate(withDuration: 0.2) {
-//                self.view.layoutIfNeeded()
-//            }
-//        })
-//        bottomConstraint.isActive = true
-//        blurredView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-//        blurredView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        view.addSubview(trackInfoView)
+        trackInfoView.translatesAutoresizingMaskIntoConstraints = false
+        trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        trackInfoConstraint.priority = .required
+        let hideTrackInfoConstraint = trackInfoView.topAnchor.constraint(equalTo: view.bottomAnchor)
+        hideTrackInfoConstraint.priority = .defaultHigh
+        NSLayoutConstraint.activate([
+            hideTrackInfoConstraint,
+            trackInfoView.leftAnchor.constraint(equalTo: view.leftAnchor),
+            trackInfoView.rightAnchor.constraint(equalTo: view.rightAnchor),
+            trackInfoView.heightAnchor.constraint(equalToConstant: 120)
+        ])
 
-        view.backgroundColor = .white
-        
 
 //        mapView.unbox.addAnnotation(draggedPointAnnotation.unbox)
         
@@ -184,8 +151,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
 //            }
 //        })
 
-//        let isLoading = state[\.loading]
-//        let loadingIndicator = activityIndicator(style: darkMode.map { $0 ? .gray : .white }, animating: isLoading)
         loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.startAnimating()
