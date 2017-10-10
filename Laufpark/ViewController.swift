@@ -15,7 +15,7 @@ struct State: Equatable {
     var loading: Bool { return tracks.isEmpty }
     var annotationsVisible: Bool = false
     
-    var selection: MKPolygon? {
+    var selection: Track? {
         didSet {
             trackPosition = nil
         }
@@ -48,13 +48,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
     var trackInfoView: TrackInfoView!
     let darkMode: I<Bool>
 
-    var selectedTrack: I<Track?> {
-        return state.i[\.selection].map {
-            guard let p = $0 else { return nil }
-            return self.tracks[p]
-        }
-    }
-    
     init() {
         state = Input(State(tracks: []))
         hasSelection = state.i.map { $0.selection != nil }
@@ -62,9 +55,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
         super.init(nibName: nil, bundle: nil)
 
-        draggedLocation = state.i.map(eq: lift(==), { [weak self] state in
-            guard let s = state.selection,
-                let track = self?.tracks[s],
+        draggedLocation = state.i.map(eq: lift(==), { state in
+            guard let track = state.selection,
                 let location = state.trackPosition else { return nil }
             let distance = Double(location) * track.distance
             guard let point = track.point(at: distance) else { return nil }
@@ -75,7 +67,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             ($0?.distance).map { CGFloat($0) }
         }
         
-        let elevations = selectedTrack.map(eq: { _, _ in false }) { track in
+        let elevations = state.i[\.selection].map(eq: { _, _ in false }) { track in
             track?.elevationProfile
         }
         
@@ -91,7 +83,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             return CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
         }
         
-        trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: selectedTrack, darkMode: darkMode)
+        trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: state.i[\.selection], darkMode: darkMode)
     }
     
     func setTracks(_ t: [Track]) {
@@ -201,19 +193,19 @@ class ViewController: UIViewController, MKMapViewDelegate {
     @objc func mapTapped(sender: UITapGestureRecognizer) {
         let point = sender.location(ofTouch: 0, in: mapView.unbox)
         let mapPoint = MKMapPointForCoordinate(mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox))
-        let possibilities = tracks.keys.filter { polygon in
+        let possibilities = tracks.filter { (polygon, track) in
             let renderer = mapView.unbox.renderer(for: polygon) as! MKPolygonRenderer
             let point = renderer.point(for: mapPoint)
             return renderer.path.contains(point)
         }
         
         // in case of multiple matches, toggle between the selections, and start out with the smallest route
-        if let s = state.i[\.selection].value ?? nil, possibilities.count > 1 && possibilities.contains(s) {
+        if let s = state.i[\.selection].value ?? nil, possibilities.count > 1 && possibilities.values.contains(s) {
             state.change {
-                $0.selection = possibilities.lazy.sorted { $0.pointCount < $1.pointCount }.first(where: { $0 != s })
+                $0.selection = possibilities.lazy.sorted { $0.key.pointCount < $1.key.pointCount }.first(where: { $0.value != s }).map { $0.value }
             }
         } else {
-            state.change { $0.selection = possibilities.first }
+            state.change { $0.selection = possibilities.first?.value }
         }
     }
 
@@ -261,7 +253,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func buildRenderer(_ polygon: MKPolygon) -> IBox<MKPolygonRenderer> {
-        let isSelected = state.i[\.selection].map { $0 == polygon }
+        let track = tracks[polygon]!
+        let isSelected = state.i[\.selection].map { $0 == track }
         let shouldHighlight = !hasSelection || isSelected
         let lineColor = tracks[polygon]!.color.uiColor
         let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.2), else: lineColor.withAlphaComponent(0.1))
