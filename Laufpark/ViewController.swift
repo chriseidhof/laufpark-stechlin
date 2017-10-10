@@ -32,7 +32,7 @@ struct State: Equatable {
     }
 }
 
-class ViewController: UIViewController, MKMapViewDelegate {
+class ViewController: UIViewController, MKMapViewDelegate, TrackInfoViewDelegate {
     let mapView: MKMapView = buildMapView()
     var polygons: [MKPolygon: Track] = [:]
     var loadingIndicator: UIActivityIndicatorView!
@@ -75,6 +75,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
             }
             trackInfoView.track = state.selection.flatMap { polygons[$0] }
         }
+        if state.trackPosition != old.trackPosition {
+            trackInfoView.position = state.trackPosition
+        }
     }
     
     init() {
@@ -98,7 +101,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
         mapView.translatesAutoresizingMaskIntoConstraints = false
         mapView.addConstraintsToSizeToParent()
         mapView.delegate = self
-        
+
+        trackInfoView.delegate = self
         view.addSubview(trackInfoView)
         trackInfoView.translatesAutoresizingMaskIntoConstraints = false
         trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
@@ -183,6 +187,10 @@ class ViewController: UIViewController, MKMapViewDelegate {
         let highlighted = state.selection == nil || selected
         renderer.lineWidth = highlighted ? 3 : 1
         renderer.alpha = 1
+    }
+    
+    func changedPosition(to position: CGFloat?) {
+        state.trackPosition = position
     }
 }
 

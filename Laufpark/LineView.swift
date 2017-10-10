@@ -65,8 +65,8 @@ final class LineView: UIView {
         }
         
         if let position = position {
-            let start = CGPoint(x: position*scaleX, y: 0)
-            let end = CGPoint(x: position*scaleX, y: -bounds.size.height)
+            let start = CGPoint(x: position*bounds.size.width, y: 0)
+            let end = CGPoint(x: position*bounds.size.width, y: -bounds.size.height)
             context.move(to: start)
             context.addLine(to: end)
             positionColor.setStroke()

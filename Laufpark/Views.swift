@@ -10,15 +10,22 @@ import UIKit
 import Incremental
 import MapKit
 
+protocol TrackInfoViewDelegate: class {
+    func changedPosition(to position: CGFloat?)
+}
+
 final class TrackInfoView: UIView {
     private var lineView = buildLineView(position: nil, points: [], pointsRect: .zero, strokeColor: .black)
     private var nameLabel = UILabel()
     private var distanceLabel = UILabel()
     private var ascentLabel = UILabel()
+    
+    weak var delegate: TrackInfoViewDelegate?
     var track: Track? {
         didSet {
             updateLineView()
             updateTrackInfo()
+            position = nil
         }
     }
     var position: CGFloat? {
@@ -83,7 +90,7 @@ final class TrackInfoView: UIView {
     
     @objc func linePanned(sender: UIPanGestureRecognizer) {
         let normalizedLocation = (sender.location(in: lineView).x / lineView.bounds.size.width).clamped(to: 0.0...1.0)
-        lineView.position = normalizedLocation
+        delegate?.changedPosition(to: normalizedLocation)
     }
 }
 
