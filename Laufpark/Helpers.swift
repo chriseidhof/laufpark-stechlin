@@ -26,10 +26,11 @@ func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
     }
 }
 
-func time(name: StaticString = #function, line: Int = #line, _ f: () -> ()) {
+func time<Result>(name: StaticString = #function, line: Int = #line, _ f: () -> Result) -> Result {
     let startTime = DispatchTime.now()
-    f()
+    let result = f()
     let endTime = DispatchTime.now()
-    let diff = (endTime.uptimeNanoseconds - startTime.uptimeNanoseconds) / 1_000_000
-    print("\(name) (line \(line)): \(diff)")
+    let diff = Double(endTime.uptimeNanoseconds - startTime.uptimeNanoseconds) / 1_000_000_000 as Double
+    print("\(name) (line \(line)): \(diff) sec")
+    return result
 }

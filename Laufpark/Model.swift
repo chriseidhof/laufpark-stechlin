@@ -9,6 +9,7 @@
 import Foundation
 import CoreLocation
 
+
 struct POI {
     let location: CLLocationCoordinate2D
     let name: String
@@ -29,7 +30,7 @@ struct POI {
     ]
 }
 
-enum Color {
+enum Color: Int, Codable {
     case red
     case turquoise
     case brightGreen
@@ -65,8 +66,29 @@ extension Sequence where SubSequence: Sequence, SubSequence.Element == Element {
 
 }
 
-struct Track {
-    let coordinates: [(CLLocationCoordinate2D, elevation: Double)]
+struct Coordinate: Codable {
+    let latitude: Double
+    let longitude: Double
+}
+
+extension Coordinate {
+    init(_ locationCoordinate: CLLocationCoordinate2D) {
+        self.latitude = locationCoordinate.latitude
+        self.longitude = locationCoordinate.longitude
+    }
+    
+    var clLocationCoordinate: CLLocationCoordinate2D {
+        return CLLocationCoordinate2D(latitude: self.latitude, longitude: self.longitude)
+    }
+}
+
+struct CoordinateWithElevation: Codable {
+    let coordinate: Coordinate
+    let elevation: Double
+}
+
+struct Track: Codable {
+    let coordinates: [CoordinateWithElevation]
     let color: Color
     let number: Int
     let name: String
@@ -74,8 +96,8 @@ struct Track {
     var distance: CLLocationDistance {
         guard let first = coordinates.first else { return 0 }
         
-        let (result, _) = coordinates.reduce(into: (0 as CLLocationDistance, previous: CLLocation(first.0))) { r, coord in
-            let loc = CLLocation(coord.0)
+        let (result, _) = coordinates.reduce(into: (0 as CLLocationDistance, previous: CLLocation(first.coordinate.clLocationCoordinate))) { r, coord in
+            let loc = CLLocation(coord.coordinate.clLocationCoordinate)
             let distance = loc.distance(from: r.1)
             r.1 = loc
             r.0 += distance
@@ -90,7 +112,7 @@ struct Track {
 
     func point(at distance: CLLocationDistance) -> CLLocation? {
         var current = 0 as CLLocationDistance
-        for (p1, p2) in coordinates.lazy.map({ CLLocation($0.0) }).diffed() {
+        for (p1, p2) in coordinates.lazy.map({ CLLocation($0.coordinate.clLocationCoordinate) }).diffed() {
             current += p2.distance(from: p1)
             if current > distance { return p2 }
         }
@@ -110,7 +132,7 @@ extension Track {
         self.number = number
         self.name = name
         coordinates = points.map { point in
-            (CLLocationCoordinate2D(latitude: point.lat, longitude: point.lon), elevation: point.ele)
+            CoordinateWithElevation(coordinate: Coordinate(latitude: point.lat, longitude: point.lon), elevation: point.ele)
         }
     }
 }

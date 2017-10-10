@@ -57,7 +57,7 @@ extension Color {
 
 extension Track {
     var line: MKPolygon {
-        var coordinates = self.coordinates.map { $0.0 }
+        var coordinates = self.coordinates.map { $0.coordinate.clLocationCoordinate }
         let result = MKPolygon(coordinates: &coordinates, count: coordinates.count)
         return result
     }
@@ -65,7 +65,7 @@ extension Track {
     typealias ElevationProfile = [(distance: CLLocationDistance, elevation: Double)]
     var elevationProfile: ElevationProfile {
         let result = coordinates.diffed { l, r in
-            (CLLocation(l.0).distance(from: CLLocation(r.0)), r.elevation)
+            (CLLocation(l.coordinate.clLocationCoordinate).distance(from: CLLocation(r.coordinate.clLocationCoordinate)), r.elevation)
         }
         var distanceTotal = 0 as CLLocationDistance
         return result.map { pair in
