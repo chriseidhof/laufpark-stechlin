@@ -23,19 +23,13 @@ final class LineView: UIView {
     var position: CGFloat? = nil { didSet { setNeedsDisplay() }}
     var positionColor: UIColor = .red { didSet { setNeedsDisplay() }}
     
-    var pointsRect: CGRect {
-        var  (minY, maxY, maxX): (CGFloat, CGFloat, CGFloat) = (100000, 0, 0)
-        for p in points {
-            minY = min(minY, CGFloat(p.y))
-            maxY = max(maxY, CGFloat(p.y))
-            maxX = max(maxX, CGFloat(p.x))
-        }
+    private var _pointsRect: CGRect = .zero
 
-        return CGRect(x: 0, y: minY, width: maxX.rounded(.up), height: maxY-minY)
-
-    }
     var points: [Point] = [] {
-        didSet { setNeedsDisplay() }
+        didSet {
+            recomputePointsRect()
+            setNeedsDisplay()
+        }
     }
     
     var horizontalTick: CGFloat? = 5000 { didSet { setNeedsDisplay() } }
@@ -51,7 +45,16 @@ final class LineView: UIView {
         }
     }
     
-    
+    func recomputePointsRect() {
+        var (minY, maxY, maxX): (CGFloat, CGFloat, CGFloat) = (100000, 0, 0)
+        for p in points {
+            minY = min(minY, CGFloat(p.y))
+            maxY = max(maxY, CGFloat(p.y))
+            maxX = max(maxX, CGFloat(p.x))
+        }
+
+        _pointsRect = CGRect(x: 0, y: minY, width: maxX.rounded(.up), height: maxY-minY)
+    }
     
     override func draw(_ rect: CGRect) {
         guard !self.points.isEmpty else { return }
@@ -59,8 +62,8 @@ final class LineView: UIView {
 
         context.translateBy(x: 0, y: bounds.size.height)
         
-        let scaleX = bounds.size.width/pointsRect.size.width
-        let scaleY = bounds.size.height/pointsRect.size.height
+        let scaleX = bounds.size.width/_pointsRect.size.width
+        let scaleY = bounds.size.height/_pointsRect.size.height
 
         if let tickWidth = horizontalTick {
             let cgTickWidth = tickWidth * scaleX
@@ -93,7 +96,7 @@ final class LineView: UIView {
         context.setLineWidth(strokeWidth)
         strokeColor.setStroke()
         let points = self.points.map {
-            CGPoint(x: (CGFloat($0.x)-pointsRect.origin.x) * scaleX, y: (CGFloat($0.y)-pointsRect.origin.y) * -scaleY)
+            CGPoint(x: (CGFloat($0.x)-_pointsRect.origin.x) * scaleX, y: (CGFloat($0.y)-_pointsRect.origin.y) * -scaleY)
         }
         guard let start = points.first else { return }
         context.move(to: start)
