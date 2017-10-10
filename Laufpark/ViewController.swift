@@ -32,11 +32,14 @@ struct State: Equatable {
     }
 }
 
+struct PolygonData {
+    let track: Track
+    var renderer: MKPolygonRenderer?
+}
+
 class ViewController: UIViewController, MKMapViewDelegate {
     let mapView: MKMapView = buildMapView()
-    var lines: [MKPolygon: Color] = [:]
-    var renderers: [MKPolygon: MKPolygonRenderer] = [:]
-    var trackForPolygon: [MKPolygon: Track] = [:]
+    var polygons: [MKPolygon: PolygonData] = [:]
     var loadingIndicator: UIActivityIndicatorView!
     
     var state: State {
@@ -59,8 +62,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             mapView.removeOverlays(mapView.overlays)
             for track in state.tracks {
                 let line = track.line
-                lines[line] = track.color
-                trackForPolygon[line] = track
+                polygons[line] = PolygonData(track: track, renderer: nil)
                 mapView.add(line)
             }
         }
@@ -69,13 +71,14 @@ class ViewController: UIViewController, MKMapViewDelegate {
             UIView.animate(withDuration: 0.2) {
                 self.view.layoutIfNeeded()
             }
-            for (line, renderer) in renderers {
+            for (line, data) in polygons {
+                guard let renderer = data.renderer else { continue }
                 configureRenderer(renderer, with: line, selected: false)
             }
-            if let newSelection = state.selection, let renderer = renderers[newSelection] {
+            if let newSelection = state.selection, let renderer = polygons[newSelection]?.renderer {
                 configureRenderer(renderer, with: newSelection, selected: true)
             }
-            trackInfoView.track = state.selection.flatMap { trackForPolygon[$0] }
+            trackInfoView.track = state.selection.flatMap { polygons[$0]?.track }
         }
     }
     
@@ -144,8 +147,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     @objc func mapTapped(sender: UITapGestureRecognizer) {
         let point = sender.location(ofTouch: 0, in: mapView)
         let mapPoint = MKMapPointForCoordinate(mapView.convert(point, toCoordinateFrom: mapView))
-        let possibilities = lines.keys.filter { line in
-            let renderer = renderers[line]!
+        let possibilities = polygons.keys.filter { line in
+            guard let renderer = polygons[line]?.renderer else { return false }
             let point = renderer.point(for: mapPoint)
             return renderer.path.contains(point)
         }
@@ -165,9 +168,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
         guard let line = overlay as? MKPolygon else { return MKOverlayRenderer() }
-        if let renderer = renderers[line] { return renderer }
+        if let renderer = polygons[line]?.renderer { return renderer }
         let renderer = buildRenderer(line)
-        renderers[line] = renderer
+        polygons[line]?.renderer = renderer
         return renderer
     }
         
@@ -179,7 +182,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func configureRenderer(_ renderer: MKPolygonRenderer, with line: MKPolygon, selected: Bool) {
-        let lineColor = lines[line]!.uiColor
+        let lineColor = polygons[line]!.track.color.uiColor
         let fillColor = selected ? lineColor.withAlphaComponent(0.2) : lineColor.withAlphaComponent(0.1)
         renderer.strokeColor = lineColor
         renderer.fillColor = fillColor
