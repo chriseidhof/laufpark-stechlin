@@ -249,10 +249,22 @@ class ViewController: UIViewController, MKMapViewDelegate {
             result.pinTintColor = .red
             return result
         } else {
-            let result = MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
-            result.image = UIImage(named: "partner")!
-            result.frame.size = CGSize(width: 32, height: 32)
-//            result.pinTintColor = .blue
+            let result: MKAnnotationView
+            
+            if #available(iOS 11.0, *) {
+                let ma = MKMarkerAnnotationView(annotation: annotation, reuseIdentifier: nil)
+                ma.glyphText = "⚑"
+                ma.glyphTintColor = .white
+                ma.markerTintColor = .lightGray
+                ma.titleVisibility = .adaptive
+                result = ma
+            } else {
+                result = MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
+                result.image = UIImage(named: "partner")!
+                result.frame.size = CGSize(width: 32, height: 32)
+            }
+            
+            
             result.canShowCallout = true
             return result
         }
