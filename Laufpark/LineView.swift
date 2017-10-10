@@ -9,15 +9,32 @@
 import UIKit
 
 final class LineView: UIView {
+    struct Point: Equatable {
+        static func ==(lhs: LineView.Point, rhs: LineView.Point) -> Bool {
+            return lhs.x == rhs.x && lhs.y == rhs.y
+        }
+
+        var x: Double
+        var y: Double
+    }
+
     var strokeWidth: CGFloat = 1 { didSet { setNeedsDisplay() }}
     var strokeColor: UIColor = .black { didSet { setNeedsDisplay() }}
     var position: CGFloat? = nil { didSet { setNeedsDisplay() }}
     var positionColor: UIColor = .red { didSet { setNeedsDisplay() }}
     
-    var pointsRect: CGRect = .zero {
-        didSet { setNeedsDisplay() }
+    var pointsRect: CGRect {
+        var  (minY, maxY, maxX): (CGFloat, CGFloat, CGFloat) = (100000, 0, 0)
+        for p in points {
+            minY = min(minY, CGFloat(p.y))
+            maxY = max(maxY, CGFloat(p.y))
+            maxX = max(maxX, CGFloat(p.x))
+        }
+
+        return CGRect(x: 0, y: minY, width: maxX.rounded(.up), height: maxY-minY)
+
     }
-    var points: [CGPoint] = [] {
+    var points: [Point] = [] {
         didSet { setNeedsDisplay() }
     }
     
@@ -76,7 +93,7 @@ final class LineView: UIView {
         context.setLineWidth(strokeWidth)
         strokeColor.setStroke()
         let points = self.points.map {
-            CGPoint(x: ($0.x-pointsRect.origin.x) * scaleX, y: ($0.y-pointsRect.origin.y) * -scaleY)
+            CGPoint(x: (CGFloat($0.x)-pointsRect.origin.x) * scaleX, y: (CGFloat($0.y)-pointsRect.origin.y) * -scaleY)
         }
         guard let start = points.first else { return }
         context.move(to: start)

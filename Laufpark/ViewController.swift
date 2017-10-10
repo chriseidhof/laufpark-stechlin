@@ -74,19 +74,13 @@ class ViewController: UIViewController, MKMapViewDelegate {
             track?.elevationProfile
         }
         
-        let points: I<[CGPoint]> = elevations.map(eq: ==) { ele in
+        let points: I<[LineView.Point]> = elevations.map(eq: ==) { ele in
             ele.map { profile in
-                profile.map { CGPoint(x: $0.distance, y: $0.elevation) }
+                profile.map { LineView.Point(x: $0.distance, y: $0.elevation) }
             } ?? []
         }
         
-        let rect: I<CGRect> = elevations.map { profile in
-            guard let profile = profile else { return .zero }
-            let elevations = profile.map { $0.elevation }
-            return CGRect(x: 0, y: elevations.min()!, width: profile.last!.distance.rounded(.up), height: elevations.max()!-elevations.min()!)
-        }
-        
-        trackInfoView = TrackInfoView(position: position, points: points, pointsRect: rect, track: state.i[\.selection], darkMode: darkMode)
+        trackInfoView = TrackInfoView(position: position, points: points, track: state.i[\.selection], darkMode: darkMode)
     }
     
     func setTracks(_ t: [Track]) {

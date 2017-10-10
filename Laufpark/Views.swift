@@ -21,9 +21,9 @@ final class TrackInfoView {
     }
     private var _pannedLocation: Input<CGFloat> = Input(0)
     
-    init(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, track: I<Track?>, darkMode: I<Bool>) {
+    init(position: I<CGFloat?>, points: I<[LineView.Point]>, track: I<Track?>, darkMode: I<Bool>) {
         let blurredViewForeground: I<UIColor> = if_(darkMode, then: I(constant: .white), else: I(constant: .black))
-        self.lineView = buildLineView(position: position, points: points, pointsRect: pointsRect, strokeColor: blurredViewForeground)
+        self.lineView = buildLineView(position: position, points: points, strokeColor: blurredViewForeground)
 
         
         // Lineview
@@ -129,11 +129,10 @@ extension CLLocationCoordinate2D: Equatable {
     }
 }
 
-func buildLineView(position: I<CGFloat?>, points: I<[CGPoint]>, pointsRect: I<CGRect>, strokeColor: I<UIColor>) -> IBox<LineView> {
+func buildLineView(position: I<CGFloat?>, points: I<[LineView.Point]>, strokeColor: I<UIColor>) -> IBox<LineView> {
     let box = IBox(LineView())
     box.bind(position, to: \LineView.position)
     box.bind(points, to: \.points)
-    box.bind(pointsRect, to: \.pointsRect)
     box.bind(strokeColor, to: \.strokeColor)
     return box
 }
