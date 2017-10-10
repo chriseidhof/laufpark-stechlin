@@ -37,12 +37,10 @@ class ViewController: UIViewController, MKMapViewDelegate {
     let mapView: IBox<MKMapView> = buildMapView()
     var tracks: [MKPolygon:Track] = [:]
     
-    var draggedPointAnnotation: IBox<MKPointAnnotation>!
     var draggedLocation: I<(distance: Double, location: CLLocation)?>!
     var rootView: IBox<UIView>!
     
     let state: Input<State>
-    let selection: I<MKPolygon?>
     let hasSelection: I<Bool>
 
     var disposables: [Any] = []
@@ -51,7 +49,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     let darkMode: I<Bool>
 
     var selectedTrack: I<Track?> {
-        return selection.map {
+        return state.i[\.selection].map {
             guard let p = $0 else { return nil }
             return self.tracks[p]
         }
@@ -59,7 +57,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     init() {
         state = Input(State(tracks: []))
-        selection = state.i.map { $0.selection }
         hasSelection = state.i.map { $0.selection != nil }
         darkMode = mapView[\.mapType] == .standard
 
@@ -73,12 +70,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
             guard let point = track.point(at: distance) else { return nil }
             return (distance: distance, location: point)
         })
-
-        let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
-            $0?.location.coordinate ?? CLLocationCoordinate2D()
-        }
-        
-        draggedPointAnnotation = annotation(location: draggedPoint)
         
         let position: I<CGFloat?> = draggedLocation.map {
             ($0?.distance).map { CGFloat($0) }
@@ -144,7 +135,10 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
         view.backgroundColor = .white
         
-
+        let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
+            $0?.location.coordinate ?? CLLocationCoordinate2D()
+        }
+        let draggedPointAnnotation = annotation(location: draggedPoint)
         mapView.unbox.addAnnotation(draggedPointAnnotation.unbox)
         
         disposables.append(trackInfoView.pannedLocation.observe { loc in
@@ -155,7 +149,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         self.disposables.append(draggedLocation.observe { x in
             guard let (_, location) = x else { return }
             // todo subtract the height of the trackInfo box (if selected)
-            if !self.mapView.unbox.annotations(in: self.mapView.unbox.visibleMapRect).contains(self.draggedPointAnnotation.unbox) {
+            if !self.mapView.unbox.annotations(in: self.mapView.unbox.visibleMapRect).contains(draggedPointAnnotation.unbox) {
                 self.mapView.unbox.setCenter(location.coordinate, animated: true)
             }
         })
@@ -214,7 +208,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         
         // in case of multiple matches, toggle between the selections, and start out with the smallest route
-        if let s = selection.value ?? nil, possibilities.count > 1 && possibilities.contains(s) {
+        if let s = state.i[\.selection].value ?? nil, possibilities.count > 1 && possibilities.contains(s) {
             state.change {
                 $0.selection = possibilities.lazy.sorted { $0.pointCount < $1.pointCount }.first(where: { $0 != s })
             }
@@ -240,11 +234,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         guard annotation is MKPointAnnotation else { return nil }
-        if annotation === self.draggedPointAnnotation.unbox {
-            let result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
-            result.pinTintColor = .red
-            return result
-        } else {
+        if POI.all.contains(where: { $0.location == annotation.coordinate }) {
             let result: MKAnnotationView
             
             if #available(iOS 11.0, *) {
@@ -263,11 +253,15 @@ class ViewController: UIViewController, MKMapViewDelegate {
             
             result.canShowCallout = true
             return result
+        } else {
+            let result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
+            result.pinTintColor = .red
+            return result
         }
     }
     
     func buildRenderer(_ polygon: MKPolygon) -> IBox<MKPolygonRenderer> {
-        let isSelected = selection.map { $0 == polygon }
+        let isSelected = state.i[\.selection].map { $0 == polygon }
         let shouldHighlight = !hasSelection || isSelected
         let lineColor = tracks[polygon]!.color.uiColor
         let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.2), else: lineColor.withAlphaComponent(0.1))
