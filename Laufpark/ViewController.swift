@@ -32,13 +32,9 @@ struct State: Equatable {
     }
 }
 
-struct PolygonData {
-    let track: Track
-}
-
 class ViewController: UIViewController, MKMapViewDelegate {
     let mapView: MKMapView = buildMapView()
-    var polygons: [MKPolygon: PolygonData] = [:]
+    var polygons: [MKPolygon: Track] = [:]
     var loadingIndicator: UIActivityIndicatorView!
     
     var state: State {
@@ -61,7 +57,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             mapView.removeOverlays(mapView.overlays)
             for track in state.tracks {
                 let line = track.line
-                polygons[line] = PolygonData(track: track)
+                polygons[line] = track
                 mapView.add(line)
             }
         }
@@ -77,7 +73,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             if let newSelection = state.selection, let renderer = mapView.renderer(for: newSelection) as? MKPolygonRenderer {
                 configureRenderer(renderer, with: newSelection, selected: true)
             }
-            trackInfoView.track = state.selection.flatMap { polygons[$0]?.track }
+            trackInfoView.track = state.selection.flatMap { polygons[$0] }
         }
     }
     
@@ -180,7 +176,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func configureRenderer(_ renderer: MKPolygonRenderer, with line: MKPolygon, selected: Bool) {
-        let lineColor = polygons[line]!.track.color.uiColor
+        let lineColor = polygons[line]!.color.uiColor
         let fillColor = selected ? lineColor.withAlphaComponent(0.2) : lineColor.withAlphaComponent(0.1)
         renderer.strokeColor = lineColor
         renderer.fillColor = fillColor
