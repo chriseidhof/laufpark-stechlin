@@ -12,11 +12,13 @@ final class TableVC<A>: UITableViewController {
     var items: [A] = []
     let configure: (UITableViewCell,A) -> ()
     let didSelect: ((A) -> ())?
+    let didDelete: ((A) -> ())?
     
-    init(_ items: [A], didSelect: ((A) -> ())? = nil, configure: @escaping (UITableViewCell,A) -> ()) {
+    init(_ items: [A], didSelect: ((A) -> ())? = nil, didDelete: ((A) -> ())? = nil, configure: @escaping (UITableViewCell,A) -> ()) {
         self.items = items
         self.configure = configure
         self.didSelect = didSelect
+        self.didDelete = didDelete
         super.init(style: .plain)
     }
     
@@ -30,6 +32,11 @@ final class TableVC<A>: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         didSelect?(items[indexPath.row])
+    }
+    
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        guard editingStyle == .delete else { return }
+        didDelete?(items[indexPath.row])
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -65,6 +72,22 @@ public func tableViewController<A>(items value: ArrayWithHistory<A>, didSelect: 
     }, handleChange: { change in
         tableVC.apply(change)
     }))
+    return box
+}
+
+public func tableViewController<A>(items: I<ArrayWithHistory<A>>, didSelect: ((A) -> ())? = nil, didDelete: ((A) -> ())? = nil, configure: @escaping (UITableViewCell, A) -> ()) -> IBox<UITableViewController> {
+    let tableVC = TableVC([], didSelect: didSelect, didDelete: didDelete, configure: configure)
+    let box = IBox<UITableViewController>(tableVC)
+    var previousObserver: Any?
+    box.disposables.append(items.observe { value in
+        previousObserver = nil
+        previousObserver = value.observe(current: {
+            tableVC.items = $0
+            tableVC.tableView.reloadData()
+        }, handleChange: { change in
+            tableVC.apply(change)
+        })
+    })
     return box
 }
 

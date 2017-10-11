@@ -21,3 +21,13 @@ public func viewController<V: UIView>(rootView: IBox<V>, constraints: [Constrain
     return box
 }
 
+extension IBox where V: UIViewController {
+    public func setRightBarButtonItems(_ value: [IBox<UIBarButtonItem>]) {
+        let existing = unbox.navigationItem.rightBarButtonItems ?? []
+        precondition(existing == [])
+        for b in value {
+            disposables.append(b)
+        }
+        unbox.navigationItem.rightBarButtonItems = value.map { $0.unbox }
+    }
+}

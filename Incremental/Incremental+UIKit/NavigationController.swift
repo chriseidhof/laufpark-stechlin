@@ -8,7 +8,15 @@
 
 import Foundation
 
-func navigationController(_ viewControllers: ArrayWithHistory<IBox<UIViewController>>) -> IBox<UINavigationController> {
+public func barButtonItem(systemItem: UIBarButtonSystemItem, onTap: @escaping () -> ()) -> IBox<UIBarButtonItem> {
+    let ta = TargetAction(onTap)
+    let result = UIBarButtonItem(barButtonSystemItem: systemItem, target: ta, action: #selector(TargetAction.action(_:)))
+    let box = IBox(result)
+    box.disposables.append(ta)
+    return box
+}
+
+public func navigationController(_ viewControllers: ArrayWithHistory<IBox<UIViewController>>) -> IBox<UINavigationController> {
     let nc = UINavigationController()
     let result = IBox(nc)
     result.bindViewControllers(to: viewControllers)

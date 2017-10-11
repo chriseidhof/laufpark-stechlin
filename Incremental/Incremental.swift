@@ -160,10 +160,11 @@ public final class Input<A> {
         i.write(newValue)
     }
     
-    public func change(_ by: (inout A) -> ()) {
+    public func change<B>(_ by: (inout A) -> B) -> B {
         var copy = i.value!
-        by(&copy)
+        let result = by(&copy)
         i.write(copy)
+        return result
     }
     
     public subscript<B: Equatable>(keyPath: KeyPath<A,B>) -> I<B> {

@@ -198,7 +198,7 @@ extension Array where Element: Equatable {
     }
 }
 
-public struct ArrayWithHistory<A: Equatable>: Equatable {
+public final class ArrayWithHistory<A: Equatable>: Equatable {
     public let initial: [A]
     public let changes: I<IList<ArrayChange<A>>> // todo: this should be write-only
     public init(_ initial: [A]) {
@@ -210,12 +210,43 @@ public struct ArrayWithHistory<A: Equatable>: Equatable {
         self.changes = changes
     }
 
+    public static func ==(lhs: ArrayWithHistory<A>, rhs: ArrayWithHistory<A>) -> Bool {
+        return lhs === rhs
+    }
+}
+
+extension ArrayWithHistory { // mutation
+    
     public func change(_ change: ArrayChange<A>) {
         appendOnly(change, to: changes)
     }
-
-    public static func ==(lhs: ArrayWithHistory<A>, rhs: ArrayWithHistory<A>) -> Bool {
-        return lhs.initial == rhs.initial && lhs.changes.value == rhs.changes.value
+    
+    // todo not so sure if this is a great idea! we should only expose append/change when creating an array anyway.
+    public func append(_ value: A) {
+        let index = self.unsafeLatestSnapshot.count
+        self.change(.insert(value, at: index))
+    }
+    
+    // todo I'm not sure if this is a good idea either...
+    public func index(of: A) -> Int? {
+        return unsafeLatestSnapshot.index(of: of)
+    }
+    
+    // todo not sure if this is the best idea
+    public func remove(where condition: (A) -> Bool) {
+        let reversed = self.unsafeLatestSnapshot.enumerated().reversed()
+        for (index, item) in reversed {
+            if condition(item) {
+                self.change(.remove(at: index))
+            }
+        }
+    }
+    
+    public func mutate(at index: Int, transform: (inout A) -> ()) {
+        var value = unsafeLatestSnapshot[index]
+        transform(&value)
+        self.change(.remove(at: index))
+        self.change(.insert(value, at: index))
     }
 }
 
