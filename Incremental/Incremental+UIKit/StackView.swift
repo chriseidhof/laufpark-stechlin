@@ -54,8 +54,8 @@ extension IBox where V: UIStackView {
             switch $0 {
             case let .insert(v, at: i):
                 v.unbox.isHidden = true
-                self.insertArrangedSubview(v, at: i)
-                // todo also add v to disposables!
+                let offset = self.unbox.arrangedSubviews[0..<i].filter { $0.isHidden }.count
+                self.insertArrangedSubview(v, at: i + offset)
                 UIView.animate(withDuration: duration) {
                     v.unbox.isHidden = false
                 }
@@ -63,8 +63,10 @@ extension IBox where V: UIStackView {
                 let v: Subview = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i] as! Subview
                 UIView.animate(withDuration: duration, animations: {
                     v.isHidden = true
-                }, completion: { _ in
-                    self.removeArrangedSubview(v)
+                }, completion: { finished in
+                    if finished {
+                        self.removeArrangedSubview(v)
+                    }
                 })
             }
         })
