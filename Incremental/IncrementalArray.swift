@@ -282,6 +282,10 @@ extension ArrayWithHistory {
             }
         }
     }
+    
+    public var isEmpty: I<Bool> {
+        return latest.map { $0.isEmpty }
+    }
 }
 
 extension ArrayWithHistory {

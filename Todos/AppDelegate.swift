@@ -66,7 +66,13 @@ func render(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIVi
     let add = barButtonItem(systemItem: .add, onTap: { send(.newTodo) })
     tableVC.setRightBarButtonItems([add])
     
-    let navigationVC = navigationController(ArrayWithHistory([tableVC]))
+    let add2 = barButtonItem(systemItem: .add, onTap: { send(.newTodo) })
+    let emptyVC = viewController(rootView: label(text: I(constant: "No todos yet.")), constraints: [
+        equalCenterX(), equalCenterY()])
+    emptyVC.setRightBarButtonItems([add2])
+    
+    let vc = if_(state[\.todos].flatMap { $0.isEmpty }, then: emptyVC, else: tableVC)
+    let navigationVC = navigationController(flatten([vc]))
     return navigationVC.map { $0 }
 }
 
