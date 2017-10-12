@@ -60,6 +60,9 @@ extension TableVC where A: Equatable {
         case let .remove(at: index):
             let indexPath = IndexPath(row: index, section: 0)
             tableView.deleteRows(at: [indexPath], with: .automatic)
+        case let .replace(with: _, at: index):
+            let indexPath = IndexPath(row: index, section: 0)
+            tableView.reloadRows(at: [indexPath], with: .automatic)
         }
     }
 }

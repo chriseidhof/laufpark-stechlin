@@ -106,6 +106,7 @@ extension IList {
 public enum ArrayChange<Element>: Equatable where Element: Equatable {
     case insert(Element, at: Int)
     case remove(at: Int)
+    case replace(with: Element, at: Int)
 
     public static func ==(lhs: ArrayChange<Element>, rhs: ArrayChange<Element>) -> Bool {
         switch (lhs, rhs) {
@@ -113,6 +114,8 @@ public enum ArrayChange<Element>: Equatable where Element: Equatable {
             return e1 == e2 && a1 == a2
         case (.remove(let i1), .remove(let i2)):
             return i1 == i2
+        case let (.replace(e1,i1), .replace(e2,i2)):
+            return e1 == e2 && i1 == i2
         default:
             return false
         }
@@ -124,6 +127,8 @@ public enum ArrayChange<Element>: Equatable where Element: Equatable {
             return .insert(transform(element), at: index)
         case .remove(at: let index):
             return .remove(at: index)
+        case let .replace(with: element, at: index):
+            return .replace(with: transform(element), at: index)
         }
     }
 }
@@ -140,6 +145,8 @@ extension Array where Element: Equatable {
             self.insert(e, at: i)
         case .remove(at: let i):
             self.remove(at: i)
+        case let .replace(with: e, at: i):
+            self[i] = e
         }
     }
 }
@@ -245,8 +252,9 @@ extension ArrayWithHistory { // mutation. we could either track this with a phan
     public func mutate(at index: Int, transform: (inout A) -> ()) {
         var value = unsafeLatestSnapshot[index]
         transform(&value)
-        self.change(.remove(at: index))
-        self.change(.insert(value, at: index))
+        if unsafeLatestSnapshot[index] != value {
+            self.change(.replace(with: value, at: index))
+        }
     }
 }
 
@@ -315,6 +323,21 @@ extension ArrayWithHistory {
                 case let .remove(at: index) where currentCondition(latest[index]):
                     let newIndex = latest.filteredIndex(for: index, currentCondition)
                     appendOnly(.remove(at: newIndex), to: changesOut)
+                case let .replace(with: element, at: index) where currentCondition(latest[index]) || currentCondition(element):
+                    let inPreviousResult = currentCondition(latest[index])
+                    let inNewResult = currentCondition(element)
+                    let newIndex = latest.filteredIndex(for: index, currentCondition)
+                    if inPreviousResult && inNewResult {
+                        // replace
+                        appendOnly(.replace(with: element, at: newIndex), to: changesOut)
+                    } else if inPreviousResult && !inNewResult {
+                        // remove
+                        appendOnly(.remove(at: newIndex), to: changesOut)
+                    } else if !inPreviousResult && inNewResult {
+                        // insert
+                        appendOnly(.insert(element, at: newIndex), to: changesOut)
+                    }
+                    
                 default:
                     ()
                 }
@@ -358,6 +381,16 @@ extension ArrayWithHistory {
                     // TODO this is inefficient, since we're sorting the original array each time to look up the index of the new element
                     let newIndex = latest.sorted(by: currentSortOrder).index(of: element)!
                     appendOnly(.remove(at: newIndex), to: changesOut)
+                case let .replace(with: element, at: index):
+                    let previousElement = latest[index]
+                    let previousElementSortedIndex = latest.sorted(by: currentSortOrder).index(of: previousElement)!
+                    let newIndex = newLatest.sorted(by: currentSortOrder).index(of: element)!
+                    if previousElementSortedIndex == previousElementSortedIndex {
+                        appendOnly(.replace(with: element, at: index), to: changesOut)
+                    } else {
+                        appendOnly(.remove(at: previousElementSortedIndex), to: changesOut)
+                        appendOnly(.insert(element, at: newIndex), to: changesOut)
+                    }
                 }
                 return remainder.read(target: target) { value in
                     return sortH(target: target, changesOut: changesOut, changesIn: value, latest: newLatest)

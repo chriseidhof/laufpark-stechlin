@@ -54,6 +54,18 @@ extension IBox where V: UINavigationController {
                 }
                 self.disposables.remove(at: index!)
                 self.unbox.viewControllers.remove(at: i)
+            case .replace(let with, let i):
+                let v: UIViewController = self.unbox.viewControllers[i]
+                let index = self.disposables.index { d in
+                    if let vcBox = d as? IBox<UIViewController>, vcBox.unbox === v {
+                        return true
+                    }
+                    return false
+                }
+                self.disposables.remove(at: index!)
+                self.unbox.viewControllers[i] = with.unbox
+                self.disposables.append(with)
+
             }
         })
     }

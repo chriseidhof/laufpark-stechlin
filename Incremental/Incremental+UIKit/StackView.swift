@@ -43,6 +43,27 @@ extension IBox where V: UIStackView {
         disposables.remove(at: index)
         unbox.removeArrangedSubview(subview)
     }
+    
+    private func insert<V: UIView>(_ v: IBox<V>, at i: Int, duration: TimeInterval) {
+        v.unbox.isHidden = true
+        let offset = self.unbox.arrangedSubviews[0..<i].filter { $0.isHidden }.count
+        self.insertArrangedSubview(v, at: i + offset)
+        UIView.animate(withDuration: duration) {
+            v.unbox.isHidden = false
+        }
+    }
+    
+    private func remove(at i: Int, duration: TimeInterval) {
+        let v = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i]
+        UIView.animate(withDuration: duration, animations: {
+            v.isHidden = true
+        }, completion: { finished in
+            if finished {
+                self.removeArrangedSubview(v)
+            }
+        })
+
+    }
 
     public func bindArrangedSubviews<Subview: UIView>(to value: ArrayWithHistory<IBox<Subview>>, animationDuration duration: TimeInterval = 0.2) {
         self.disposables.append(value.observe(current: { initialArrangedSubviews in
@@ -53,21 +74,13 @@ extension IBox where V: UIStackView {
         }) {
             switch $0 {
             case let .insert(v, at: i):
-                v.unbox.isHidden = true
-                let offset = self.unbox.arrangedSubviews[0..<i].filter { $0.isHidden }.count
-                self.insertArrangedSubview(v, at: i + offset)
-                UIView.animate(withDuration: duration) {
-                    v.unbox.isHidden = false
-                }
+                self.insert(v, at: i, duration: duration)
             case .remove(at: let i):
-                let v: Subview = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i] as! Subview
-                UIView.animate(withDuration: duration, animations: {
-                    v.isHidden = true
-                }, completion: { finished in
-                    if finished {
-                        self.removeArrangedSubview(v)
-                    }
-                })
+                self.remove(at: i, duration: duration)
+            case let .replace(with: element, at: i):
+                // todo guard if they're the same? or should we replace?
+                self.insert(element, at: i, duration: duration)
+                self.remove(at: i+1, duration: duration)
             }
         })
     }

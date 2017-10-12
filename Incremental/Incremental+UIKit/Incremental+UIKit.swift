@@ -21,20 +21,41 @@ extension IBox where V: UIView {
         }
     }
     
+    private func insert<View: UIView>(_ subview: IBox<View>, at index: Int) {
+        self.disposables.append(subview)
+        self.unbox.insertSubview(subview.unbox, at: index)
+    }
+    
+    private func remove<View: UIView>(at index: Int, ofType: View.Type) {
+        let oldView = self.unbox.subviews[index] as! View
+        guard let i = self.disposables.index(where: {
+            if let oldDisposable = $0 as? IBox<View>, oldDisposable.unbox == oldView {
+                return true
+            }
+            return false
+        }) else {
+            fatalError()
+        }
+        self.disposables.remove(at: i)
+        oldView.removeFromSuperview()
+    }
+    
     public func bindSubviews<View: UIView>(_ iArray: I<ArrayWithHistory<IBox<View>>>) {
-        
+        // todo replace with custom array observing
         disposables.append(iArray.observe { value in // todo owernship of self?
             assert(self.unbox.subviews.isEmpty)
             for view in value.initial { self.unbox.addSubview(view.unbox) }
             value.changes.read { changeList in
                 return changeList.reduce(eq: { _,_ in false }, initial: (), combine: { (change, _) in
+                    
                     switch change {
                     case let .insert(subview, index):
-                        self.disposables.append(subview)
-                        self.unbox.insertSubview(subview.unbox, at: index)
+                        self.insert(subview, at: index)
                     case .remove(let index):
-                        // todo remove disposable!
-                        self.unbox.subviews[index].removeFromSuperview()
+                        self.remove(at: index, ofType: View.self)
+                    case let .replace(with: subview, at: i):
+                        self.insert(subview, at: i)
+                        self.remove(at: i+1, ofType: View.self)
                     }
                     return ()
                 })

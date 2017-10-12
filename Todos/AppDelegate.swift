@@ -52,13 +52,8 @@ struct State: RootComponent {
     }    
 }
 
-
 func render(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIViewController> {
-    let tableVC: IBox<UIViewController> = tableViewController(items: state[\.todos], didSelect: { item in
-        send(.select(item))
-    }, didDelete: { item in
-        send(.delete(item))
-    }, configure: { cell, todo in
+    let tableVC: IBox<UIViewController> = tableViewController(items: state[\.todos], didSelect: { send(.select($0)) }, didDelete: { send(.delete($0)) }, configure: { cell, todo in
         cell.textLabel?.text = todo.title
         cell.accessoryType = todo.done ? .checkmark : .none
     }).map { $0 }
@@ -71,6 +66,7 @@ func render(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIVi
     emptyVC.setRightBarButtonItems([add()])
     
     let vc = if_(state[\.todos].flatMap { $0.isEmpty }, then: emptyVC, else: tableVC)
+    
     let navigationVC = navigationController(flatten([vc]))
     return navigationVC.map { $0 }
 }
