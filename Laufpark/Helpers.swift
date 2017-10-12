@@ -25,6 +25,14 @@ extension UIView {
     }
 }
 
+extension CGContext {
+    func drawLine(from start: CGPoint, to end: CGPoint, color: UIColor) {
+        move(to: start)
+        addLine(to: end)
+        color.setStroke()
+        strokePath()
+    }
+}
 
 extension Comparable {
     func clamped(to: ClosedRange<Self>) -> Self {
