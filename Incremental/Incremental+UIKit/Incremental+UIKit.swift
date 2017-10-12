@@ -56,6 +56,12 @@ extension IBox where V: UIView {
                     case let .replace(with: subview, at: i):
                         self.insert(subview, at: i)
                         self.remove(at: i+1, ofType: View.self)
+                    case let .move(at: i, to: j):
+                        let view = self.unbox.subviews[i]
+                        view.removeFromSuperview()
+                        let offset = j > i ? -1 : 0
+                        self.unbox.insertSubview(view, at: j + offset)
+
                     }
                     return ()
                 })

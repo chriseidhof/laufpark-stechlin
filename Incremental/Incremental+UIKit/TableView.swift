@@ -63,6 +63,8 @@ extension TableVC where A: Equatable {
         case let .replace(with: _, at: index):
             let indexPath = IndexPath(row: index, section: 0)
             tableView.reloadRows(at: [indexPath], with: .automatic)
+        case let .move(at: i, to: j):
+            tableView.moveRow(at: IndexPath(row: i, section: 0), to: IndexPath(row: j, section: 0))
         }
     }
 }

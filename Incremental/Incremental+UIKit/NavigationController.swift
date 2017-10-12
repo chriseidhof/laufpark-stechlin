@@ -65,7 +65,8 @@ extension IBox where V: UINavigationController {
                 self.disposables.remove(at: index!)
                 self.unbox.viewControllers[i] = with.unbox
                 self.disposables.append(with)
-
+            case let .move(at: from, to: to):
+                self.unbox.viewControllers.swapAt(from, to)
             }
         })
     }

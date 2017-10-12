@@ -19,8 +19,16 @@ struct Todo: Codable, Equatable {
     var done: Bool
 }
 
+func <(lhs: Todo, rhs: Todo) -> Bool {
+    if lhs.done == rhs.done {
+        return lhs.title < rhs.title
+    } else {
+        return lhs.done && !rhs.done
+    }
+}
+
 struct State: RootComponent {
-    var todos: ArrayWithHistory<Todo> = ArrayWithHistory<Todo>([])
+    let todos: ArrayWithHistory<Todo> = ArrayWithHistory<Todo>([])
     
     enum Message {
         case newTodo
@@ -49,11 +57,13 @@ struct State: RootComponent {
     
     static func ==(lhs: State, rhs: State) -> Bool {
         return lhs.todos == rhs.todos
-    }    
+    }
+    
 }
 
 func render(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIViewController> {
-    let tableVC: IBox<UIViewController> = tableViewController(items: state[\.todos], didSelect: { send(.select($0)) }, didDelete: { send(.delete($0)) }, configure: { cell, todo in
+    let items = state[\.todos].map { $0.sort(by: I(constant: <)) }
+    let tableVC: IBox<UIViewController> = tableViewController(items: items, didSelect: { send(.select($0)) }, didDelete: { send(.delete($0)) }, configure: { cell, todo in
         cell.textLabel?.text = todo.title
         cell.accessoryType = todo.done ? .checkmark : .none
     }).map { $0 }

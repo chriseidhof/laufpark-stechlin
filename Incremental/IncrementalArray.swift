@@ -107,6 +107,7 @@ public enum ArrayChange<Element>: Equatable where Element: Equatable {
     case insert(Element, at: Int)
     case remove(at: Int)
     case replace(with: Element, at: Int)
+    case move(at: Int, to: Int)
 
     public static func ==(lhs: ArrayChange<Element>, rhs: ArrayChange<Element>) -> Bool {
         switch (lhs, rhs) {
@@ -116,6 +117,8 @@ public enum ArrayChange<Element>: Equatable where Element: Equatable {
             return i1 == i2
         case let (.replace(e1,i1), .replace(e2,i2)):
             return e1 == e2 && i1 == i2
+        case let (.move(at: i1, to: i2), .move(at: i3, to: i4)):
+            return i1 == i3 && i2 == i4
         default:
             return false
         }
@@ -129,6 +132,8 @@ public enum ArrayChange<Element>: Equatable where Element: Equatable {
             return .remove(at: index)
         case let .replace(with: element, at: index):
             return .replace(with: transform(element), at: index)
+        case let .move(at: i1, to: i2):
+            return .move(at: i1, to: i2)
         }
     }
 }
@@ -147,6 +152,8 @@ extension Array where Element: Equatable {
             self.remove(at: i)
         case let .replace(with: e, at: i):
             self[i] = e
+        case .move(let at, let to):
+            self.swapAt(at, to)
         }
     }
 }
@@ -385,12 +392,15 @@ extension ArrayWithHistory {
                     let previousElement = latest[index]
                     let previousElementSortedIndex = latest.sorted(by: currentSortOrder).index(of: previousElement)!
                     let newIndex = newLatest.sorted(by: currentSortOrder).index(of: element)!
-                    if previousElementSortedIndex == previousElementSortedIndex {
-                        appendOnly(.replace(with: element, at: index), to: changesOut)
+                    if previousElementSortedIndex == newIndex {
+                        appendOnly(.replace(with: element, at: newIndex), to: changesOut)
                     } else {
-                        appendOnly(.remove(at: previousElementSortedIndex), to: changesOut)
-                        appendOnly(.insert(element, at: newIndex), to: changesOut)
+                        appendOnly(.move(at: previousElementSortedIndex, to: newIndex), to: changesOut)
+                        appendOnly(.replace(with: element, at: newIndex), to: changesOut)
                     }
+                case .move:
+                    // ignore
+                    ()
                 }
                 return remainder.read(target: target) { value in
                     return sortH(target: target, changesOut: changesOut, changesIn: value, latest: newLatest)

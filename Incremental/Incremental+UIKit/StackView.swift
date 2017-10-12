@@ -52,7 +52,7 @@ extension IBox where V: UIStackView {
             v.unbox.isHidden = false
         }
     }
-    
+        
     private func remove(at i: Int, duration: TimeInterval) {
         let v = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i]
         UIView.animate(withDuration: duration, animations: {
@@ -81,6 +81,11 @@ extension IBox where V: UIStackView {
                 // todo guard if they're the same? or should we replace?
                 self.insert(element, at: i, duration: duration)
                 self.remove(at: i+1, duration: duration)
+            case let .move(at: i, to: j):
+                let offset = j > i ? -1 : 0
+                let v = self.unbox.arrangedSubviews.filter { !$0.isHidden }[i]
+                self.unbox.removeArrangedSubview(v)
+                self.unbox.insertArrangedSubview(v, at: j + offset)
             }
         })
     }
