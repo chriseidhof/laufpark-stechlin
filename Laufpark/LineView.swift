@@ -43,14 +43,9 @@ final class LineView: UIView {
         pointsRect = CGRect(x: 0, y: minY, width: maxX.rounded(.up), height: maxY-minY)
     }
     
-    override var frame: CGRect {
-        get {
-            return super.frame
-        }
-        set {
-            super.frame = newValue
-            setNeedsDisplay()
-        }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        setNeedsDisplay()
     }
     
     override func draw(_ rect: CGRect) {
