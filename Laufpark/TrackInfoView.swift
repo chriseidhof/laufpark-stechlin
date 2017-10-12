@@ -31,7 +31,7 @@ final class TrackInfoView: UIView {
     
     func updateLineView() {
         let profile = track.map { $0.elevationProfile } ?? []
-        lineView.points = profile.map { LineView.Point(x: $0.distance, y: $0.elevation) }
+        lineView.points = profile.map { (x: $0.distance, y: $0.elevation) }
     }
     
     func updateTrackInfo() {

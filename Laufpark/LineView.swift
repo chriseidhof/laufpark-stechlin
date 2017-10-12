@@ -9,22 +9,13 @@
 import UIKit
 
 final class LineView: UIView {
-    struct Point: Equatable {
-        static func ==(lhs: LineView.Point, rhs: LineView.Point) -> Bool {
-            return lhs.x == rhs.x && lhs.y == rhs.y
-        }
-
-        var x: Double
-        var y: Double
-    }
-
     var strokeWidth: CGFloat = 1 { didSet { setNeedsDisplay() }}
     var strokeColor: UIColor = .black { didSet { setNeedsDisplay() }}
     var position: CGFloat? = nil { didSet { setNeedsDisplay() }}
     var positionColor: UIColor = .red { didSet { setNeedsDisplay() }}
     var horizontalTick: CGFloat? = 5000 { didSet { setNeedsDisplay() } }
     var tickColor: UIColor = UIColor.gray.withAlphaComponent(0.3) { didSet { setNeedsDisplay() } }
-    var points: [Point] = [] {
+    var points: [(x: Double, y: Double)] = [] {
         didSet {
             updatePointsRect()
             setNeedsDisplay()
