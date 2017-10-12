@@ -69,7 +69,7 @@ final class ViewController: UIViewController {
         // Configuration
         mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
         mapView.addAnnotation(positionAnnotation)
-        trackInfoView.delegate = self
+        trackInfoView.panGestureRecognizer.addTarget(self, action: #selector(didPanProfile))
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.startAnimating()
 
@@ -174,12 +174,10 @@ final class ViewController: UIViewController {
             state.selection = possibilities.first
         }
     }
-}
-
-
-extension ViewController: TrackInfoViewDelegate {
-    func changedPosition(to position: CGFloat?) {
-        state.trackPosition = position
+    
+    @objc func didPanProfile(sender: UIPanGestureRecognizer) {
+        let normalizedPosition = (sender.location(in: trackInfoView).x / trackInfoView.bounds.size.width).clamped(to: 0.0...1.0)
+        state.trackPosition = normalizedPosition
     }
 }
 

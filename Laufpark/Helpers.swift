@@ -6,7 +6,25 @@
 //  Copyright © 2017 objc.io. All rights reserved.
 //
 
-import Foundation
+import UIKit
+
+extension UIView {
+    func addConstraintsToSizeToParent(spacing: CGFloat = 0) {
+        guard let view = superview else { fatalError() }
+        let top = topAnchor.constraint(equalTo: view.topAnchor)
+        let bottom = bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        let left = leftAnchor.constraint(equalTo: view.leftAnchor)
+        let right = rightAnchor.constraint(equalTo: view.rightAnchor)
+        view.addConstraints([top,bottom,left,right])
+        if spacing != 0 {
+            top.constant = spacing
+            left.constant = spacing
+            right.constant = -spacing
+            bottom.constant = -spacing
+        }
+    }
+}
+
 
 extension Comparable {
     func clamped(to: ClosedRange<Self>) -> Self {
@@ -16,15 +34,6 @@ extension Comparable {
     }
 }
 
-func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
-    return { l, r in
-        switch (l,r) {
-        case (nil,nil): return true
-        case let (x?, y?): return f(x,y)
-        default: return false
-        }
-    }
-}
 
 func time(name: StaticString = #function, line: Int = #line, _ f: () -> ()) {
     let startTime = DispatchTime.now()
