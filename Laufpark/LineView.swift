@@ -54,8 +54,9 @@ final class LineView: UIView {
 
         context.translateBy(x: 0, y: bounds.size.height)
         
+        let lineYOffset = CGFloat(15)
         let scaleX = bounds.size.width/pointsRect.size.width
-        let scaleY = bounds.size.height/pointsRect.size.height
+        let scaleY = (bounds.size.height - lineYOffset)/pointsRect.size.height
 
         if let tickWidth = horizontalTick {
             let cgTickWidth = tickWidth * scaleX
@@ -88,7 +89,7 @@ final class LineView: UIView {
         context.setLineWidth(strokeWidth)
         strokeColor.setStroke()
         let points = self.points.map {
-            CGPoint(x: (CGFloat($0.x)-pointsRect.origin.x) * scaleX, y: (CGFloat($0.y)-pointsRect.origin.y) * -scaleY)
+            CGPoint(x: (CGFloat($0.x) - pointsRect.origin.x) * scaleX, y: (CGFloat($0.y) - pointsRect.origin.y) * -scaleY - lineYOffset)
         }
         guard let start = points.first else { return }
         context.move(to: start)
