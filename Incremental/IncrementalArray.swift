@@ -215,7 +215,7 @@ public final class ArrayWithHistory<A: Equatable>: Equatable {
     }
 }
 
-extension ArrayWithHistory { // mutation
+extension ArrayWithHistory { // mutation. we could either track this with a phantom type, or only allow changes on creation... not sure yet.
     
     public func change(_ change: ArrayChange<A>) {
         appendOnly(change, to: changes)
@@ -227,7 +227,7 @@ extension ArrayWithHistory { // mutation
         self.change(.insert(value, at: index))
     }
     
-    // todo I'm not sure if this is a good idea either...
+    // todo I'm not sure if this is a good idea either... should only be used when mutating.
     public func index(of: A) -> Int? {
         return unsafeLatestSnapshot.index(of: of)
     }
