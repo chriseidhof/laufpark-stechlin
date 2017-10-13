@@ -10,24 +10,16 @@ import UIKit
 import MapKit
 
 struct State: Equatable {
-    var tracks: [Track]
-    var loading: Bool { return tracks.isEmpty }
-    
+    var tracks: [Track] = []
+    var trackPosition: CGFloat? // 0...1
     var selection: MKPolygon? {
         didSet {
             trackPosition = nil
         }
     }
- 
-    var trackPosition: CGFloat? // 0...1
-    
+
+    var loading: Bool { return tracks.isEmpty }
     var hasSelection: Bool { return selection != nil }
-    
-    init(tracks: [Track]) {
-        selection = nil
-        trackPosition = nil
-        self.tracks = tracks
-    }
     
     static func ==(lhs: State, rhs: State) -> Bool {
         return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks
@@ -42,7 +34,7 @@ final class ViewController: UIViewController {
     
     private var trackInfoConstraint: NSLayoutConstraint!
 
-    private var state: State = State(tracks: []) {
+    private var state: State = State() {
         didSet {
             update(old: oldValue)
         }
