@@ -10,8 +10,6 @@ import UIKit
 import MapKit
 
 final class TrackInfoView: UIView {
-    private var lineView = LineView()
-    
     let panGestureRecognizer = UIPanGestureRecognizer()
     var track: Track? {
         didSet {
