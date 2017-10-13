@@ -153,7 +153,10 @@ extension Array where Element: Equatable {
         case let .replace(with: e, at: i):
             self[i] = e
         case .move(let at, let to):
-            self.swapAt(at, to)
+            if at == to { return }
+            let value = self.remove(at: at)
+            let offset = to > at ? -1 : 0
+            self.insert(value, at: to + offset)
         }
     }
 }
