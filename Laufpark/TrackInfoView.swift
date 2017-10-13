@@ -26,9 +26,6 @@ final class TrackInfoView: UIView {
         }
     }
 
-    private var strokeWidth: CGFloat = 1 { didSet { setNeedsDisplay() }}
-    private var strokeColor: UIColor = .black { didSet { setNeedsDisplay() }}
-    private var positionColor: UIColor = .red { didSet { setNeedsDisplay() }}
     private var points: [(x: CGFloat, y: CGFloat)] = []
     
     init() {
@@ -47,7 +44,6 @@ final class TrackInfoView: UIView {
     }
 
     override func draw(_ rect: CGRect) {
-        guard !self.points.isEmpty else { return }
         guard let context = UIGraphicsGetCurrentContext() else { return }
         context.translateBy(x: 0, y: bounds.size.height)
         context.scaleBy(x: 1, y: -1)
@@ -55,11 +51,10 @@ final class TrackInfoView: UIView {
         if let position = position {
             let start = CGPoint(x: position*bounds.size.width, y: 0)
             let end = CGPoint(x: position*bounds.size.width, y: -bounds.size.height)
-            context.drawLine(from: start, to: end, color: positionColor)
+            context.drawLine(from: start, to: end, color: .red)
         }
         
-        context.setLineWidth(strokeWidth)
-        strokeColor.setStroke()
+        UIColor.black.setStroke()
         let points = self.points.map { CGPoint(x: $0.x * bounds.size.width, y: $0.y * bounds.size.height) }
         guard let start = points.first else { return }
         context.move(to: start)
@@ -71,18 +66,13 @@ final class TrackInfoView: UIView {
 
     private func updatePoints() {
         let profile = track.map { $0.elevationProfile } ?? []
-        guard !profile.isEmpty else {
-            points = []
-            return
+        var (maxX, minY, maxY): (Double, Double, Double) = (0, .greatestFiniteMagnitude, 0)
+        for value in profile {
+            maxX = max(maxX, value.distance)
+            minY = min(minY, value.elevation)
+            maxY = max(maxY, value.elevation)
         }
-        let x = profile.map { CGFloat($0.distance) }
-        let y = profile.map { CGFloat($0.elevation) }
-        let maxX = x.max()!
-        let minY = y.min()!
-        let maxY = y.max()!
-        let normalizedX = x.map { $0 / maxX }
-        let normalizedY = y.map { ($0 - minY) / (maxY - minY) }
-        points = Array(zip(normalizedX, normalizedY))
+        points = profile.map { (CGFloat($0.distance / maxX), CGFloat(($0.elevation - minY) / (maxY - minY))) }
     }
 }
 
