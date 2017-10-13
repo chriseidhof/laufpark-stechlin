@@ -50,7 +50,7 @@ final class TrackInfoView: UIView {
         
         if let position = position {
             let start = CGPoint(x: position*bounds.size.width, y: 0)
-            let end = CGPoint(x: position*bounds.size.width, y: -bounds.size.height)
+            let end = CGPoint(x: position*bounds.size.width, y: bounds.size.height)
             context.drawLine(from: start, to: end, color: .red)
         }
         
