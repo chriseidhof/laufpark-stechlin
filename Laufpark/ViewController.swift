@@ -29,11 +29,8 @@ struct State: Equatable {
 final class ViewController: UIViewController {
     private let mapView: MKMapView = buildMapView()
     private let positionAnnotation = MKPointAnnotation()
-    private let trackInfoView = TrackInfoView()
     private let loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     
-    private var trackInfoConstraint: NSLayoutConstraint!
-
     private var state: State = State() {
         didSet {
             update(old: oldValue)
@@ -61,7 +58,6 @@ final class ViewController: UIViewController {
         // Configuration
         mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
         mapView.addAnnotation(positionAnnotation)
-        trackInfoView.panGestureRecognizer.addTarget(self, action: #selector(didPanProfile))
         loadingIndicator.hidesWhenStopped = true
         loadingIndicator.startAnimating()
 
@@ -70,19 +66,6 @@ final class ViewController: UIViewController {
         mapView.translatesAutoresizingMaskIntoConstraints = false
         mapView.addConstraintsToSizeToParent()
         mapView.delegate = self
-
-        view.addSubview(trackInfoView)
-        trackInfoView.translatesAutoresizingMaskIntoConstraints = false
-        trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        trackInfoConstraint.priority = .required
-        let hideTrackInfoConstraint = trackInfoView.topAnchor.constraint(equalTo: view.bottomAnchor)
-        hideTrackInfoConstraint.priority = .defaultHigh
-        NSLayoutConstraint.activate([
-            hideTrackInfoConstraint,
-            trackInfoView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            trackInfoView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            trackInfoView.heightAnchor.constraint(equalToConstant: 120)
-        ])
 
         view.addSubview(loadingIndicator)
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
@@ -115,28 +98,12 @@ final class ViewController: UIViewController {
             }
         }
         if state.selection != old.selection {
-            self.trackInfoConstraint.isActive = self.state.selection != nil
-            UIView.animate(withDuration: 0.2) {
-                self.view.layoutIfNeeded()
-            }
             for polygon in polygons.keys {
                 guard let renderer = mapView.renderer(for: polygon) as? MKPolygonRenderer else { continue }
                 renderer.configure(color: polygons[polygon]!.color.uiColor, selected: !state.hasSelection)
             }
             if let selectedPolygon = state.selection, let renderer = mapView.renderer(for: selectedPolygon) as? MKPolygonRenderer {
                 renderer.configure(color: polygons[selectedPolygon]!.color.uiColor, selected: true)
-            }
-            trackInfoView.track = state.selection.flatMap { polygons[$0] }
-        }
-        if state.trackPosition != old.trackPosition {
-            trackInfoView.position = state.trackPosition
-            if let position = state.trackPosition, let selection = state.selection, let track = polygons[selection] {
-                let distance = Double(position) * track.distance
-                if let point = track.point(at: distance) {
-                    positionAnnotation.coordinate = point.coordinate
-                }
-            } else {
-                positionAnnotation.coordinate = CLLocationCoordinate2D()
             }
         }
     }
@@ -165,11 +132,6 @@ final class ViewController: UIViewController {
         } else {
             state.selection = possibilities.first
         }
-    }
-    
-    @objc func didPanProfile(sender: UIPanGestureRecognizer) {
-        let normalizedPosition = (sender.location(in: trackInfoView).x / trackInfoView.bounds.size.width).clamped(to: 0.0...1.0)
-        state.trackPosition = normalizedPosition
     }
 }
 

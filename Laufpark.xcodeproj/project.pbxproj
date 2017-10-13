@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1765D82A1F8F92B400B1408F /* TrackInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1765D8291F8F92B400B1408F /* TrackInfoView.swift */; };
 		8306185B1F6E765300F70583 /* ViewHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8306185A1F6E765300F70583 /* ViewHelpers.swift */; };
 		83099AEC1F63CD7900D3EBB8 /* wabe beige-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE51F63CD2700D3EBB8 /* wabe beige-strecke 0.gpx */; };
 		83099AED1F63CD7900D3EBB8 /* wabe blau-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE41F63CD2700D3EBB8 /* wabe blau-strecke 0.gpx */; };
@@ -146,7 +145,6 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		1765D8291F8F92B400B1408F /* TrackInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackInfoView.swift; sourceTree = "<group>"; };
 		8306185A1F6E765300F70583 /* ViewHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewHelpers.swift; sourceTree = "<group>"; };
 		83099AE01F63CD2600D3EBB8 /* wabe hellbraun-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe hellbraun-strecke 0.gpx"; sourceTree = "<group>"; };
 		83099AE11F63CD2600D3EBB8 /* wabe tuerkis-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe tuerkis-strecke 0.gpx"; sourceTree = "<group>"; };
@@ -408,7 +406,6 @@
 				8340DF9A1F61B1F8002176C6 /* Assets.xcassets */,
 				8340DF9F1F61B1F8002176C6 /* Info.plist */,
 				8306185A1F6E765300F70583 /* ViewHelpers.swift */,
-				1765D8291F8F92B400B1408F /* TrackInfoView.swift */,
 				83354DA11F6FEA5700F3C33A /* Helpers.swift */,
 			);
 			path = Laufpark;
@@ -758,7 +755,6 @@
 			files = (
 				8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */,
 				83354DA21F6FEA5700F3C33A /* Helpers.swift in Sources */,
-				1765D82A1F8F92B400B1408F /* TrackInfoView.swift in Sources */,
 				8306185B1F6E765300F70583 /* ViewHelpers.swift in Sources */,
 				8340DF961F61B1F8002176C6 /* ViewController.swift in Sources */,
 				83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */,
