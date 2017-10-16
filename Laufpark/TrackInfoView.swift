@@ -14,6 +14,15 @@ final class TrackInfoView: UIView {
     private var nameLabel = UILabel()
     private var distanceLabel = UILabel()
     private var ascentLabel = UILabel()
+    private let blurredView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
+
+    var darkMode = false {
+        didSet {
+            blurredView.effect = UIBlurEffect(style: darkMode ? .dark : .light)
+            lineView.strokeColor = darkMode ? .white : .black
+            [nameLabel, distanceLabel, ascentLabel].forEach { $0.textColor = lineView.strokeColor }
+        }
+    }
     
     let panGestureRecognizer = UIPanGestureRecognizer()
     var track: Track? {
@@ -57,7 +66,6 @@ final class TrackInfoView: UIView {
         trackInfo.distribution = .equalCentering
         trackInfo.spacing = 10
         
-        let blurredView = UIVisualEffectView(effect: UIBlurEffect(style: .light))
         blurredView.translatesAutoresizingMaskIntoConstraints = false
         
         let stackView = UIStackView(arrangedSubviews: [trackInfo, lineView])

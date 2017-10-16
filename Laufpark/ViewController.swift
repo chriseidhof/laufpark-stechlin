@@ -8,6 +8,49 @@
 
 import UIKit
 import MapKit
+import Incremental
+
+final class Box<A> {
+    let unbox: A
+    var references: [Any] = []
+    
+    init(_ value: A) {
+        self.unbox = value
+    }
+}
+
+extension Box where A: UIActivityIndicatorView {
+    func bindIsAnimating(to isAnimating: I<Bool>) {
+        let disposable = isAnimating.observe { isLoading in
+            if isLoading {
+                self.unbox.startAnimating()
+            } else {
+                self.unbox.stopAnimating()
+            }
+        }
+        references.append(disposable)
+    }
+}
+
+extension Box where A: UIView {
+    func addSubview<V: UIView>(_ view: Box<V>) {
+        unbox.addSubview(view.unbox)
+        references.append(view)
+    }
+    
+    func addConstraint(_ constraint: Box<NSLayoutConstraint>) {
+        references.append(constraint)
+    }
+}
+
+extension Box where A: NSLayoutConstraint {
+    func bindIsActive(to isActive: I<Bool>) {
+        references.append(isActive.observe { [unowned self] active in
+            self.unbox.isActive = active
+        })
+    }
+}
+
 
 struct State: Equatable {
     var tracks: [Track]
@@ -38,18 +81,22 @@ final class ViewController: UIViewController {
     private let mapView: MKMapView = buildMapView()
     private let positionAnnotation = MKPointAnnotation()
     private let trackInfoView = TrackInfoView()
-    private let loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
     
-    private var trackInfoConstraint: NSLayoutConstraint!
 
-    private var state: State = State(tracks: []) {
+    private var stateInput: Input<State> = Input(State(tracks: []))
+    private var state: I<State> {
+        return stateInput.i
+    }
+    private var _state: State = State(tracks: []) {
         didSet {
+            stateInput.write(_state)
             update(old: oldValue)
         }
     }
 
     private var polygons: [MKPolygon: Track] = [:]
     private var locationManager: CLLocationManager?
+    private var rootView: Box<UIView>!
 
     init() {
         super.init(nibName: nil, bundle: nil)
@@ -60,18 +107,17 @@ final class ViewController: UIViewController {
     }
 
     func setTracks(_ t: [Track]) {
-        state.tracks = t
+        _state.tracks = t
     }
 
     override func viewDidLoad() {
         view.backgroundColor = .white
+        rootView = Box(view)
 
         // Configuration
         mapView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(mapTapped(sender:))))
         mapView.addAnnotation(positionAnnotation)
         trackInfoView.panGestureRecognizer.addTarget(self, action: #selector(didPanProfile))
-        loadingIndicator.hidesWhenStopped = true
-        loadingIndicator.startAnimating()
 
         // Layout
         view.addSubview(mapView)
@@ -79,9 +125,13 @@ final class ViewController: UIViewController {
         mapView.addConstraintsToSizeToParent()
         mapView.delegate = self
 
-        view.addSubview(trackInfoView)
+        let trackInfoBox = Box(trackInfoView)
+        rootView.addSubview(trackInfoBox)
+        
         trackInfoView.translatesAutoresizingMaskIntoConstraints = false
-        trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        let trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        let trackInfoConstraintBox = Box(trackInfoConstraint)
+        
         trackInfoConstraint.priority = .required
         let hideTrackInfoConstraint = trackInfoView.topAnchor.constraint(equalTo: view.bottomAnchor)
         hideTrackInfoConstraint.priority = .defaultHigh
@@ -91,8 +141,14 @@ final class ViewController: UIViewController {
             trackInfoView.rightAnchor.constraint(equalTo: view.rightAnchor),
             trackInfoView.heightAnchor.constraint(equalToConstant: 120)
         ])
+        trackInfoConstraintBox.bindIsActive(to: state.map { $0.hasSelection })
+        trackInfoBox.addConstraint(trackInfoConstraintBox)
 
-        view.addSubview(loadingIndicator)
+        let loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+        loadingIndicator.hidesWhenStopped = true
+        let box = Box(loadingIndicator)
+        box.bindIsAnimating(to: state.map { $0.loading })
+        rootView.addSubview(box)
         loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
@@ -109,36 +165,27 @@ final class ViewController: UIViewController {
     }
     
     private func update(old: State) {
-        if state.loading {
-            loadingIndicator.startAnimating()
-        } else {
-            loadingIndicator.stopAnimating()
-        }
-        if state.tracks != old.tracks {
+        if _state.tracks != old.tracks {
             mapView.removeOverlays(mapView.overlays)
-            for track in state.tracks {
+            for track in _state.tracks {
                 let polygon = track.polygon
                 polygons[polygon] = track
                 mapView.add(polygon)
             }
         }
-        if state.selection != old.selection {
-            self.trackInfoConstraint.isActive = self.state.selection != nil
-            UIView.animate(withDuration: 0.2) {
-                self.view.layoutIfNeeded()
-            }
+        if _state.selection != old.selection {
             for polygon in polygons.keys {
                 guard let renderer = mapView.renderer(for: polygon) as? MKPolygonRenderer else { continue }
-                renderer.configure(color: polygons[polygon]!.color.uiColor, selected: !state.hasSelection)
+                renderer.configure(color: polygons[polygon]!.color.uiColor, selected: !_state.hasSelection)
             }
-            if let selectedPolygon = state.selection, let renderer = mapView.renderer(for: selectedPolygon) as? MKPolygonRenderer {
+            if let selectedPolygon = _state.selection, let renderer = mapView.renderer(for: selectedPolygon) as? MKPolygonRenderer {
                 renderer.configure(color: polygons[selectedPolygon]!.color.uiColor, selected: true)
             }
-            trackInfoView.track = state.selection.flatMap { polygons[$0] }
+            trackInfoView.track = _state.selection.flatMap { polygons[$0] }
         }
-        if state.trackPosition != old.trackPosition {
-            trackInfoView.position = state.trackPosition
-            if let position = state.trackPosition, let selection = state.selection, let track = polygons[selection] {
+        if _state.trackPosition != old.trackPosition {
+            trackInfoView.position = _state.trackPosition
+            if let position = _state.trackPosition, let selection = _state.selection, let track = polygons[selection] {
                 let distance = Double(position) * track.distance
                 if let point = track.point(at: distance) {
                     positionAnnotation.coordinate = point.coordinate
@@ -168,16 +215,16 @@ final class ViewController: UIViewController {
         }
         
         // in case of multiple matches, toggle between the selections, and start out with the smallest route
-        if let s = state.selection, possibilities.count > 1 && possibilities.contains(s) {
-            state.selection = possibilities.lazy.sorted { $0.pointCount < $1.pointCount }.first(where: { $0 != s })
+        if let s = _state.selection, possibilities.count > 1 && possibilities.contains(s) {
+            _state.selection = possibilities.lazy.sorted { $0.pointCount < $1.pointCount }.first(where: { $0 != s })
         } else {
-            state.selection = possibilities.first
+            _state.selection = possibilities.first
         }
     }
     
     @objc func didPanProfile(sender: UIPanGestureRecognizer) {
         let normalizedPosition = (sender.location(in: trackInfoView).x / trackInfoView.bounds.size.width).clamped(to: 0.0...1.0)
-        state.trackPosition = normalizedPosition
+        _state.trackPosition = normalizedPosition
     }
 }
 
@@ -187,8 +234,8 @@ extension ViewController: MKMapViewDelegate {
         guard let polygon = overlay as? MKPolygon else { return MKOverlayRenderer() }
         if let renderer = mapView.renderer(for: overlay) { return renderer }
         let renderer = MKPolygonRenderer(polygon: polygon)
-        let isSelected = state.selection == polygon
-        renderer.configure(color: polygons[polygon]!.color.uiColor, selected: isSelected || !state.hasSelection)
+        let isSelected = _state.selection == polygon
+        renderer.configure(color: polygons[polygon]!.color.uiColor, selected: isSelected || !_state.hasSelection)
         return renderer
     }
     
