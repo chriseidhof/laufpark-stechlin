@@ -94,6 +94,7 @@
 		8340DFB21F61B40C002176C6 /* wabe rot-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */; };
 		837A8ABA1F72DACB00ED898C /* IncrementalArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837A8AB91F72DACB00ED898C /* IncrementalArray.swift */; };
 		8384EC601F8288FD003AAC56 /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8384EC5F1F8288FD003AAC56 /* NavigationController.swift */; };
+		839E68021F9616DD00DC1308 /* TrackInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 839E68011F9616DD00DC1308 /* TrackInfoView.swift */; };
 		83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824D1F6302DF004070DA /* Model+UIKit.swift */; };
 		83B2A26C1F692CFA00A6D9F9 /* Incremental.h in Headers */ = {isa = PBXBuildFile; fileRef = 83B2A26A1F692CFA00A6D9F9 /* Incremental.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83B2A26F1F692CFA00A6D9F9 /* Incremental.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; };
@@ -237,6 +238,7 @@
 		834CE82B1F796D3500785B16 /* iOSPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = iOSPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		837A8AB91F72DACB00ED898C /* IncrementalArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalArray.swift; sourceTree = "<group>"; };
 		8384EC5F1F8288FD003AAC56 /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
+		839E68011F9616DD00DC1308 /* TrackInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackInfoView.swift; sourceTree = "<group>"; };
 		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
 		83B0824F1F63052D004070DA /* Incremental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incremental.swift; sourceTree = "<group>"; };
 		83B082511F630835004070DA /* MacPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MacPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -370,6 +372,7 @@
 		8340DF871F61B1F8002176C6 = {
 			isa = PBXGroup;
 			children = (
+				839E68011F9616DD00DC1308 /* TrackInfoView.swift */,
 				834CE82B1F796D3500785B16 /* iOSPlayground.playground */,
 				83B082511F630835004070DA /* MacPlayground.playground */,
 				8340DF921F61B1F8002176C6 /* Laufpark */,
@@ -755,6 +758,7 @@
 			files = (
 				8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */,
 				83354DA21F6FEA5700F3C33A /* Helpers.swift in Sources */,
+				839E68021F9616DD00DC1308 /* TrackInfoView.swift in Sources */,
 				8306185B1F6E765300F70583 /* ViewHelpers.swift in Sources */,
 				8340DF961F61B1F8002176C6 /* ViewController.swift in Sources */,
 				83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */,
