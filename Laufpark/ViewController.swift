@@ -21,7 +21,7 @@ final class Box<A> {
 
 extension Box where A: UIActivityIndicatorView {
     func bindIsAnimating(to isAnimating: I<Bool>) {
-        let disposable = isAnimating.observe { isLoading in
+        let disposable = isAnimating.observe { [unowned self] isLoading in
             if isLoading {
                 self.unbox.startAnimating()
             } else {
