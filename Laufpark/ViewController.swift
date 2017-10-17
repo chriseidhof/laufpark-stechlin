@@ -117,7 +117,7 @@ func equal<Axis, L>(_ keyPath: KeyPath<UIView, L>, _ to: KeyPath<UIView, L>) -> 
     }
 }
 
-func height(_ constant: CGFloat) -> Constraint {
+func equal<Axis, L>(_ keyPath: KeyPath<UIView, L>, _ constant: CGFloat) -> Constraint where L: NSLayoutAnchor<Axis> {
     return { view, _ in
         view.heightAnchor.constraint(equalToConstant: constant)
     }
@@ -181,7 +181,7 @@ final class ViewController: UIViewController {
         trackInfoConstraint.priority = .required
         let hideTrackInfoConstraint = trackInfoView.topAnchor.constraint(equalTo: view.bottomAnchor)
         hideTrackInfoConstraint.priority = .defaultHigh
-        rootView.addSubview(trackInfoBox, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), height(120)])
+        rootView.addSubview(trackInfoBox, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.heightAnchor, 120)])
         trackInfoView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             hideTrackInfoConstraint
