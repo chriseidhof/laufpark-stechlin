@@ -129,7 +129,7 @@ final class ViewController: UIViewController {
     func setTracks(_ t: [Track]) {
         _state.tracks = t
     }
-
+    
     override func viewDidLoad() {
         view.backgroundColor = .white
         rootView = Box(view)
@@ -147,24 +147,19 @@ final class ViewController: UIViewController {
         mapView.bind(\.mapType, to: state.map { $0.satellite ? .satellite : .standard })
 
         let trackInfoBox = Box(trackInfoView)
+        trackInfoBox.bind(\.darkMode, to: state.map { $0.satellite })
+        let trackInfoViewHeight: CGFloat = 120
         rootView.addSubview(trackInfoBox)
-        
         trackInfoView.translatesAutoresizingMaskIntoConstraints = false
-        let trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        let trackInfoConstraintBox = Box(trackInfoConstraint)
-        
-        trackInfoConstraint.priority = .required
-        let hideTrackInfoConstraint = trackInfoView.topAnchor.constraint(equalTo: view.bottomAnchor)
-        hideTrackInfoConstraint.priority = .defaultHigh
         NSLayoutConstraint.activate([
-            hideTrackInfoConstraint,
             trackInfoView.leftAnchor.constraint(equalTo: view.leftAnchor),
             trackInfoView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            trackInfoView.heightAnchor.constraint(equalToConstant: 120)
+            trackInfoView.heightAnchor.constraint(equalToConstant: trackInfoViewHeight)
         ])
-        trackInfoConstraintBox.bind(\.isActive, to: state.map { $0.hasSelection })
+        let trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: trackInfoViewHeight)
+        let trackInfoConstraintBox = Box(trackInfoConstraint)
+        trackInfoConstraintBox.bind(\.constant, to: state.map { $0.hasSelection ? 0 : trackInfoViewHeight })
         trackInfoBox.addConstraint(trackInfoConstraintBox)
-        trackInfoBox.bind(\.darkMode, to: state.map { $0.satellite })
 
         let loadingIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
         loadingIndicator.hidesWhenStopped = true
