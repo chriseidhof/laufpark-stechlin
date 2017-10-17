@@ -42,9 +42,14 @@ extension Box {
 }
 
 extension Box where A: UIView {
-    func addSubview<V: UIView>(_ view: Box<V>) {
+    func addSubview<V: UIView>(_ view: Box<V>, constraints: [Constraint] = []) {
         unbox.addSubview(view.unbox)
         references.append(view)
+        view.unbox.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate(constraints.map { constraint in
+            constraint(view.unbox, unbox)
+        })
+
     }
     
     func addConstraint(_ constraint: Box<NSLayoutConstraint>) {
@@ -95,6 +100,26 @@ struct State: Equatable {
     
     static func ==(lhs: State, rhs: State) -> Bool {
         return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.satellite == rhs.satellite
+    }
+}
+
+typealias Constraint = (UIView, UIView) -> NSLayoutConstraint
+
+func equal<Axis, L>(_ keyPath: KeyPath<UIView, L>) -> Constraint where L: NSLayoutAnchor<Axis> {
+    return { view, parent in
+        view[keyPath: keyPath].constraint(equalTo: parent[keyPath: keyPath])
+    }
+}
+
+func equal<Axis, L>(_ keyPath: KeyPath<UIView, L>, _ to: KeyPath<UIView, L>) -> Constraint where L: NSLayoutAnchor<Axis> {
+    return { view, parent in
+        view[keyPath: keyPath].constraint(equalTo: parent[keyPath: to])
+    }
+}
+
+func height(_ constant: CGFloat) -> Constraint {
+    return { view, _ in
+        view.heightAnchor.constraint(equalToConstant: constant)
     }
 }
 
@@ -150,20 +175,16 @@ final class ViewController: UIViewController {
         mapView.bind(\.mapType, to: state.map { $0.satellite ? MKMapType.satellite : .standard })
 
         let trackInfoBox = Box(trackInfoView)
-        rootView.addSubview(trackInfoBox)
-        
-        trackInfoView.translatesAutoresizingMaskIntoConstraints = false
         let trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         let trackInfoConstraintBox = Box(trackInfoConstraint)
         
         trackInfoConstraint.priority = .required
         let hideTrackInfoConstraint = trackInfoView.topAnchor.constraint(equalTo: view.bottomAnchor)
         hideTrackInfoConstraint.priority = .defaultHigh
+        rootView.addSubview(trackInfoBox, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), height(120)])
+        trackInfoView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            hideTrackInfoConstraint,
-            trackInfoView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            trackInfoView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            trackInfoView.heightAnchor.constraint(equalToConstant: 120)
+            hideTrackInfoConstraint
         ])
         trackInfoConstraintBox.bind(\.isActive, to: state.map { $0.hasSelection })
         trackInfoBox.addConstraint(trackInfoConstraintBox)
@@ -173,12 +194,7 @@ final class ViewController: UIViewController {
         loadingIndicator.hidesWhenStopped = true
         let box = Box(loadingIndicator)
         box.bindIsAnimating(to: state.map { $0.loading })
-        rootView.addSubview(box)
-        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-        ])
+        rootView.addSubview(box, constraints: [equal(\.centerXAnchor), equal(\.centerYAnchor)])
         
         let toggleMapButton = Box(UIButton(type: .roundedRect))
         toggleMapButton.unbox.setTitle("Toggle", for: .normal)
@@ -186,13 +202,10 @@ final class ViewController: UIViewController {
             self._state.satellite = !self._state.satellite
         }
         
-        mapView.addSubview(toggleMapButton)
-        toggleMapButton.unbox.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            toggleMapButton.unbox.trailingAnchor.constraint(equalTo: mapView.unbox.safeAreaLayoutGuide.trailingAnchor),
-            toggleMapButton.unbox.topAnchor.constraint(equalTo: mapView.unbox.safeAreaLayoutGuide.topAnchor)
+        mapView.addSubview(toggleMapButton, constraints: [
+            equal(\.trailingAnchor, \.safeAreaLayoutGuide.trailingAnchor),
+            equal(\.topAnchor, \.safeAreaLayoutGuide.topAnchor)
         ])
-        
     }
     
     override func viewDidAppear(_ animated: Bool) {
