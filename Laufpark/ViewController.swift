@@ -54,7 +54,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
     init() {
         state = Input(State(tracks: []))
-        darkMode = mapView[\.mapType] == .standard
+        darkMode = state[\.satellite]
 
         super.init(nibName: nil, bundle: nil)
 
