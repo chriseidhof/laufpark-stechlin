@@ -15,6 +15,7 @@ struct State: Equatable {
     var loading: Bool { return tracks.isEmpty }
     var annotationsVisible: Bool = false
     var satellite: Bool = false
+    var showConfiguration: Bool = false
     
     var selection: Track? {
         didSet {
@@ -35,8 +36,17 @@ struct State: Equatable {
     }
     
     static func ==(lhs: State, rhs: State) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite && lhs.showConfiguration == rhs.showConfiguration
     }
+}
+
+func uiSwitch(valueChange: @escaping (Bool) -> ()) -> IBox<UISwitch> {
+    let view = UISwitch()
+    let result = IBox(view)
+    result.handle(.valueChanged) { [unowned view] in
+        valueChange(view.isOn)
+    }
+    return result
 }
 
 class ViewController: UIViewController, MKMapViewDelegate {
@@ -79,6 +89,10 @@ class ViewController: UIViewController, MKMapViewDelegate {
         rootView = IBox(view)
         rootView.addSubview(mapView, constraints: sizeToParent())
         
+        let changeState: ((inout State) -> ()) -> () = { [unowned self] f in
+            self.state.change(f)
+        }
+        
         
         // MapView
         mapView.unbox.delegate = self
@@ -102,28 +116,61 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         let (trackInfo, location) = trackInfoView(position: position, points: points, track: state.i[\.selection], darkMode: darkMode)
         disposables.append(location.observe { loc in
-            self.state.change { $0.trackPosition = loc }
+            changeState { $0.trackPosition = loc }
         })
         
+        func switchWith(label text: String, textColor: I<UIColor>, action: @escaping (Bool) -> ()) -> IBox<UIView> {
+            let switchLabel = label(text: I(constant: text), textColor: textColor.map { $0 } )
+            switchLabel.unbox.widthAnchor.constraint(equalToConstant: 100)
+            let switch_ = uiSwitch(valueChange: action)
+            let stack = stackView(arrangedSubviews: [switchLabel.cast, switch_.cast], axis: .horizontal)
+            stack.unbox.heightAnchor.constraint(equalToConstant: 40)
+            return stack.cast
+        }
+        
+        let textColor = darkMode.map { $0 ? UIColor.white : .black }
+        let backgroundColor = darkMode.map { $0 ? UIColor.black : .white }
+        // Configuration View
+        let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), textColor: textColor, action: { value in changeState {
+            $0.annotationsVisible = value
+        }})
+        let satellite = switchWith(label: NSLocalizedString("Satellit", comment: ""), textColor: textColor, action: { value in changeState {
+            $0.satellite = value
+        }})
+        
+        let divider = IBox(UIView())
+        divider.bind(textColor.map { $0.withAlphaComponent(0.1) }, to: \.backgroundColor)
+        divider.unbox.heightAnchor.constraint(equalToConstant: 1).isActive = true
+        divider.bind(!(state.i[\.hasSelection] && state.i[\.showConfiguration]), to: \.hidden)
+
+        let trackInfoHeight: CGFloat = 120
+        trackInfo.bind(state.i[\.hasSelection].map { !$0 }, to: \.isHidden)
+        trackInfo.unbox.heightAnchor.constraint(equalToConstant: trackInfoHeight).isActive = true
         
         // Blurred Bottom View
+        let infoStackView = stackView(arrangedSubviews: [trackInfo, divider, accomodation.cast, satellite.cast])
+
+        let inset: CGFloat = 10
         let blurredView = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
-        blurredView.addSubview(trackInfo, path: \.contentView, constraints: sizeToParent(inset: 10))
+        blurredView.addSubview(infoStackView, path: \.contentView, constraints: [equal(\.leftAnchor, constant: -inset), equal(\.topAnchor, constant: -inset), equal(\.rightAnchor, constant: inset)])
         rootView.addSubview(blurredView, constraints: [
             equal(\.leftAnchor), equal(\.rightAnchor)
         ])
-        let height: CGFloat = 120
-        let heightConstraint = blurredView.unbox.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
-        let bottomConstraint = blurredView.unbox.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        disposables.append(if_(state.i[\.hasSelection], then: 0, else: height).observe { newHeight in
-            self.view.layoutIfNeeded()
-            bottomConstraint.constant = newHeight
+        let heightConstraint = blurredView.unbox.heightAnchor.constraint(greaterThanOrEqualToConstant: 300)
+        let bottomConstraint = blurredView.unbox.topAnchor.constraint(equalTo: view.bottomAnchor)
+        
+        
+        let configurationHeight: I<CGFloat> = if_(state.i[\.showConfiguration], then: 100, else: 0)
+        let selectionHeight: I<CGFloat> = if_(state.i[\.hasSelection], then: trackInfoHeight + 2 * inset, else: 0)
+        
+        disposables.append((selectionHeight + configurationHeight).observe { newHeight in
+            bottomConstraint.constant = -newHeight
             UIView.animate(withDuration: 0.2) {
                 self.view.layoutIfNeeded()
             }
         })
         NSLayoutConstraint.activate([heightConstraint, bottomConstraint])
-
+        
         // Dragged Point Annotation
         let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
             $0?.location.coordinate ?? CLLocationCoordinate2D()
@@ -147,16 +194,12 @@ class ViewController: UIViewController, MKMapViewDelegate {
         rootView.addSubview(loadingIndicator, constraints: [equal(\.centerXAnchor), equal(\.centerXAnchor)])
         
         // Toggle Map Button
-        let toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
-            self.state.change { $0.satellite.toggle() }
+        let toggleMapButton = button(type: .custom, title: I(constant: "…"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: {
+            changeState { $0.showConfiguration.toggle() }
         })
+        toggleMapButton.unbox.layer.cornerRadius = 3
         rootView.addSubview(toggleMapButton, constraints: [equal(\.topAnchor, constant: -25), equal(\.trailingAnchor, constant: 10)])
         
-        // Toggle Annotation
-        let toggleAnnotation = button(type: .custom, title: I(constant: "i"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
-            self.state.change { $0.annotationsVisible = !$0.annotationsVisible }
-        })
-        rootView.addSubview(toggleAnnotation, constraints: [equal(\.topAnchor, constant: -55), equal(\.trailingAnchor, constant: 10)])
     }
     
     func resetMapRect() {

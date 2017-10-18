@@ -329,7 +329,7 @@ extension I {
     public subscript<R: Equatable>(keyPath: KeyPath<A,R>) -> I<R> {
         return map { $0[keyPath: keyPath] }
     }
-
+    
     // All of the below goes away with conditional conformance
 
     // convenience for optionals
@@ -351,12 +351,11 @@ extension I {
     public func map<B: Equatable>(_ transform: @escaping (A) -> [B]) -> I<[B]> {
         return map(eq: ==, transform)
     }
-
+    
     // convenience for tuples
     public func map<B: Equatable, C: Equatable>(_ transform: @escaping (A) -> (B, C)) -> I<(B,C)> {
         return map(eq: ==, transform)
     }
-
 }
 
 extension I where A: Equatable {
@@ -373,3 +372,4 @@ extension I: Equatable {
         return lhs === rhs
     }
 }
+

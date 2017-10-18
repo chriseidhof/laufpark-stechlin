@@ -18,12 +18,20 @@ public func if_<A: Equatable>(_ condition: I<Bool>, then l: A, else r: A) -> I<A
     return condition.map { $0 ? l : r }
 }
 
+public func if_<A: Equatable>(_ condition: I<Bool>, then l: A?) -> I<A?> {
+    return condition.map { $0 ? l : nil }
+}
+
 public func &&(l: I<Bool>, r: I<Bool>) -> I<Bool> {
     return l.zip2(r, { $0 && $1 })
 }
 
 public func ||(l: I<Bool>, r: I<Bool>) -> I<Bool> {
     return l.zip2(r, { $0 || $1 })
+}
+
+public func +<N: Numeric>(l: I<N>, r: I<N>) -> I<N> {
+    return l.zip2(r, +)
 }
 
 public func ??<A: Equatable>(l: I<A?>, r: A) -> I<A> {

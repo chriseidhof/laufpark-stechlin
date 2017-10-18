@@ -16,7 +16,7 @@ extension IBox where V == UIStackView {
         disposables.append(arrangedSubviews)
     }
     
-    public convenience init<S>(arrangedSubviews: ArrayWithHistory<IBox<S>>) where S: UIView {
+    public convenience init<S>(arrangedSubviews: ArrayWithHistory<IBox<S>>, axis: UILayoutConstraintAxis = .vertical) where S: UIView {
         let stackView = UIStackView(arrangedSubviews: [])
         self.init(stackView)
         self.bindArrangedSubviews(to: arrangedSubviews)
@@ -92,11 +92,11 @@ extension IBox where V: UIStackView {
     }
 }
 
-public func stackView<V: UIView>(arrangedSubviews: [IBox<V>], axis: UILayoutConstraintAxis = .vertical, spacing: I<CGFloat> = I(constant: 10)) -> IBox<UIView> {
+public func stackView<V: UIView>(arrangedSubviews: [IBox<V>], axis: UILayoutConstraintAxis = .vertical, spacing: I<CGFloat> = I(constant: 10)) -> IBox<UIStackView> {
     let stackView = IBox<UIStackView>(arrangedSubviews: arrangedSubviews)
     stackView.unbox.axis = axis
     stackView.bind(spacing, to: \.spacing)
-    return stackView.cast
+    return stackView
 }
 
 
