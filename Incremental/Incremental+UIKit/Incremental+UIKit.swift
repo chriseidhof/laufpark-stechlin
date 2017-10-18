@@ -8,17 +8,22 @@
 
 import Foundation
 
+extension UIView {
+    public func addSubview(_ subview: UIView, constraints: [Constraint]) {
+        addSubview(subview)
+        if !constraints.isEmpty {
+            subview.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate(constraints.map { $0(self, subview) })
+        }
+
+    }
+}
 
 extension IBox where V: UIView {
     public func addSubview<S>(_ subview: IBox<S>, constraints: [Constraint] = []) where S: UIView {
         disposables.append(subview)
-        unbox.addSubview(subview.unbox)
-        if !constraints.isEmpty {
-            subview.unbox.translatesAutoresizingMaskIntoConstraints = false
-            for c in constraints {
-                c(unbox, subview.unbox).isActive = true
-            }
-        }
+        unbox.addSubview(subview.unbox, constraints: constraints)
+        
     }
     
     private func insert<View: UIView>(_ subview: IBox<View>, at index: Int) {

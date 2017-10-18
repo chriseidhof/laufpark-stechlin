@@ -59,11 +59,8 @@ final class TrackInfoView {
         blurredView.translatesAutoresizingMaskIntoConstraints = false
         
         let stackView = UIStackView(arrangedSubviews: [trackInfo.unbox, lineView.unbox])
-        blurredView.contentView.addSubview(stackView)
-        stackView.axis = .vertical
-        stackView.addConstraintsToSizeToParent(spacing: 10)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        
+        blurredView.contentView.addSubview(stackView, constraints: sizeToParent(inset: 10))
+        stackView.axis = .vertical        
         view = blurredView
     }
     
@@ -73,27 +70,6 @@ final class TrackInfoView {
         _pannedLocation.write(normalizedLocation)
     }
 }
-
-
-extension UIView {
-    func addConstraintsToSizeToParent(spacing: CGFloat = 0) {
-        guard let view = superview else { fatalError() }
-        let top = topAnchor.constraint(equalTo: view.topAnchor)
-        let bottom = bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        let left = leftAnchor.constraint(equalTo: view.leftAnchor)
-        let right = rightAnchor.constraint(equalTo: view.rightAnchor)
-        view.addConstraints([top,bottom,left,right])
-        if spacing != 0 {
-            top.constant = spacing
-            left.constant = spacing
-            right.constant = -spacing
-            bottom.constant = -spacing
-        }
-    }
-}
-
-
-
 
 func buildMapView() -> IBox<MKMapView> {
     let box = IBox(MKMapView())

@@ -10,10 +10,17 @@ import UIKit
 import MapKit
 import Incremental
 
+extension Bool {
+    mutating func toggle() {
+        self = !self
+    }
+}
+
 struct State: Equatable {
     var tracks: [Track]
     var loading: Bool { return tracks.isEmpty }
     var annotationsVisible: Bool = false
+    var satellite: Bool = false
     
     var selection: Track? {
         didSet {
@@ -34,7 +41,7 @@ struct State: Equatable {
     }
     
     static func ==(lhs: State, rhs: State) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.annotationsVisible == rhs.annotationsVisible
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite
     }
 }
 
@@ -92,11 +99,9 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     override func viewDidLoad() {
-        rootView = IBox(view!)
-        rootView.addSubview(mapView)
-        mapView.unbox.translatesAutoresizingMaskIntoConstraints = false
-        mapView.unbox.addConstraintsToSizeToParent()
-        
+        rootView = IBox(view)
+        rootView.addSubview(mapView, constraints: sizeToParent())
+                
         // MapView
         mapView.unbox.delegate = self
         disposables.append(state.i.map { $0.tracks }.observe { [unowned self] in
@@ -109,19 +114,21 @@ class ViewController: UIViewController, MKMapViewDelegate {
         })
         
         let blurredView = trackInfoView.view!
-        view.addSubview(blurredView)
+        view.addSubview(blurredView, constraints: [
+            equal(\.leftAnchor), equal(\.rightAnchor)
+        ])
         let height: CGFloat = 120
-        blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
+        let heightConstraint = blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
         let bottomConstraint = blurredView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-        disposables.append(if_(state.i[\.hasSelection], then: 0, else: height).observe { newOffset in
-            bottomConstraint.constant = newOffset
+        disposables.append(if_(state.i[\.hasSelection], then: 0, else: height).observe { newHeight in
+            heightConstraint.constant = newHeight
+            self.view.layoutIfNeeded()
+            bottomConstraint.constant = newHeight
             UIView.animate(withDuration: 0.2) {
                 self.view.layoutIfNeeded()
             }
         })
-        bottomConstraint.isActive = true
-        blurredView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        blurredView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        NSLayoutConstraint.activate([heightConstraint, bottomConstraint])
 
         view.backgroundColor = .white
         
@@ -130,6 +137,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         let draggedPointAnnotation = annotation(location: draggedPoint)
         mapView.unbox.addAnnotation(draggedPointAnnotation.unbox)
+        mapView.bind(state.i.map { $0.satellite ? .satellite : .standard }, to: \.mapType)
         
         disposables.append(trackInfoView.pannedLocation.observe { loc in
             self.state.change { $0.trackPosition = loc }
@@ -146,17 +154,17 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
         let isLoading = state[\.loading]
         let loadingIndicator = activityIndicator(style: darkMode.map { $0 ? .gray : .white }, animating: isLoading)
-        rootView.addSubview(loadingIndicator, constraints: [equalCenterX(), equalCenterY()])
+        rootView.addSubview(loadingIndicator, constraints: [equal(\.centerXAnchor), equal(\.centerXAnchor)])
         
         let toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
-            self.mapView.unbox.mapType = self.mapView.unbox.mapType == .standard ? .hybrid : .standard
+            self.state.change { $0.satellite.toggle() }
         })
-        rootView.addSubview(toggleMapButton, constraints: [equalTop(offset: -25), equalRight(offset: 10)])
+        rootView.addSubview(toggleMapButton, constraints: [equal(\.topAnchor, constant: -25), equal(\.trailingAnchor, constant: 10)])
         
         let toggleAnnotation = button(type: .custom, title: I(constant: "i"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
             self.state.change { $0.annotationsVisible = !$0.annotationsVisible }
         })
-        rootView.addSubview(toggleAnnotation, constraints: [equalTop(offset: -55), equalRight(offset: 10)])
+        rootView.addSubview(toggleAnnotation, constraints: [equal(\.topAnchor, constant: -55), equal(\.trailingAnchor, constant: 10)])
         let annotations: [MKPointAnnotation] = POI.all.map { poi in
             let annotation = MKPointAnnotation()
             annotation.coordinate = poi.location

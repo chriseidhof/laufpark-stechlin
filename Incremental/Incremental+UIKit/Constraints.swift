@@ -10,42 +10,19 @@ import Foundation
 
 public typealias Constraint = (_ parent: UIView, _ child: UIView) -> NSLayoutConstraint
 
-public func equalTop(offset: CGFloat = 0) -> Constraint {
+public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, to: KeyPath<UIView, Anchor>, constant: CGFloat = 0) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
     return { parent, child in
-        // todo not sure if this is a good idea
-        if #available(iOS 11.0, *) {
-            return parent.safeAreaLayoutGuide.topAnchor.constraint(equalTo: child.topAnchor, constant: offset)
-        } else {
-            return parent.topAnchor.constraint(equalTo: child.topAnchor, constant: offset)
-        }
+         parent[keyPath: keyPath].constraint(equalTo: child[keyPath: keyPath], constant: constant)
     }
 }
 
-public func equalLeading(offset: CGFloat = 0) -> Constraint {
-    return { parent, child in
-        parent.leadingAnchor.constraint(equalTo: child.leadingAnchor, constant: offset)
-    }
-}
-public func equalTrailing(offset: CGFloat = 0) -> Constraint {
-    return { parent, child in
-        parent.trailingAnchor.constraint(equalTo: child.trailingAnchor, constant: offset)
-    }
+public func sizeToParent(inset constant: CGFloat = 0) -> [Constraint] {
+    return [equal(\.leadingAnchor, constant: -constant),
+            equal(\.trailingAnchor, constant: constant),
+            equal(\.topAnchor, constant: -constant),
+            equal(\.bottomAnchor, constant: constant)]
 }
 
-public func equalCenterX(offset: CGFloat = 0) -> Constraint {
-    return { parent, child in
-        parent.centerXAnchor.constraint(equalTo: child.centerXAnchor, constant: offset)
-    }
-}
-
-public func equalCenterY(offset: CGFloat = 0) -> Constraint {
-    return { parent, child in
-        parent.centerYAnchor.constraint(equalTo: child.centerYAnchor, constant: offset)
-    }
-}
-
-public func equalRight(offset: CGFloat = 0) -> Constraint {
-    return { parent, child in
-        parent.rightAnchor.constraint(equalTo: child.rightAnchor, constant: offset)
-    }
+public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, constant: CGFloat = 0) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
+    return equal(keyPath, to: keyPath, constant: constant)
 }
