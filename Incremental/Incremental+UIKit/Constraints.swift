@@ -26,3 +26,9 @@ public func sizeToParent(inset constant: CGFloat = 0) -> [Constraint] {
 public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, constant: CGFloat = 0) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
     return equal(keyPath, to: keyPath, constant: constant)
 }
+
+
+public func equalTo(constant: CGFloat = 0, _ keyPath: KeyPath<UIView, NSLayoutDimension>) -> Constraint  {
+    return equal(keyPath, to: keyPath, constant: constant)
+}
+

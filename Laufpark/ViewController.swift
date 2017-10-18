@@ -10,12 +10,6 @@ import UIKit
 import MapKit
 import Incremental
 
-extension Bool {
-    mutating func toggle() {
-        self = !self
-    }
-}
-
 struct State: Equatable {
     var tracks: [Track]
     var loading: Bool { return tracks.isEmpty }
@@ -56,7 +50,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
 
     var disposables: [Any] = []
     var locationManager: CLLocationManager?
-    var trackInfoView: TrackInfoView!
     let darkMode: I<Bool>
 
     init() {
@@ -72,22 +65,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
             guard let point = track.point(at: distance) else { return nil }
             return (distance: distance, location: point)
         })
-        
-        let position: I<CGFloat?> = draggedLocation.map {
-            ($0?.distance).map { CGFloat($0) }
-        }
-        
-        let elevations = state.i[\.selection].map(eq: { _, _ in false }) { track in
-            track?.elevationProfile
-        }
-        
-        let points: I<[LineView.Point]> = elevations.map(eq: ==) { ele in
-            ele.map { profile in
-                profile.map { LineView.Point(x: $0.distance, y: $0.elevation) }
-            } ?? []
-        }
-        
-        trackInfoView = TrackInfoView(position: position, points: points, track: state.i[\.selection], darkMode: darkMode)
     }
     
     func setTracks(_ t: [Track]) {
@@ -101,7 +78,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
     override func viewDidLoad() {
         rootView = IBox(view)
         rootView.addSubview(mapView, constraints: sizeToParent())
-                
+        
+        
         // MapView
         mapView.unbox.delegate = self
         disposables.append(state.i.map { $0.tracks }.observe { [unowned self] in
@@ -112,16 +90,32 @@ class ViewController: UIViewController, MKMapViewDelegate {
                 self.mapView.unbox.add(polygon)
             }
         })
+        mapView.bind(annotations: POI.all.map { poi in MKPointAnnotation(coordinate: poi.location, title: poi.name) }, visible: state[\.annotationsVisible])
+
+        // Track Info View
+        let position: I<CGFloat?> = draggedLocation.map { ($0?.distance).map { CGFloat($0) } }
+        let elevations = state.i[\.selection].map(eq: { _, _ in false }) { $0?.elevationProfile }
+        let points: I<[LineView.Point]> = elevations.map { ele in
+            ele.map { profile in
+                profile.map { LineView.Point(x: $0.distance, y: $0.elevation) }
+            } ?? []
+        }
+        let (trackInfo, location) = trackInfoView(position: position, points: points, track: state.i[\.selection], darkMode: darkMode)
+        disposables.append(location.observe { loc in
+            self.state.change { $0.trackPosition = loc }
+        })
         
-        let blurredView = trackInfoView.view!
-        view.addSubview(blurredView, constraints: [
+        
+        // Blurred Bottom View
+        let blurredView = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
+        blurredView.addSubview(trackInfo, path: \.contentView, constraints: sizeToParent(inset: 10))
+        rootView.addSubview(blurredView, constraints: [
             equal(\.leftAnchor), equal(\.rightAnchor)
         ])
         let height: CGFloat = 120
-        let heightConstraint = blurredView.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
-        let bottomConstraint = blurredView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        let heightConstraint = blurredView.unbox.heightAnchor.constraint(greaterThanOrEqualToConstant: height)
+        let bottomConstraint = blurredView.unbox.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         disposables.append(if_(state.i[\.hasSelection], then: 0, else: height).observe { newHeight in
-            heightConstraint.constant = newHeight
             self.view.layoutIfNeeded()
             bottomConstraint.constant = newHeight
             UIView.animate(withDuration: 0.2) {
@@ -130,20 +124,15 @@ class ViewController: UIViewController, MKMapViewDelegate {
         })
         NSLayoutConstraint.activate([heightConstraint, bottomConstraint])
 
-        view.backgroundColor = .white
-        
+        // Dragged Point Annotation
         let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
             $0?.location.coordinate ?? CLLocationCoordinate2D()
         }
         let draggedPointAnnotation = annotation(location: draggedPoint)
         mapView.unbox.addAnnotation(draggedPointAnnotation.unbox)
         mapView.bind(state.i.map { $0.satellite ? .satellite : .standard }, to: \.mapType)
-        
-        disposables.append(trackInfoView.pannedLocation.observe { loc in
-            self.state.change { $0.trackPosition = loc }
-        })
 
-
+        // Center the map location on position dragging
         self.disposables.append(draggedLocation.observe { x in
             guard let (_, location) = x else { return }
             // todo subtract the height of the trackInfo box (if selected)
@@ -152,33 +141,22 @@ class ViewController: UIViewController, MKMapViewDelegate {
             }
         })
 
+        // Loading Indicator
         let isLoading = state[\.loading]
         let loadingIndicator = activityIndicator(style: darkMode.map { $0 ? .gray : .white }, animating: isLoading)
         rootView.addSubview(loadingIndicator, constraints: [equal(\.centerXAnchor), equal(\.centerXAnchor)])
         
+        // Toggle Map Button
         let toggleMapButton = button(type: .custom, titleImage: I(constant: UIImage(named: "map")!), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
             self.state.change { $0.satellite.toggle() }
         })
         rootView.addSubview(toggleMapButton, constraints: [equal(\.topAnchor, constant: -25), equal(\.trailingAnchor, constant: 10)])
         
+        // Toggle Annotation
         let toggleAnnotation = button(type: .custom, title: I(constant: "i"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: { [unowned self] in
             self.state.change { $0.annotationsVisible = !$0.annotationsVisible }
         })
         rootView.addSubview(toggleAnnotation, constraints: [equal(\.topAnchor, constant: -55), equal(\.trailingAnchor, constant: 10)])
-        let annotations: [MKPointAnnotation] = POI.all.map { poi in
-            let annotation = MKPointAnnotation()
-            annotation.coordinate = poi.location
-            annotation.title = poi.name
-            return annotation
-        }
-
-        disposables.append(state[\.annotationsVisible].observe { [unowned self] visible in
-            if visible {
-                self.mapView.unbox.addAnnotations(annotations)
-            } else {
-                self.mapView.unbox.removeAnnotations(annotations)
-            }
-        })
     }
     
     func resetMapRect() {

@@ -9,8 +9,9 @@
 import Foundation
 
 extension IBox where V == UIStackView {
-    public convenience init<S>(arrangedSubviews: [IBox<S>]) where S: UIView {
+    public convenience init<S>(arrangedSubviews: [IBox<S>], axis: UILayoutConstraintAxis = .vertical) where S: UIView {
         let stackView = UIStackView(arrangedSubviews: arrangedSubviews.map { $0.unbox })
+        stackView.axis = axis
         self.init(stackView)
         disposables.append(arrangedSubviews)
     }

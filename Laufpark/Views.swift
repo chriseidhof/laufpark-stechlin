@@ -10,64 +10,59 @@ import UIKit
 import Incremental
 import MapKit
 
-final class TrackInfoView {
-    private var lineView: IBox<LineView>
-    var view: UIView! = nil
-    var disposables: [Any] = []
-    
-    // 0...1.0
-    var pannedLocation: I<CGFloat> {
-        return _pannedLocation.i
-    }
-    private var _pannedLocation: Input<CGFloat> = Input(0)
-    
-    init(position: I<CGFloat?>, points: I<[LineView.Point]>, track: I<Track?>, darkMode: I<Bool>) {
-        let blurredViewForeground: I<UIColor> = if_(darkMode, then: I(constant: .white), else: I(constant: .black))
-        self.lineView = buildLineView(position: position, points: points, strokeColor: blurredViewForeground)
 
-        
-        // Lineview
-        lineView.unbox.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        lineView.unbox.backgroundColor = .clear
-        lineView.unbox.addGestureRecognizer(UIPanGestureRecognizer(target: self, action: #selector(linePanned(sender:))))
-        
-        let formatter = MKDistanceFormatter()
-        let formattedDistance = track.map { track in
-            track.map { formatter.string(fromDistance: $0.distance) }
+
+func trackInfoView(position: I<CGFloat?>, points: I<[LineView.Point]>, track: I<Track?>, darkMode: I<Bool>) -> (IBox<UIView>, location: I<CGFloat>) {
+    let pannedLocation: Input<CGFloat> = Input(0)
+    let result = IBox(UIView())
+
+    let foregroundColor: I<UIColor> = if_(darkMode, then: I(constant: .white), else: I(constant: .black))
+    let lv = lineView(position: position, points: points, strokeColor: foregroundColor)
+    lv.unbox.backgroundColor = .clear
+    lv.addGestureRecognizer(panGestureRecognizer { sender in
+        let normalizedLocation = (sender.location(in: sender.view!).x /
+            sender.view!.bounds.size.width).clamped(to: 0.0...1.0)
+        pannedLocation.write(normalizedLocation)
+    })
+ 
+    let formatter = MKDistanceFormatter()
+    let formattedDistance = track.map { track in
+        track.map { formatter.string(fromDistance: $0.distance) }
         } ?? ""
-        let formattedAscent = track.map { track in
-            track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
+    let formattedAscent = track.map { track in
+        track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
         } ?? ""
-        let name = label(text: track.map { $0?.name ?? "" }, textColor: blurredViewForeground.map { $0 })
-        let totalDistance = label(text: formattedDistance, textColor: blurredViewForeground.map { $0 })
-        let totalAscent = label(text: formattedAscent, textColor: blurredViewForeground.map { $0 })
-        // Track information
-        let trackInfo = IBox<UIStackView>(arrangedSubviews: [name, totalDistance, totalAscent])
-        trackInfo.unbox.axis = .horizontal
-        trackInfo.unbox.distribution = .equalCentering
-        trackInfo.unbox.heightAnchor.constraint(equalToConstant: 20)
-        trackInfo.unbox.spacing = 10
-        disposables.append(trackInfo) // need to keep a reference
-        
-        let blurEffect = if_(darkMode, then: UIBlurEffect(style: .dark), else: UIBlurEffect(style: .light))
-        let blurredView = UIVisualEffectView(effect: nil)
-        disposables.append(blurEffect.observe { effect in
-            UIView.animate(withDuration: 0.2) {
-                blurredView.effect = effect
-            }
-        })
-        blurredView.translatesAutoresizingMaskIntoConstraints = false
-        
-        let stackView = UIStackView(arrangedSubviews: [trackInfo.unbox, lineView.unbox])
-        blurredView.contentView.addSubview(stackView, constraints: sizeToParent(inset: 10))
-        stackView.axis = .vertical        
-        view = blurredView
-    }
+    let name = label(text: track.map { $0?.name ?? "" }, textColor: foregroundColor.map { $0 })
+    let totalDistance = label(text: formattedDistance, textColor: foregroundColor.map { $0 })
+    let totalAscent = label(text: formattedAscent, textColor: foregroundColor.map { $0 })
+    // Track information
+    let trackInfo = IBox<UIStackView>(arrangedSubviews: [name, totalDistance, totalAscent], axis: .horizontal)
+    trackInfo.unbox.distribution = .equalCentering
+    trackInfo.unbox.spacing = 10
     
-    @objc func linePanned(sender: UIPanGestureRecognizer) {
-        let normalizedLocation = (sender.location(in: lineView.unbox).x /
-            lineView.unbox.bounds.size.width).clamped(to: 0.0...1.0)
-        _pannedLocation.write(normalizedLocation)
+    result.addSubview(trackInfo, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.topAnchor)])
+    result.addSubview(lv, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.bottomAnchor), equalTo(constant: 20, \.heightAnchor)])
+    lv.unbox.topAnchor.constraint(equalTo: trackInfo.unbox.bottomAnchor).isActive = true
+    
+    return (result, pannedLocation.i)
+}
+
+func effectView(effect: I<UIVisualEffect>) -> IBox<UIVisualEffectView> {
+    let view = UIVisualEffectView(effect: nil)
+    let result = IBox(view)
+    result.observe(value: effect, onChange: { view, value in
+        UIView.animate(withDuration: 0.2) {
+            view.effect = value
+        }
+    })
+    return result
+}
+
+extension MKPointAnnotation {
+    convenience init(coordinate: CLLocationCoordinate2D, title: String) {
+        self.init()
+        self.coordinate = coordinate
+        self.title = title
     }
 }
 
@@ -105,7 +100,7 @@ extension CLLocationCoordinate2D: Equatable {
     }
 }
 
-func buildLineView(position: I<CGFloat?>, points: I<[LineView.Point]>, strokeColor: I<UIColor>) -> IBox<LineView> {
+func lineView(position: I<CGFloat?>, points: I<[LineView.Point]>, strokeColor: I<UIColor>) -> IBox<LineView> {
     let box = IBox(LineView())
     box.bind(position, to: \LineView.position)
     box.bind(points, to: \.points)

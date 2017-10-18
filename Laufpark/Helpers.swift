@@ -8,6 +8,12 @@
 
 import Foundation
 
+extension Bool {
+    mutating func toggle() {
+        self = !self
+    }
+}
+
 extension Comparable {
     func clamped(to: ClosedRange<Self>) -> Self {
         if self < to.lowerBound { return to.lowerBound }

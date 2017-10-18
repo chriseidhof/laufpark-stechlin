@@ -23,6 +23,7 @@
 		83099AF71F63CD7900D3EBB8 /* wabe violett-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE21F63CD2600D3EBB8 /* wabe violett-strecke 0.gpx */; };
 		83099AF91F63CDA400D3EBB8 /* wabe gelb-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AF81F63CDA100D3EBB8 /* wabe gelb-strecke 0.gpx */; };
 		83099AFB1F63CE8400D3EBB8 /* wabe pink-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AFA1F63CE6E00D3EBB8 /* wabe pink-strecke 0.gpx */; };
+		830E62E71F9799F400046F5B /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830E62E61F9799F400046F5B /* MapView.swift */; };
 		83354DA01F6FE9A900F3C33A /* Incremental+NSObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */; };
 		83354DA21F6FEA5700F3C33A /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83354DA11F6FEA5700F3C33A /* Helpers.swift */; };
 		834004E51F7BA9EA0035984B /* Constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834004E41F7BA9EA0035984B /* Constraints.swift */; };
@@ -204,6 +205,7 @@
 		83099AEB1F63CD2800D3EBB8 /* wabe rot-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe rot-strecke 0.gpx"; sourceTree = "<group>"; };
 		83099AF81F63CDA100D3EBB8 /* wabe gelb-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gelb-strecke 0.gpx"; sourceTree = "<group>"; };
 		83099AFA1F63CE6E00D3EBB8 /* wabe pink-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe pink-strecke 0.gpx"; sourceTree = "<group>"; };
+		830E62E61F9799F400046F5B /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
 		83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+NSObject.swift"; sourceTree = "<group>"; };
 		83354DA11F6FEA5700F3C33A /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		834004E41F7BA9EA0035984B /* Constraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constraints.swift; sourceTree = "<group>"; };
@@ -615,6 +617,7 @@
 				83FC89841F7B89A30020EED6 /* ViewController.swift */,
 				834004E41F7BA9EA0035984B /* Constraints.swift */,
 				8384EC5F1F8288FD003AAC56 /* NavigationController.swift */,
+				830E62E61F9799F400046F5B /* MapView.swift */,
 			);
 			path = "Incremental+UIKit";
 			sourceTree = "<group>";
@@ -941,6 +944,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				83354DA01F6FE9A900F3C33A /* Incremental+NSObject.swift in Sources */,
+				830E62E71F9799F400046F5B /* MapView.swift in Sources */,
 				83FC93D31F7147250034E3B2 /* Helpers.swift in Sources */,
 				837A8ABA1F72DACB00ED898C /* IncrementalArray.swift in Sources */,
 				83FC89831F7B88F40020EED6 /* TextField.swift in Sources */,

@@ -19,10 +19,27 @@ extension UIView {
     }
 }
 
+public func panGestureRecognizer(_ panned: @escaping (UIPanGestureRecognizer) -> ()) -> IBox<UIPanGestureRecognizer> {
+    let recognizer = UIPanGestureRecognizer()
+    let targetAction = TargetAction {
+        panned(recognizer)
+    }
+    recognizer.addTarget(targetAction, action: #selector(TargetAction.action(_:)))
+    let result = IBox(recognizer)
+    result.disposables.append(targetAction)
+    return result
+}
+
 extension IBox where V: UIView {
-    public func addSubview<S>(_ subview: IBox<S>, constraints: [Constraint] = []) where S: UIView {
+    public func addGestureRecognizer<G: UIGestureRecognizer>(_ gestureRecognizer: IBox<G>) {
+        self.unbox.addGestureRecognizer(gestureRecognizer.unbox)
+        disposables.append(gestureRecognizer)
+    }
+
+    public func addSubview<S>(_ subview: IBox<S>, path: KeyPath<V,UIView>? = nil, constraints: [Constraint] = []) where S: UIView {
         disposables.append(subview)
-        unbox.addSubview(subview.unbox, constraints: constraints)
+        let target: UIView = path.map { kp in unbox[keyPath: kp] } ?? unbox
+        target.addSubview(subview.unbox, constraints: constraints)
         
     }
     
@@ -79,12 +96,12 @@ extension IBox where V: UIView {
     }
 }
 
-class TargetAction: NSObject {
+public class TargetAction: NSObject {
     let callback: () -> ()
-    init(_ callback: @escaping () -> ()) {
+    public init(_ callback: @escaping () -> ()) {
         self.callback = callback
     }
-    @objc func action(_ sender: AnyObject) {
+    @objc public func action(_ sender: AnyObject) {
         callback()
     }
 }
