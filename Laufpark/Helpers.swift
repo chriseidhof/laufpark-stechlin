@@ -22,16 +22,6 @@ extension Comparable {
     }
 }
 
-func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
-    return { l, r in
-        switch (l,r) {
-        case (nil,nil): return true
-        case let (x?, y?): return f(x,y)
-        default: return false
-        }
-    }
-}
-
 func time<Result>(name: StaticString = #function, line: Int = #line, _ f: () -> Result) -> Result {
     let startTime = DispatchTime.now()
     let result = f()

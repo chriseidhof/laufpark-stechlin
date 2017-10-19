@@ -356,7 +356,24 @@ extension I {
     public func map<B: Equatable, C: Equatable>(_ transform: @escaping (A) -> (B, C)) -> I<(B,C)> {
         return map(eq: ==, transform)
     }
+
+    // convenience for optional tuples
+    public func map<B: Equatable, C: Equatable>(_ transform: @escaping (A) -> (B, C)?) -> I<(B,C)?> {
+        return map(eq: lift(==), transform)
+    }
+
 }
+
+public func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
+    return { l, r in
+        switch (l,r) {
+        case (nil,nil): return true
+        case let (x?, y?): return f(x,y)
+        default: return false
+        }
+    }
+}
+
 
 extension I where A: Equatable {
     convenience init() {

@@ -35,12 +35,20 @@ struct State: Equatable {
         self.tracks = tracks
     }
     
+    var draggedLocation: (Double, CLLocation)? {
+        guard let track = selection,
+            let location = trackPosition else { return nil }
+        let distance = Double(location) * track.distance
+        guard let point = track.point(at: distance) else { return nil }
+        return (distance: distance, location: point)
+    }
+
     static func ==(lhs: State, rhs: State) -> Bool {
         return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite && lhs.showConfiguration == rhs.showConfiguration
     }
 }
 
-func uiSwitch(valueChange: @escaping (Bool) -> ()) -> IBox<UISwitch> {
+func uiSwitch(valueChange: @escaping (_ isOn: Bool) -> ()) -> IBox<UISwitch> {
     let view = UISwitch()
     let result = IBox(view)
     result.handle(.valueChanged) { [unowned view] in
@@ -53,7 +61,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
     let mapView: IBox<MKMapView> = buildMapView()
     var tracks: [MKPolygon:Track] = [:]
     
-    var draggedLocation: I<(distance: Double, location: CLLocation)?>!
     var rootView: IBox<UIView>!
     
     let state: Input<State>
@@ -67,14 +74,6 @@ class ViewController: UIViewController, MKMapViewDelegate {
         darkMode = state[\.satellite]
 
         super.init(nibName: nil, bundle: nil)
-
-        draggedLocation = state.i.map(eq: lift(==), { state in
-            guard let track = state.selection,
-                let location = state.trackPosition else { return nil }
-            let distance = Double(location) * track.distance
-            guard let point = track.point(at: distance) else { return nil }
-            return (distance: distance, location: point)
-        })
     }
     
     func setTracks(_ t: [Track]) {
@@ -89,6 +88,8 @@ class ViewController: UIViewController, MKMapViewDelegate {
         rootView = IBox(view)
         rootView.addSubview(mapView, constraints: sizeToParent())
         
+        let draggedLocation: I<(Double, CLLocation)?> = state.i.map({ $0.draggedLocation })
+
         let changeState: ((inout State) -> ()) -> () = { [unowned self] f in
             self.state.change(f)
         }
@@ -107,7 +108,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         mapView.bind(annotations: POI.all.map { poi in MKPointAnnotation(coordinate: poi.location, title: poi.name) }, visible: state[\.annotationsVisible])
 
         // Track Info View
-        let position: I<CGFloat?> = draggedLocation.map { ($0?.distance).map { CGFloat($0) } }
+        let position: I<CGFloat?> = draggedLocation.map { ($0?.0).map { CGFloat($0) } }
         let elevations = state.i[\.selection].map(eq: { _, _ in false }) { $0?.elevationProfile }
         let points: I<[LineView.Point]> = elevations.map { ele in
             ele.map { profile in
@@ -129,7 +130,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         }
         
         let textColor = darkMode.map { $0 ? UIColor.white : .black }
-        let backgroundColor = darkMode.map { $0 ? UIColor.black : .white }
+
         // Configuration View
         let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), textColor: textColor, action: { value in changeState {
             $0.annotationsVisible = value
@@ -173,7 +174,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         
         // Dragged Point Annotation
         let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
-            $0?.location.coordinate ?? CLLocationCoordinate2D()
+            $0?.1.coordinate ?? CLLocationCoordinate2D()
         }
         let draggedPointAnnotation = annotation(location: draggedPoint)
         mapView.unbox.addAnnotation(draggedPointAnnotation.unbox)
