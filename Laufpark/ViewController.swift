@@ -10,7 +10,7 @@ import UIKit
 import MapKit
 import Incremental
 
-struct State: Equatable {
+struct State: Equatable, Codable {
     var tracks: [Track]
     var loading: Bool { return tracks.isEmpty }
     var annotationsVisible: Bool = false
