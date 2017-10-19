@@ -63,7 +63,7 @@ struct State: RootComponent {
 
 func emptyVC(text: String) -> IBox<UIViewController> {
     return viewController(rootView: label(text: I(constant: text)), constraints: [
-        equalCenterX(), equalCenterY()])
+        equal(\.centerXAnchor), equal(\.centerYAnchor)])
 
 }
 
