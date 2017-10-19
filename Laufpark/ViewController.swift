@@ -50,14 +50,45 @@ extension Box where A: UIActivityIndicatorView {
     }
 }
 
+extension UIView {
+    func addSubview(_ other: UIView, constraints: [Constraint]) {
+        addSubview(other)
+        other.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate(constraints.map { c in
+            c(other, self)
+        })
+
+    }
+}
+
 extension Box where A: UIView {
-    func addSubview<V: UIView>(_ view: Box<V>) {
-        unbox.addSubview(view.unbox)
+    func addSubview<V: UIView>(_ view: Box<V>, constraints: [Constraint]) {
+        unbox.addSubview(view.unbox, constraints: constraints)
         references.append(view)
     }
-    
+
     func addConstraint(_ constraint: Box<NSLayoutConstraint>) {
         references.append(constraint)
+    }
+}
+
+typealias Constraint = (_ child: UIView, _ parent: UIView) -> NSLayoutConstraint
+
+func equal<L, Axis>(_ to: KeyPath<UIView, L>) -> Constraint where L: NSLayoutAnchor<Axis> {
+    return { view, parent in
+        view[keyPath: to].constraint(equalTo: parent[keyPath: to])
+    }
+}
+
+func equal<L>(_ keyPath: KeyPath<UIView, L>, to constant: CGFloat) -> Constraint where L: NSLayoutDimension {
+    return { view, parent in
+        view[keyPath: keyPath].constraint(equalToConstant: constant)
+    }
+}
+
+func equal<L, Axis>(_ from: KeyPath<UIView, L>, _ to: KeyPath<UIView, L>) -> Constraint where L: NSLayoutAnchor<Axis> {
+    return { view, parent in
+        view[keyPath: from].constraint(equalTo: parent[keyPath: to])
     }
 }
 
@@ -149,14 +180,13 @@ final class ViewController: UIViewController {
         let trackInfoBox = Box(trackInfoView)
         trackInfoBox.bind(\.darkMode, to: state.map { $0.satellite })
         let trackInfoViewHeight: CGFloat = 120
-        rootView.addSubview(trackInfoBox)
-        trackInfoView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            trackInfoView.leftAnchor.constraint(equalTo: view.leftAnchor),
-            trackInfoView.rightAnchor.constraint(equalTo: view.rightAnchor),
-            trackInfoView.heightAnchor.constraint(equalToConstant: trackInfoViewHeight)
+        rootView.addSubview(trackInfoBox, constraints: [
+            equal(\.leftAnchor),
+            equal(\.rightAnchor),
+            equal(\.heightAnchor, to: trackInfoViewHeight)
         ])
         let trackInfoConstraint = trackInfoView.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: trackInfoViewHeight)
+        trackInfoConstraint.isActive = true
         let trackInfoConstraintBox = Box(trackInfoConstraint)
         trackInfoConstraintBox.bind(\.constant, to: state.map { $0.hasSelection ? 0 : trackInfoViewHeight })
         trackInfoBox.addConstraint(trackInfoConstraintBox)
@@ -165,11 +195,9 @@ final class ViewController: UIViewController {
         loadingIndicator.hidesWhenStopped = true
         let box = Box(loadingIndicator)
         box.bindIsAnimating(to: state.map { $0.loading })
-        rootView.addSubview(box)
-        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            loadingIndicator.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            loadingIndicator.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+        rootView.addSubview(box, constraints: [
+            equal(\.centerXAnchor),
+            equal(\.centerYAnchor)
         ])
         
         let button = UIButton(type: .system)
@@ -178,11 +206,9 @@ final class ViewController: UIViewController {
         boxedButton.handle(.touchUpInside) { [unowned self] in
             self._state.satellite = !self._state.satellite
         }
-        mapView.addSubview(boxedButton)
-        button.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            button.topAnchor.constraint(equalTo: _mapView.safeAreaLayoutGuide.topAnchor),
-            button.trailingAnchor.constraint(equalTo: _mapView.safeAreaLayoutGuide.trailingAnchor)
+        mapView.addSubview(boxedButton, constraints: [
+            equal(\.topAnchor, \.safeAreaLayoutGuide.topAnchor),
+            equal(\.trailingAnchor, \.safeAreaLayoutGuide.trailingAnchor)
         ])
     }
     
