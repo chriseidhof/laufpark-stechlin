@@ -61,6 +61,12 @@ struct State: RootComponent {
     
 }
 
+func emptyVC(text: String) -> IBox<UIViewController> {
+    return viewController(rootView: label(text: I(constant: text)), constraints: [
+        equalCenterX(), equalCenterY()])
+
+}
+
 func render(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIViewController> {
     let items = state[\.todos].map { $0.sort(by: I(constant: <)) }
     let tableVC: IBox<UIViewController> = tableViewController(items: items, didSelect: { send(.select($0)) }, didDelete: { send(.delete($0)) }, configure: { cell, todo in
@@ -71,11 +77,10 @@ func render(state: I<State>, send: @escaping (State.Message) -> ()) -> IBox<UIVi
     let add = { barButtonItem(systemItem: .add, onTap: { send(.newTodo) }) }
     tableVC.setRightBarButtonItems([add()])
     
-    let emptyVC = viewController(rootView: label(text: I(constant: "No todos yet.")), constraints: [
-        equalCenterX(), equalCenterY()])
-    emptyVC.setRightBarButtonItems([add()])
+    let e = emptyVC(text: "No todos yet.")
+    e.setRightBarButtonItems([add()])
     
-    let vc = if_(state[\.todos].flatMap { $0.isEmpty }, then: emptyVC, else: tableVC)
+    let vc = if_(state[\.todos].flatMap { $0.isEmpty }, then: e, else: tableVC)
     
     let navigationVC = navigationController(flatten([vc]))
     return navigationVC.map { $0 }
@@ -95,29 +100,5 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.makeKeyAndVisible()
         return true
     }
-
-    func applicationWillResignActive(_ application: UIApplication) {
-        // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-        // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
-    }
-
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-        // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-    }
-
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
-    }
-
-    func applicationDidBecomeActive(_ application: UIApplication) {
-        // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-    }
-
-    func applicationWillTerminate(_ application: UIApplication) {
-        // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-    }
-
-
 }
 
