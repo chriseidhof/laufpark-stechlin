@@ -10,6 +10,9 @@ import UIKit
 import Incremental
 import MapKit
 
+enum Stylesheet {
+    static let emphasis: I<UIFont> = I(constant: UIFont.boldSystemFont(ofSize: 17))
+}
 
 
 func trackInfoView(position: I<CGFloat?>, points: I<[LineView.Point]>, track: I<Track?>, darkMode: I<Bool>) -> (IBox<UIView>, location: I<CGFloat>) {
@@ -32,18 +35,20 @@ func trackInfoView(position: I<CGFloat?>, points: I<[LineView.Point]>, track: I<
     let formattedAscent = track.map { track in
         track.map { "↗ \(formatter.string(fromDistance: $0.ascent))" }
         } ?? ""
-    let name = label(text: track.map { $0?.name ?? "" }, textColor: foregroundColor.map { $0 })
-    let totalDistance = label(text: formattedDistance, textColor: foregroundColor.map { $0 })
-    let totalAscent = label(text: formattedAscent, textColor: foregroundColor.map { $0 })
+    //let name = label(text: track.map { $0?.name ?? "" }, textColor: foregroundColor.map { $0 })
+    let totalDistance = label(text: formattedDistance, textColor: foregroundColor.map { $0 }, font: Stylesheet.emphasis)
+    let totalAscent = label(text: formattedAscent, textColor: foregroundColor.map { $0 }, font: Stylesheet.emphasis)
+    let spacer = IBox(UILabel())
+    
     // Track information
-    let trackInfo = IBox<UIStackView>(arrangedSubviews: [name, totalDistance, totalAscent], axis: .horizontal)
+    let trackInfo = IBox<UIStackView>(arrangedSubviews: [totalDistance, totalAscent, spacer], axis: .horizontal)
     trackInfo.unbox.distribution = .equalCentering
     trackInfo.unbox.spacing = 10
     
     result.addSubview(trackInfo, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.topAnchor)])
     result.addSubview(lv, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.bottomAnchor), equalTo(constant: 20, \.heightAnchor)])
     lv.unbox.topAnchor.constraint(equalTo: trackInfo.unbox.bottomAnchor).isActive = true
-    
+        
     return (result, pannedLocation.i)
 }
 
@@ -64,6 +69,27 @@ extension MKPointAnnotation {
         self.coordinate = coordinate
         self.title = title
     }
+}
+
+func trailNumber(track: I<Track>) -> IBox<UIView> {
+    let diameter: CGFloat = 42
+    let circle = UIView(frame: .init(origin: .zero, size: CGSize(width: diameter, height: diameter)))
+    circle.layer.cornerRadius = diameter/2
+    circle.layer.masksToBounds = true
+    circle.translatesAutoresizingMaskIntoConstraints = false
+    circle.widthAnchor.constraint(equalToConstant: diameter).isActive = true
+    circle.heightAnchor.constraint(equalToConstant: diameter).isActive = true
+    
+    let backgroundColor = track.map { $0.color.uiColor }
+    let result = IBox(circle)
+    result.bind(backgroundColor, to: \.backgroundColor)
+
+    
+    let numberLabel = label(text: track.map { $0.numbers }, backgroundColor: backgroundColor.map { $0 }, textColor: I(constant: .white), font: I(constant: UIFont.boldSystemFont(ofSize: 17)) )
+    result.addSubview(numberLabel, constraints: [
+        equal(\.centerXAnchor), equal(\.centerYAnchor)])
+    
+    return result
 }
 
 func buildMapView() -> IBox<MKMapView> {

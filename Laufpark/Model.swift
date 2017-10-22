@@ -118,6 +118,18 @@ struct Track: Codable {
         }
         return nil
     }
+    
+    var numbers: String {
+        let components = name.split(separator: " ")
+        guard !components.isEmpty else { return "" }
+        
+        func simplify<S: StringProtocol>(_ numbers: [S]) -> String {
+            if numbers.count == 1 { return String(numbers[0]) }
+            return String("\(numbers[0])-\(numbers.last!)")
+        }
+
+        return simplify(components.last!.split(separator: "/"))
+    }
 }
 
 extension Track: Equatable {

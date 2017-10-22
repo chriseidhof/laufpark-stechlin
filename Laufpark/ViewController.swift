@@ -149,10 +149,20 @@ class ViewController: UIViewController, MKMapViewDelegate {
         trackInfo.unbox.heightAnchor.constraint(equalToConstant: trackInfoHeight).isActive = true
         
         // Blurred Bottom View
-        let infoStackView = stackView(arrangedSubviews: [trackInfo, divider, accomodation.cast, satellite.cast])
-
-        let inset: CGFloat = 10
         let blurredView = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
+
+            // Border
+        
+            let _border = UIView()
+            _border.heightAnchor.constraint(equalToConstant: 1).isActive = true
+            let border = IBox(_border)
+            border.bind(state.i[\.selection].map { $0?.color.uiColor }, to: \.backgroundColor)
+            blurredView.addSubview(border, path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.topAnchor)])
+
+        
+        
+        let infoStackView = stackView(arrangedSubviews: [trackInfo, divider, accomodation.cast, satellite.cast])
+        let inset: CGFloat = 10
         blurredView.addSubview(infoStackView, path: \.contentView, constraints: [equal(\.leftAnchor, constant: -inset), equal(\.topAnchor, constant: -inset), equal(\.rightAnchor, constant: inset)])
         rootView.addSubview(blurredView, constraints: [
             equal(\.leftAnchor), equal(\.rightAnchor)
@@ -162,7 +172,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         
         
         let configurationHeight: I<CGFloat> = if_(state.i[\.showConfiguration], then: 100, else: 0)
-        let selectionHeight: I<CGFloat> = if_(state.i[\.hasSelection], then: trackInfoHeight + 2 * inset, else: 0)
+        let selectionHeight: I<CGFloat> = if_(state.i[\.hasSelection], then: trackInfoHeight + 2 * inset, else: -20)
         
         disposables.append((selectionHeight + configurationHeight).observe { newHeight in
             bottomConstraint.constant = -newHeight
@@ -171,6 +181,13 @@ class ViewController: UIViewController, MKMapViewDelegate {
             }
         })
         NSLayoutConstraint.activate([heightConstraint, bottomConstraint])
+        
+        // Number View
+        let trackNumber = trailNumber(track: state.i.map { $0.selection} ?? Track(color: .blue, number: 0, name: "", points: []))
+        rootView.addSubview(trackNumber)
+        let yConstraint = blurredView.unbox.topAnchor.constraint(equalTo: trackNumber.unbox.centerYAnchor)
+        let xConstraint = blurredView.unbox.rightAnchor.constraint(equalTo: trackNumber.unbox.centerXAnchor, constant: 42)
+        NSLayoutConstraint.activate([xConstraint,yConstraint])
         
         // Dragged Point Annotation
         let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
