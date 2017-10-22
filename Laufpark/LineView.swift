@@ -96,7 +96,7 @@ final class LineView: UIView {
 
         let attributes: [NSAttributedStringKey : Any] = [
             .foregroundColor: strokeColor,
-            .font: UIFont.systemFont(ofSize: 12)
+            .font: Stylesheet.smallFont
         ]
         
         for tick in ticks {
@@ -107,6 +107,7 @@ final class LineView: UIView {
 
             let text = distanceFormatter.string(fromDistance: CLLocationDistance((tick/scaleX))) as NSString
             let width = text.size(withAttributes: attributes).width
+            guard (tick + width/2) < bounds.width else { continue }
             (text as NSString).draw(at: CGPoint(x: tick - (width/2), y: bounds.size.height-labelPadding + 5), withAttributes: attributes)
         }
         

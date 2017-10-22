@@ -183,7 +183,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
         NSLayoutConstraint.activate([heightConstraint, bottomConstraint])
         
         // Number View
-        let trackNumber = trailNumber(track: state.i.map { $0.selection} ?? Track(color: .blue, number: 0, name: "", points: []))
+        let trackNumber = trackNumberView(state.i.map { $0.selection} ?? Track(color: .blue, number: 0, name: "", points: []))
         rootView.addSubview(trackNumber)
         let yConstraint = blurredView.unbox.topAnchor.constraint(equalTo: trackNumber.unbox.centerYAnchor)
         let xConstraint = blurredView.unbox.rightAnchor.constraint(equalTo: trackNumber.unbox.centerXAnchor, constant: 42)

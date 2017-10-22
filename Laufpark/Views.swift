@@ -12,6 +12,8 @@ import MapKit
 
 enum Stylesheet {
     static let emphasis: I<UIFont> = I(constant: UIFont.boldSystemFont(ofSize: 17))
+
+    static let smallFont = UIFont.systemFont(ofSize: 10)
 }
 
 
@@ -71,7 +73,7 @@ extension MKPointAnnotation {
     }
 }
 
-func trailNumber(track: I<Track>) -> IBox<UIView> {
+func trackNumberView(_ track: I<Track>) -> IBox<UIView> {
     let diameter: CGFloat = 42
     let circle = UIView(frame: .init(origin: .zero, size: CGSize(width: diameter, height: diameter)))
     circle.layer.cornerRadius = diameter/2
@@ -85,7 +87,7 @@ func trailNumber(track: I<Track>) -> IBox<UIView> {
     result.bind(backgroundColor, to: \.backgroundColor)
 
     
-    let numberLabel = label(text: track.map { $0.numbers }, backgroundColor: backgroundColor.map { $0 }, textColor: I(constant: .white), font: I(constant: UIFont.boldSystemFont(ofSize: 17)) )
+    let numberLabel = label(text: track.map { $0.numbers }, backgroundColor: backgroundColor.map { $0 }, textColor: I(constant: .white), font: Stylesheet.emphasis)
     result.addSubview(numberLabel, constraints: [
         equal(\.centerXAnchor), equal(\.centerYAnchor)])
     
