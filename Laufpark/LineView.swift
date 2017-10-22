@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import MapKit
 
 final class LineView: UIView {
     struct Point: Equatable {
@@ -22,6 +23,11 @@ final class LineView: UIView {
     var strokeColor: UIColor = .black { didSet { setNeedsDisplay() }}
     var position: CGFloat? = nil { didSet { setNeedsDisplay() }}
     var positionColor: UIColor = .red { didSet { setNeedsDisplay() }}
+    let distanceFormatter: MKDistanceFormatter = {
+        let result = MKDistanceFormatter()
+        result.unitStyle = .abbreviated
+        return result
+    }()
     
     private var _pointsRect: CGRect = .zero
 
@@ -32,7 +38,9 @@ final class LineView: UIView {
         }
     }
     
-    var horizontalTick: CGFloat? = 5000 { didSet { setNeedsDisplay() } }
+    var horizontalTick: CGFloat? {
+        return distanceFormatter.units == .metric ? 5000 : 4828.03
+    }
     var tickColor: UIColor = UIColor.gray.withAlphaComponent(0.3) { didSet { setNeedsDisplay() } }
     
     override var frame: CGRect {
@@ -52,7 +60,7 @@ final class LineView: UIView {
             maxY = max(maxY, CGFloat(p.y))
             maxX = max(maxX, CGFloat(p.x))
         }
-
+        
         _pointsRect = CGRect(x: 0, y: minY, width: maxX.rounded(.up), height: maxY-minY)
     }
     
@@ -64,7 +72,7 @@ final class LineView: UIView {
         
         let scaleX = bounds.size.width/_pointsRect.size.width
         let scaleY = bounds.size.height/_pointsRect.size.height
-
+        
         if let tickWidth = horizontalTick {
             let cgTickWidth = tickWidth * scaleX
             context.setLineWidth(1)
@@ -75,8 +83,8 @@ final class LineView: UIView {
                 context.addLine(to: CGPoint(x: currentTick, y: -bounds.size.height))
                 tickColor.setStroke()
                 context.strokePath()
-                let km = Int((currentTick/scaleX)/1000)
-                ("\(km) km" as NSString).draw(at: CGPoint(x: currentTick + 5, y: -15), withAttributes: [
+                let text = distanceFormatter.string(fromDistance: CLLocationDistance((currentTick/scaleX).rounded()))
+                (text as NSString).draw(at: CGPoint(x: currentTick + 5, y: -15), withAttributes: [
                     .foregroundColor: strokeColor,
                     .font: UIFont.systemFont(ofSize: 12)
                     ])
