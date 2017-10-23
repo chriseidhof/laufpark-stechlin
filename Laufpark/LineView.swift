@@ -53,14 +53,9 @@ final class LineView: UIView {
     }
     var tickColor: UIColor = UIColor.gray.withAlphaComponent(0.3) { didSet { setNeedsDisplay() } }
     
-    override var frame: CGRect {
-        get {
-            return super.frame
-        }
-        set {
-            super.frame = newValue
-            setNeedsDisplay()
-        }
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        setNeedsDisplay()
     }
     
     func recomputePointsRect() {

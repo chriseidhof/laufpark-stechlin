@@ -17,6 +17,14 @@ extension UIColor {
 }
 
 extension Color {
+    var textColor: UIColor {
+        switch self {
+        case .yellow, .gray, .beige:
+            return .black
+        default:
+            return .white
+        }
+    }
     var uiColor: UIColor {
         switch self {
         case .red:

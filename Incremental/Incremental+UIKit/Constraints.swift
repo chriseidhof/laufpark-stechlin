@@ -32,3 +32,13 @@ public func equalTo(constant: CGFloat = 0, _ keyPath: KeyPath<UIView, NSLayoutDi
     return equal(keyPath, to: keyPath, constant: constant)
 }
 
+extension IBox where V: NSLayoutConstraint {
+    public func bindConstant(_ i: I<CGFloat>, view: UIView, animated: CGFloat = 0.2) {
+        disposables.append((i).observe { [unowned self] newValue in
+            self.unbox.constant = newValue
+            UIView.animate(withDuration: 0.2) {
+                view.layoutIfNeeded()
+            }
+        })
+    }
+}

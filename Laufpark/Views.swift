@@ -12,7 +12,7 @@ import MapKit
 
 enum Stylesheet {
     static let emphasis: I<UIFont> = I(constant: UIFont.boldSystemFont(ofSize: 17))
-
+    
     static let smallFont = UIFont.systemFont(ofSize: 10)
 }
 
@@ -87,7 +87,7 @@ func trackNumberView(_ track: I<Track>) -> IBox<UIView> {
     result.bind(backgroundColor, to: \.backgroundColor)
 
     
-    let numberLabel = label(text: track.map { $0.numbers }, backgroundColor: backgroundColor.map { $0 }, textColor: I(constant: .white), font: Stylesheet.emphasis)
+    let numberLabel = label(text: track.map { $0.numbers }, backgroundColor: backgroundColor.map { $0 }, textColor: track.map { $0.color.textColor }, font: Stylesheet.emphasis)
     result.addSubview(numberLabel, constraints: [
         equal(\.centerXAnchor), equal(\.centerYAnchor)])
     
