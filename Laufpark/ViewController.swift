@@ -117,11 +117,24 @@ final class MapViewDelegate: NSObject, MKMapViewDelegate {
 /// Returns a function that you can call to set the visible map rect
 func addMapView(persistent: Input<PersistentState>, state: Input<State>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
     var polygonToTrack: [MKPolygon:Track] = [:]
+    let darkMode = persistent[\.satellite]
+
+    func buildRenderer(_ polygon: MKPolygon) -> IBox<MKPolygonRenderer> {
+        let track = polygonToTrack[polygon]!
+        let isSelected = state.i[\.selection].map { $0 == track }
+        let shouldHighlight = !state.i[\.hasSelection] || isSelected
+        let lineColor = polygonToTrack[polygon]!.color.uiColor
+        let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.2), else: lineColor.withAlphaComponent(0.1))
+        return polygonRenderer(polygon: polygon,
+                               strokeColor: I(constant: lineColor),
+                               fillColor: fillColor.map { $0 },
+                               alpha: if_(shouldHighlight, then: I(constant: 1.0), else: if_(darkMode, then: 0.7, else: 1.0)),
+                               lineWidth: if_(shouldHighlight, then: I(constant: 3.0), else: if_(darkMode, then: 1.0, else: 1.0)))
+    }
     
     let mapView: IBox<MKMapView> = newMapView()
     rootView.addSubview(mapView, constraints: sizeToParent())
 
-    let darkMode = persistent[\.satellite]
     
     // MapView
     mapView.delegate = MapViewDelegate(rendererForOverlay: { [unowned mapView] mapView_, overlay in
@@ -207,19 +220,6 @@ func addMapView(persistent: Input<PersistentState>, state: Input<State>, rootVie
             mapView.unbox.setCenter(location.coordinate, animated: true)
         }
     })
-    
-    func buildRenderer(_ polygon: MKPolygon) -> IBox<MKPolygonRenderer> {
-        let track = polygonToTrack[polygon]!
-        let isSelected = state.i[\.selection].map { $0 == track }
-        let shouldHighlight = !state.i[\.hasSelection] || isSelected
-        let lineColor = polygonToTrack[polygon]!.color.uiColor
-        let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.2), else: lineColor.withAlphaComponent(0.1))
-        return polygonRenderer(polygon: polygon,
-                               strokeColor: I(constant: lineColor),
-                               fillColor: fillColor.map { $0 },
-                               alpha: if_(shouldHighlight, then: I(constant: 1.0), else: if_(darkMode, then: 0.5, else: 1.0)),
-                               lineWidth: if_(shouldHighlight, then: I(constant: 3.0), else: if_(darkMode, then: 1.0, else: 1.0)))
-    }
     
     return { mapView.unbox.setVisibleMapRect($0, animated: true) }
 }
