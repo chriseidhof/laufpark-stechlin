@@ -10,12 +10,41 @@ import UIKit
 import MapKit
 import Incremental
 
-struct State: Equatable, Codable {
-    var tracks: [Track]
-    var loading: Bool { return tracks.isEmpty }
+var globalPersistentValues: [String:Any] = [:]
+
+// Stores the state S in userDefaults under the provided key
+func persistent<S: Equatable & Codable>(key: String, initial start: S) -> Input<S> {
+    let defaults = UserDefaults.standard
+    let initial = defaults.data(forKey: key).flatMap {
+        let decoder = JSONDecoder()
+        let result = try? decoder.decode(S.self, from: $0)
+        return result
+    } ?? start
+
+    let input = Input<S>(initial)
+    let encoder = JSONEncoder()
+    let disposable = input.i.observe { value in
+        let data = try! encoder.encode(value)
+        defaults.set(data, forKey: key)
+        defaults.synchronize()
+    }
+    globalPersistentValues[key] = disposable
+    return input
+}
+
+struct PersistentState: Equatable, Codable {
     var annotationsVisible: Bool = false
     var satellite: Bool = false
     var showConfiguration: Bool = false
+
+    static func ==(lhs: PersistentState, rhs: PersistentState) -> Bool {
+        return lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite && lhs.showConfiguration == rhs.showConfiguration
+    }
+}
+
+struct State: Equatable, Codable {
+    var tracks: [Track]
+    var loading: Bool { return tracks.isEmpty }
     
     var selection: Track? {
         didSet {
@@ -44,16 +73,17 @@ struct State: Equatable, Codable {
     }
 
     static func ==(lhs: State, rhs: State) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite && lhs.showConfiguration == rhs.showConfiguration
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks
     }
 }
 
-func uiSwitch(valueChange: @escaping (_ isOn: Bool) -> ()) -> IBox<UISwitch> {
+func uiSwitch(initial: I<Bool>, valueChange: @escaping (_ isOn: Bool) -> ()) -> IBox<UISwitch> {
     let view = UISwitch()
     let result = IBox(view)
     result.handle(.valueChanged) { [unowned view] in
         valueChange(view.isOn)
     }
+    result.bind(initial, to: \.isOn)
     return result
 }
 
@@ -85,13 +115,13 @@ final class MapViewDelegate: NSObject, MKMapViewDelegate {
 }
 
 /// Returns a function that you can call to set the visible map rect
-func addMapView(state: Input<State>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
+func addMapView(persistent: Input<PersistentState>, state: Input<State>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
     var polygonToTrack: [MKPolygon:Track] = [:]
     
     let mapView: IBox<MKMapView> = newMapView()
     rootView.addSubview(mapView, constraints: sizeToParent())
 
-    let darkMode = state[\.satellite]
+    let darkMode = persistent[\.satellite]
     
     // MapView
     mapView.delegate = MapViewDelegate(rendererForOverlay: { [unowned mapView] mapView_, overlay in
@@ -138,7 +168,7 @@ func addMapView(state: Input<State>, rootView: IBox<UIView>) -> ((MKMapRect) -> 
             mapView.unbox.add(polygon)
         }
     })
-    mapView.bind(annotations: POI.all.map { poi in MKPointAnnotation(coordinate: poi.location, title: poi.name) }, visible: state[\.annotationsVisible])
+    mapView.bind(annotations: POI.all.map { poi in MKPointAnnotation(coordinate: poi.location, title: poi.name) }, visible: persistent[\.annotationsVisible])
     mapView.addGestureRecognizer(tapGestureRecognizer { [unowned mapView] sender in
         let point = sender.location(ofTouch: 0, in: mapView.unbox)
         let mapPoint = MKMapPointForCoordinate(mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox))
@@ -158,7 +188,7 @@ func addMapView(state: Input<State>, rootView: IBox<UIView>) -> ((MKMapRect) -> 
         }
         
     })
-    mapView.bind(state.i.map { $0.satellite ? .hybrid : .standard }, to: \.mapType)
+    mapView.bind(persistent.i.map { $0.satellite ? .hybrid : .standard }, to: \.mapType)
 
     let draggedLocation: I<(Double, CLLocation)?> = state.i.map({ $0.draggedLocation })
 
@@ -194,9 +224,9 @@ func addMapView(state: Input<State>, rootView: IBox<UIView>) -> ((MKMapRect) -> 
     return { mapView.unbox.setVisibleMapRect($0, animated: true) }
 }
 
-func build(state: Input<State>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
-    let darkMode = state[\.satellite]
-    let setMapRect = addMapView(state: state, rootView: rootView)
+func build(persistent: Input<PersistentState>, state: Input<State>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
+    let darkMode = persistent[\.satellite]
+    let setMapRect = addMapView(persistent: persistent, state: state, rootView: rootView)
     
     let draggedLocation: I<(Double, CLLocation)?> = state.i.map({ $0.draggedLocation })
     
@@ -213,10 +243,10 @@ func build(state: Input<State>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
         state.change { $0.trackPosition = loc }
     })
     
-    func switchWith(label text: String, textColor: I<UIColor>, action: @escaping (Bool) -> ()) -> IBox<UIView> {
+    func switchWith(label text: String, value: I<Bool>, textColor: I<UIColor>, action: @escaping (Bool) -> ()) -> IBox<UIView> {
         let switchLabel = label(text: I(constant: text), textColor: textColor.map { $0 }, font: I(constant: Stylesheet.smallFont) )
         switchLabel.unbox.textAlignment = .left
-        let switch_ = uiSwitch(valueChange: action)
+        let switch_ = uiSwitch(initial: value, valueChange: action)
         let stack = stackView(arrangedSubviews: [switch_.cast, switchLabel.cast], axis: .vertical)
         return stack.cast
     }
@@ -224,10 +254,10 @@ func build(state: Input<State>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
     let textColor = darkMode.map { $0 ? UIColor.white : .black }
     
     // Configuration View
-    let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), textColor: textColor, action: { value in state.change {
+    let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), value: persistent[\.annotationsVisible], textColor: textColor, action: { value in persistent.change {
         $0.annotationsVisible = value
         }})
-    let satellite = switchWith(label: NSLocalizedString("Satellit", comment: ""), textColor: textColor, action: { value in state.change {
+    let satellite = switchWith(label: NSLocalizedString("Satellit", comment: ""), value: persistent[\.satellite], textColor: textColor, action: { value in persistent.change {
         $0.satellite = value
         }})
     
@@ -254,7 +284,7 @@ func build(state: Input<State>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
     topStackview.unbox.distribution = .fillProportionally
     let topConstraint = IBox(rootView.unbox.topAnchor.constraint(equalTo: topView.unbox.topAnchor))
     topConstraint.unbox.isActive = true
-    topConstraint.bindConstant(if_(state.i[\.showConfiguration], then: 0, else: 100 + 1), view: rootView.unbox)
+    topConstraint.bindConstant(if_(persistent.i[\.showConfiguration], then: 0, else: 100 + 1), view: rootView.unbox)
     topStackview.disposables.append(topConstraint)
     
     
@@ -289,7 +319,7 @@ func build(state: Input<State>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
     
     // Toggle Map Button
     let toggleMapButton = button(type: .custom, title: I(constant: "…"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: {
-        state.change { $0.showConfiguration.toggle() }
+        persistent.change { $0.showConfiguration.toggle() }
     })
     toggleMapButton.unbox.layer.cornerRadius = 3
     rootView.addSubview(toggleMapButton, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -inset), equal(\.trailingAnchor, constant: 10)])
@@ -299,6 +329,7 @@ func build(state: Input<State>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
 
 class ViewController: UIViewController {
     let state: Input<State>
+    let persistentState: Input<PersistentState> = persistent(key: "de.laufpark-stechlin.state", initial: PersistentState())
     var rootView: IBox<UIView>!
 
     var disposables: [Any] = []
@@ -321,7 +352,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         rootView = IBox(view!)
-        setMapRect = build(state: state, rootView: rootView)
+        setMapRect = build(persistent: persistentState, state: state, rootView: rootView)
     }
     
     func resetMapRect() {
@@ -337,4 +368,3 @@ class ViewController: UIViewController {
         }
     }
 }
-
