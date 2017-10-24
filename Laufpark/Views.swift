@@ -48,7 +48,7 @@ func trackInfoView(position: I<CGFloat?>, points: I<[LineView.Point]>, track: I<
     trackInfo.unbox.spacing = 10
     
     result.addSubview(trackInfo, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.topAnchor)])
-    result.addSubview(lv, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.bottomAnchor), equalTo(constant: 20, \.heightAnchor)])
+    result.addSubview(lv.cast, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.bottomAnchor), equalTo(constant: I(constant: 100), \.heightAnchor)])
     lv.unbox.topAnchor.constraint(equalTo: trackInfo.unbox.bottomAnchor).isActive = true
         
     return (result, pannedLocation.i)

@@ -15,9 +15,10 @@ public func viewController<V: UIView>(rootView: IBox<V>, constraints: [Constrain
     vc.view.backgroundColor = .white
     box.disposables.append(rootView)
     rootView.unbox.translatesAutoresizingMaskIntoConstraints = false
-    for c in constraints {
-        c(vc.view, rootView.unbox).isActive = true
-    }
+    
+    let evaluatedConstraints = constraints.map { $0(vc.view, rootView.unbox) }
+    NSLayoutConstraint.activate(evaluatedConstraints.map { $0.unbox })
+    box.disposables.append(evaluatedConstraints)
     return box
 }
 

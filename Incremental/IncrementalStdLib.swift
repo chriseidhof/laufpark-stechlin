@@ -42,6 +42,10 @@ public prefix func !(l: I<Bool>) -> I<Bool> {
     return l.map { !$0 }
 }
 
+public prefix func -<N: SignedNumeric>(l: I<N>) -> I<N> {
+    return l.map { -$0 }
+}
+
 public func ==<A>(l: I<A>, r: I<A>) -> I<Bool> where A: Equatable {
     return l.zip2(r, ==)
 }

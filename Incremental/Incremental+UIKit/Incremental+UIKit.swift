@@ -9,11 +9,11 @@
 import Foundation
 
 extension UIView {
-    public func addSubview(_ subview: UIView, constraints: [Constraint]) {
+    public func addSubview<V: UIView>(_ subview: V, constraints: [NSLayoutConstraint]) {
         addSubview(subview)
         if !constraints.isEmpty {
             subview.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate(constraints.map { $0(self, subview) })
+            NSLayoutConstraint.activate(constraints)
         }
 
     }
@@ -47,7 +47,9 @@ extension IBox where V: UIView {
     public func addSubview<S>(_ subview: IBox<S>, path: KeyPath<V,UIView>? = nil, constraints: [Constraint] = []) where S: UIView {
         disposables.append(subview)
         let target: UIView = path.map { kp in unbox[keyPath: kp] } ?? unbox
-        target.addSubview(subview.unbox, constraints: constraints)
+        let evaluatedConstraints = constraints.map { $0(self.unbox, subview.unbox) }
+        target.addSubview(subview.unbox, constraints: evaluatedConstraints.map { $0.unbox })
+        disposables.append(evaluatedConstraints)
         
     }
     

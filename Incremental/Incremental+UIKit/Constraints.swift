@@ -8,28 +8,42 @@
 
 import Foundation
 
-public typealias Constraint = (_ parent: UIView, _ child: UIView) -> NSLayoutConstraint
+public typealias Constraint = (_ parent: UIView, _ child: UIView) -> IBox<NSLayoutConstraint>
 
-public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, to: KeyPath<UIView, Anchor>, constant: CGFloat = 0) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
+public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, to: KeyPath<UIView, Anchor>, constant: I<CGFloat> = I(constant: 0)) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
     return { parent, child in
-         parent[keyPath: keyPath].constraint(equalTo: child[keyPath: keyPath], constant: constant)
+         let result = IBox(parent[keyPath: keyPath].constraint(equalTo: child[keyPath: keyPath]))
+         result.bindConstant(constant, view: parent)
+         return result
     }
 }
 
-public func sizeToParent(inset constant: CGFloat = 0) -> [Constraint] {
+public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, to: KeyPath<UIView, Anchor>, constant: CGFloat) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
+    return equal(keyPath, to: to, constant: I(constant: constant))
+}
+
+public func sizeToParent(inset constant: I<CGFloat> = I(constant: 0)) -> [Constraint] {
     return [equal(\.leadingAnchor, constant: -constant),
             equal(\.trailingAnchor, constant: constant),
             equal(\.topAnchor, constant: -constant),
             equal(\.bottomAnchor, constant: constant)]
 }
 
-public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, constant: CGFloat = 0) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
+public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, constant: I<CGFloat> = I(constant: 0)) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
     return equal(keyPath, to: keyPath, constant: constant)
 }
 
+public func equal<Anchor, Axis>(_ keyPath: KeyPath<UIView, Anchor>, _ constant: CGFloat) -> Constraint where Anchor: NSLayoutAnchor<Axis> {
+    return equal(keyPath, to: keyPath, constant: I(constant: constant))
+}
 
-public func equalTo(constant: CGFloat = 0, _ keyPath: KeyPath<UIView, NSLayoutDimension>) -> Constraint  {
-    return equal(keyPath, to: keyPath, constant: constant)
+
+public func equalTo(constant: I<CGFloat> = I(constant: 0), _ keyPath: KeyPath<UIView, NSLayoutDimension>) -> Constraint  {
+    return { parent, child in
+        let constraint = IBox(child[keyPath: keyPath].constraint(equalToConstant: 0))
+        constraint.bindConstant(constant, view: parent)
+        return constraint
+    }
 }
 
 extension IBox where V: NSLayoutConstraint {

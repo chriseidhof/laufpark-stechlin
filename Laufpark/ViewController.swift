@@ -212,8 +212,6 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         $0.satellite = value
         }})
     
-    let trackInfoHeight: CGFloat = 120
-    trackInfo.unbox.heightAnchor.constraint(equalToConstant: trackInfoHeight).isActive = true
     
     func border() -> IBox<UIView> {
         let _border = UIView()
@@ -226,42 +224,38 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     let inset: CGFloat = 10
     
     // Blurred Top View (Configuration)
+    let topOffset: I<CGFloat> = if_(persistent.i[\.showConfiguration], then: 0, else: 100 + 1)
     let topView = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
-    topView.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.bottomAnchor), equal(\.heightAnchor, constant: 100)])
-    rootView.addSubview(topView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor)])
+    topView.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.bottomAnchor), equal(\.heightAnchor, constant: I(constant: 100))])
+    rootView.addSubview(topView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equal(\.topAnchor, constant: topOffset)])
     let topStackview = stackView(arrangedSubviews: [accomodation, satellite], axis: .horizontal)
-    topView.addSubview(topStackview, path: \.contentView, constraints: [equal(\.leftAnchor, constant: -inset), equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -inset), equal(\.rightAnchor, constant: inset)])
+    topView.addSubview(topStackview, path: \.contentView, constraints: [equal(\.leftAnchor, constant: I(constant: -inset)), equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: I(constant: -inset)), equal(\.rightAnchor, constant: I(constant: inset))])
     topStackview.unbox.alignment = .leading
     topStackview.unbox.distribution = .fillProportionally
-    let topConstraint = IBox(rootView.unbox.topAnchor.constraint(equalTo: topView.unbox.topAnchor))
-    topConstraint.unbox.isActive = true
-    topConstraint.bindConstant(if_(persistent.i[\.showConfiguration], then: 0, else: 100 + 1), view: rootView.unbox)
-    topStackview.disposables.append(topConstraint)
     
     
     // Blurred Bottom View (Showing the current track)
     let blurredView = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
-    
+
     // Border
     blurredView.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.topAnchor)])
+
+    let trackInfoHeight: CGFloat = 120
+    let blurredViewHeight = trackInfoHeight + 2 * inset
+    let bottomOffset: I<CGFloat> = if_(state.i[\.hasSelection], then: 0, else: -(blurredViewHeight + 20))
+    trackInfo.unbox.heightAnchor.constraint(equalToConstant: trackInfoHeight).isActive = true
     
-    let infoStackView = stackView(arrangedSubviews: [trackInfo])
-    blurredView.addSubview(infoStackView, path: \.contentView, constraints: [equal(\.leftAnchor, constant: -inset), equal(\.topAnchor, constant: -inset), equal(\.rightAnchor, constant: inset)])
-    rootView.addSubview(blurredView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equal(\.heightAnchor, constant: 120+2*inset)])
-    let bottomConstraint = IBox(blurredView.unbox.topAnchor.constraint(equalTo: rootView.unbox.bottomAnchor))
-    let bottomOffset: I<CGFloat> = if_(state.i[\.hasSelection], then: -(trackInfoHeight + 2 * inset), else: 20)
-    bottomConstraint.bindConstant(bottomOffset, view: rootView.unbox)
-    rootView.disposables.append(bottomConstraint)
-    NSLayoutConstraint.activate([bottomConstraint.unbox])
-    
+    blurredView.addSubview(trackInfo, path: \.contentView, constraints: [equal(\.leftAnchor, -inset), equal(\.topAnchor, -inset), equal(\.rightAnchor,  inset)])
+    rootView.addSubview(blurredView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: I(constant: blurredViewHeight), \.heightAnchor), equal(\.bottomAnchor, constant: bottomOffset)])
+
     // Number View
     let trackNumber = trackNumberView(state.i.map { $0.selection} ?? Track(color: .blue, number: 0, name: "", points: []))
     rootView.addSubview(trackNumber)
     let yConstraint = blurredView.unbox.topAnchor.constraint(equalTo: trackNumber.unbox.centerYAnchor)
     let xConstraint = blurredView.unbox.rightAnchor.constraint(equalTo: trackNumber.unbox.centerXAnchor, constant: 42)
     NSLayoutConstraint.activate([xConstraint,yConstraint])
-    
- 
+
+
     
     // Loading Indicator
     let isLoading = state[\.loading]
@@ -273,7 +267,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         persistent.change { $0.showConfiguration.toggle() }
     })
     toggleMapButton.unbox.layer.cornerRadius = 3
-    rootView.addSubview(toggleMapButton, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -inset), equal(\.trailingAnchor, constant: 10)])
+    rootView.addSubview(toggleMapButton.cast, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -inset), equal(\.trailingAnchor, 10)])
     
     return setMapRect
 }
