@@ -20,4 +20,15 @@ extension IBox where V: MKMapView {
         })
 
     }
+    
+    public var delegate: MKMapViewDelegate? {
+        get { return unbox.delegate }
+        set {
+            if let existing = disposables.index(where: { ($0 as? MKMapViewDelegate) === unbox.delegate }) {
+                disposables.remove(at: existing)
+            }
+            if let value = newValue { disposables.append(value) }
+            unbox.delegate = newValue
+        }
+    }
 }

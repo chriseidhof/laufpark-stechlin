@@ -94,7 +94,7 @@ func trackNumberView(_ track: I<Track>) -> IBox<UIView> {
     return result
 }
 
-func buildMapView() -> IBox<MKMapView> {
+func newMapView() -> IBox<MKMapView> {
     let box = IBox(MKMapView())
     let view = box.unbox
     view.showsCompass = true
