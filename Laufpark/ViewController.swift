@@ -10,39 +10,17 @@ import UIKit
 import MapKit
 import Incremental
 
-var globalPersistentValues: [String:Any] = [:]
-
-// Stores the state S in userDefaults under the provided key
-func persistent<S: Equatable & Codable>(key: String, initial start: S) -> Input<S> {
-    let defaults = UserDefaults.standard
-    let initial = defaults.data(forKey: key).flatMap {
-        let decoder = JSONDecoder()
-        let result = try? decoder.decode(S.self, from: $0)
-        return result
-    } ?? start
-
-    let input = Input<S>(initial)
-    let encoder = JSONEncoder()
-    let disposable = input.i.observe { value in
-        let data = try! encoder.encode(value)
-        defaults.set(data, forKey: key)
-        defaults.synchronize()
-    }
-    globalPersistentValues[key] = disposable
-    return input
-}
-
-struct PersistentState: Equatable, Codable {
+struct StoredState: Equatable, Codable {
     var annotationsVisible: Bool = false
     var satellite: Bool = false
     var showConfiguration: Bool = false
 
-    static func ==(lhs: PersistentState, rhs: PersistentState) -> Bool {
+    static func ==(lhs: StoredState, rhs: StoredState) -> Bool {
         return lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite && lhs.showConfiguration == rhs.showConfiguration
     }
 }
 
-struct State: Equatable, Codable {
+struct DisplayState: Equatable, Codable {
     var tracks: [Track]
     var loading: Bool { return tracks.isEmpty }
     
@@ -72,7 +50,7 @@ struct State: Equatable, Codable {
         return (distance: distance, location: point)
     }
 
-    static func ==(lhs: State, rhs: State) -> Bool {
+    static func ==(lhs: DisplayState, rhs: DisplayState) -> Bool {
         return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks
     }
 }
@@ -87,35 +65,8 @@ func uiSwitch(initial: I<Bool>, valueChange: @escaping (_ isOn: Bool) -> ()) -> 
     return result
 }
 
-final class MapViewDelegate: NSObject, MKMapViewDelegate {
-    let rendererForOverlay: (_ mapView: MKMapView, _ overlay: MKOverlay) -> MKOverlayRenderer
-    let viewForAnnotation: (_ mapView: MKMapView, _ annotation: MKAnnotation) -> MKAnnotationView?
-    let regionDidChangeAnimated: (_ mapView: MKMapView) -> ()
-    
-    init(rendererForOverlay: @escaping (_ mapView: MKMapView, _ overlay: MKOverlay) -> MKOverlayRenderer,
-         viewForAnnotation: @escaping (_ mapView: MKMapView, _ annotation: MKAnnotation) -> MKAnnotationView?,
-         regionDidChangeAnimated: @escaping (_ mapView: MKMapView) -> ()) {
-        self.rendererForOverlay = rendererForOverlay
-        self.viewForAnnotation = viewForAnnotation
-        self.regionDidChangeAnimated = regionDidChangeAnimated
-    }
-
-    
-    func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
-        return rendererForOverlay(mapView, overlay)
-    }
-    
-    func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
-        return viewForAnnotation(mapView, annotation)
-    }
-    
-    func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
-        return regionDidChangeAnimated(mapView)
-    }
-}
-
 /// Returns a function that you can call to set the visible map rect
-func addMapView(persistent: Input<PersistentState>, state: Input<State>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
+func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
     var polygonToTrack: [MKPolygon:Track] = [:]
     let darkMode = persistent[\.satellite]
 
@@ -224,7 +175,7 @@ func addMapView(persistent: Input<PersistentState>, state: Input<State>, rootVie
     return { mapView.unbox.setVisibleMapRect($0, animated: true) }
 }
 
-func build(persistent: Input<PersistentState>, state: Input<State>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
+func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
     let darkMode = persistent[\.satellite]
     let setMapRect = addMapView(persistent: persistent, state: state, rootView: rootView)
     
@@ -328,8 +279,8 @@ func build(persistent: Input<PersistentState>, state: Input<State>, rootView: IB
 }
 
 class ViewController: UIViewController {
-    let state: Input<State>
-    let persistentState: Input<PersistentState> = persistent(key: "de.laufpark-stechlin.state", initial: PersistentState())
+    let state: Input<DisplayState>
+    let persistentState: Input<StoredState> = persistent(key: "de.laufpark-stechlin.state", initial: StoredState())
     var rootView: IBox<UIView>!
 
     var disposables: [Any] = []
@@ -337,7 +288,7 @@ class ViewController: UIViewController {
     var setMapRect: ((MKMapRect) -> ())?
 
     init() {
-        state = Input(State(tracks: []))
+        state = Input(DisplayState(tracks: []))
 
         super.init(nibName: nil, bundle: nil)
     }

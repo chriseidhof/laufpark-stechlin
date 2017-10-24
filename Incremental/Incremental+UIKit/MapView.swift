@@ -32,3 +32,30 @@ extension IBox where V: MKMapView {
         }
     }
 }
+
+public final class MapViewDelegate: NSObject, MKMapViewDelegate {
+    let rendererForOverlay: (_ mapView: MKMapView, _ overlay: MKOverlay) -> MKOverlayRenderer
+    let viewForAnnotation: (_ mapView: MKMapView, _ annotation: MKAnnotation) -> MKAnnotationView?
+    let regionDidChangeAnimated: (_ mapView: MKMapView) -> ()
+    
+    public init(rendererForOverlay: @escaping (_ mapView: MKMapView, _ overlay: MKOverlay) -> MKOverlayRenderer,
+         viewForAnnotation: @escaping (_ mapView: MKMapView, _ annotation: MKAnnotation) -> MKAnnotationView?,
+         regionDidChangeAnimated: @escaping (_ mapView: MKMapView) -> ()) {
+        self.rendererForOverlay = rendererForOverlay
+        self.viewForAnnotation = viewForAnnotation
+        self.regionDidChangeAnimated = regionDidChangeAnimated
+    }
+    
+    
+    public func mapView(_ mapView: MKMapView, rendererFor overlay: MKOverlay) -> MKOverlayRenderer {
+        return rendererForOverlay(mapView, overlay)
+    }
+    
+    public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
+        return viewForAnnotation(mapView, annotation)
+    }
+    
+    public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        return regionDidChangeAnimated(mapView)
+    }
+}
