@@ -203,7 +203,7 @@ func addMapView(persistent: Input<PersistentState>, state: Input<State>, rootVie
     })
     mapView.bind(persistent.i.map { $0.satellite ? .hybrid : .standard }, to: \.mapType)
 
-    let draggedLocation: I<(Double, CLLocation)?> = state.i.map({ $0.draggedLocation })
+    let draggedLocation = state.i.map { $0.draggedLocation }
 
     // Dragged Point Annotation
     let draggedPoint: I<CLLocationCoordinate2D> = draggedLocation.map {
@@ -228,7 +228,7 @@ func build(persistent: Input<PersistentState>, state: Input<State>, rootView: IB
     let darkMode = persistent[\.satellite]
     let setMapRect = addMapView(persistent: persistent, state: state, rootView: rootView)
     
-    let draggedLocation: I<(Double, CLLocation)?> = state.i.map({ $0.draggedLocation })
+    let draggedLocation = state.i.map { $0.draggedLocation }
     
     // Track Info View
     let position: I<CGFloat?> = draggedLocation.map { ($0?.0).map { CGFloat($0) } }
