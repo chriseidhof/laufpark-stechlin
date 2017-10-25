@@ -222,37 +222,42 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     }
     
     let inset: CGFloat = 10
+
+    func blurredView<V: UIView>(borderAnchor: @escaping Constraint, child: IBox<V>) -> IBox<UIVisualEffectView> {
+        let result = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
+        result.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), borderAnchor])
+        result.addSubview(child, path: \.contentView, constraints: [equal(\.leftAnchor, constant: I(constant: -inset)), equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: I(constant: -inset)), equal(\.rightAnchor, constant: I(constant: inset))])        
+        return result
+    }
+    
     
     // Blurred Top View (Configuration)
     let topOffset: I<CGFloat> = if_(persistent.i[\.showConfiguration], then: 0, else: 100 + 1)
-    let topView = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
-    topView.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.bottomAnchor), equal(\.heightAnchor, constant: I(constant: 100))])
-    rootView.addSubview(topView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equal(\.topAnchor, constant: topOffset)])
+    
     let topStackview = stackView(arrangedSubviews: [accomodation, satellite], axis: .horizontal)
-    topView.addSubview(topStackview, path: \.contentView, constraints: [equal(\.leftAnchor, constant: I(constant: -inset)), equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: I(constant: -inset)), equal(\.rightAnchor, constant: I(constant: inset))])
+    let topView = blurredView(borderAnchor: equal(\.bottomAnchor), child: topStackview)
+    
+    rootView.addSubview(topView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equal(\.topAnchor, constant: topOffset, animation: Stylesheet.dampingAnimation), equalTo(constant: I(constant: 100), \.heightAnchor)])
+
     topStackview.unbox.alignment = .leading
     topStackview.unbox.distribution = .fillProportionally
     
     
     // Blurred Bottom View (Showing the current track)
-    let blurredView = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
-
-    // Border
-    blurredView.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), equal(\.topAnchor)])
-
+    let bottomView = blurredView(borderAnchor: equal(\.topAnchor), child: trackInfo)
+    
     let trackInfoHeight: CGFloat = 120
     let blurredViewHeight = trackInfoHeight + 2 * inset
     let bottomOffset: I<CGFloat> = if_(state.i[\.hasSelection], then: 0, else: -(blurredViewHeight + 20))
     trackInfo.unbox.heightAnchor.constraint(equalToConstant: trackInfoHeight).isActive = true
     
-    blurredView.addSubview(trackInfo, path: \.contentView, constraints: [equal(\.leftAnchor, -inset), equal(\.topAnchor, -inset), equal(\.rightAnchor,  inset)])
-    rootView.addSubview(blurredView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: I(constant: blurredViewHeight), \.heightAnchor), equal(\.bottomAnchor, constant: bottomOffset)])
+    rootView.addSubview(bottomView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: I(constant: blurredViewHeight), \.heightAnchor), equal(\.bottomAnchor, constant: bottomOffset, animation: Stylesheet.dampingAnimation)])
 
     // Number View
     let trackNumber = trackNumberView(state.i.map { $0.selection} ?? Track(color: .blue, number: 0, name: "", points: []))
     rootView.addSubview(trackNumber)
-    let yConstraint = blurredView.unbox.topAnchor.constraint(equalTo: trackNumber.unbox.centerYAnchor)
-    let xConstraint = blurredView.unbox.rightAnchor.constraint(equalTo: trackNumber.unbox.centerXAnchor, constant: 42)
+    let yConstraint = bottomView.unbox.topAnchor.constraint(equalTo: trackNumber.unbox.centerYAnchor)
+    let xConstraint = bottomView.unbox.rightAnchor.constraint(equalTo: trackNumber.unbox.centerXAnchor, constant: 42)
     NSLayoutConstraint.activate([xConstraint,yConstraint])
 
 

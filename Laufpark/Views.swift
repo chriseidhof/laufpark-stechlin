@@ -14,6 +14,12 @@ enum Stylesheet {
     static let emphasis: I<UIFont> = I(constant: UIFont.boldSystemFont(ofSize: 17))
     
     static let smallFont = UIFont.systemFont(ofSize: 10)
+    
+    static let dampingAnimation: Animation = { parent, _ in
+        UIViewPropertyAnimator(duration: 0.2, dampingRatio: 0.6) {
+            parent.layoutIfNeeded()
+        }.startAnimation()
+    }
 }
 
 
