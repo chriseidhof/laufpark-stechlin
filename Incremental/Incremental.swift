@@ -1,5 +1,6 @@
 import Foundation
 
+// TODO: expose an Incremental.transaction method which allows multiple writes before processing.
 // This class is (by design) not thread-safe
 final class Queue {
     static let shared = Queue()
