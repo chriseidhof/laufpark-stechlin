@@ -98,6 +98,92 @@
 		8379CF311FB83E04009CD00F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF301FB83E04009CD00F /* AppDelegate.swift */; };
 		8379CF331FB83E04009CD00F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8379CF321FB83E04009CD00F /* Assets.xcassets */; };
 		8379CF361FB83E04009CD00F /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 8379CF341FB83E04009CD00F /* MainMenu.xib */; };
+		8379CF3E1FB83F62009CD00F /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8340DFAD1F61B2F6002176C6 /* Model.swift */; };
+		8379CF3F1FB83F7A009CD00F /* wabe pink-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AFA1F63CE6E00D3EBB8 /* wabe pink-strecke 0.gpx */; };
+		8379CF401FB83F7A009CD00F /* wabe gelb-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AF81F63CDA100D3EBB8 /* wabe gelb-strecke 0.gpx */; };
+		8379CF411FB83F7A009CD00F /* wabe beige-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE51F63CD2700D3EBB8 /* wabe beige-strecke 0.gpx */; };
+		8379CF421FB83F7A009CD00F /* wabe blau-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE41F63CD2700D3EBB8 /* wabe blau-strecke 0.gpx */; };
+		8379CF431FB83F7A009CD00F /* wabe braun-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE31F63CD2700D3EBB8 /* wabe braun-strecke 0.gpx */; };
+		8379CF441FB83F7A009CD00F /* wabe gruen-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE61F63CD2700D3EBB8 /* wabe gruen-strecke 0.gpx */; };
+		8379CF451FB83F7A009CD00F /* wabe hellblau-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE91F63CD2800D3EBB8 /* wabe hellblau-strecke 0.gpx */; };
+		8379CF461FB83F7A009CD00F /* wabe hellbraun-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE01F63CD2600D3EBB8 /* wabe hellbraun-strecke 0.gpx */; };
+		8379CF471FB83F7A009CD00F /* wabe hellgruen-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE71F63CD2700D3EBB8 /* wabe hellgruen-strecke 0.gpx */; };
+		8379CF481FB83F7A009CD00F /* wabe lila-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE81F63CD2700D3EBB8 /* wabe lila-strecke 0.gpx */; };
+		8379CF491FB83F7A009CD00F /* wabe rosa-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AEA1F63CD2800D3EBB8 /* wabe rosa-strecke 0.gpx */; };
+		8379CF4A1FB83F7A009CD00F /* wabe rot-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AEB1F63CD2800D3EBB8 /* wabe rot-strecke 0.gpx */; };
+		8379CF4B1FB83F7A009CD00F /* wabe tuerkis-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE11F63CD2600D3EBB8 /* wabe tuerkis-strecke 0.gpx */; };
+		8379CF4C1FB83F7A009CD00F /* wabe violett-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AE21F63CD2600D3EBB8 /* wabe violett-strecke 0.gpx */; };
+		8379CF4D1FB83F7A009CD00F /* wabe blau-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079391F626D8700BC7C98 /* wabe blau-strecke 1.gpx */; };
+		8379CF4E1FB83F7A009CD00F /* wabe blau-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340791D1F626D8300BC7C98 /* wabe blau-strecke 2.gpx */; };
+		8379CF4F1FB83F7A009CD00F /* wabe blau-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079211F626D8400BC7C98 /* wabe blau-strecke 3.gpx */; };
+		8379CF501FB83F7A009CD00F /* wabe braun-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079311F626D8600BC7C98 /* wabe braun-strecke 1.gpx */; };
+		8379CF511FB83F7A009CD00F /* wabe braun-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079291F626D8500BC7C98 /* wabe braun-strecke 2.gpx */; };
+		8379CF521FB83F7A009CD00F /* wabe braun-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079201F626D8300BC7C98 /* wabe braun-strecke 3.gpx */; };
+		8379CF531FB83F7A009CD00F /* wabe braun-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340795C1F626F0100BC7C98 /* wabe braun-strecke 4.gpx */; };
+		8379CF541FB83F7A009CD00F /* wabe gelb-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792E1F626D8500BC7C98 /* wabe gelb-strecke 1.gpx */; };
+		8379CF551FB83F7A009CD00F /* wabe gelb-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079251F626D8400BC7C98 /* wabe gelb-strecke 2.gpx */; };
+		8379CF561FB83F7A009CD00F /* wabe gelb-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079361F626D8600BC7C98 /* wabe gelb-strecke 3.gpx */; };
+		8379CF571FB83F7A009CD00F /* wabe gelb-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079321F626D8600BC7C98 /* wabe gelb-strecke 4.gpx */; };
+		8379CF581FB83F7A009CD00F /* wabe grau-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079341F626D8600BC7C98 /* wabe grau-strecke 0.gpx */; };
+		8379CF591FB83F7A009CD00F /* wabe hellblau-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792A1F626D8500BC7C98 /* wabe hellblau-strecke 1.gpx */; };
+		8379CF5A1FB83F7A009CD00F /* wabe hellblau-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340791C1F626D8300BC7C98 /* wabe hellblau-strecke 2.gpx */; };
+		8379CF5B1FB83F7A009CD00F /* wabe hellblau-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079371F626D8700BC7C98 /* wabe hellblau-strecke 3.gpx */; };
+		8379CF5C1FB83F7A009CD00F /* wabe hellblau-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792B1F626D8500BC7C98 /* wabe hellblau-strecke 4.gpx */; };
+		8379CF5D1FB83F7A009CD00F /* wabe hellbraun-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079331F626D8600BC7C98 /* wabe hellbraun-strecke 1.gpx */; };
+		8379CF5E1FB83F7A009CD00F /* wabe hellbraun-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792F1F626D8500BC7C98 /* wabe hellbraun-strecke 2.gpx */; };
+		8379CF5F1FB83F7A009CD00F /* wabe hellbraun-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079231F626D8400BC7C98 /* wabe hellbraun-strecke 3.gpx */; };
+		8379CF601FB83F7A009CD00F /* wabe hellbraun-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079221F626D8400BC7C98 /* wabe hellbraun-strecke 4.gpx */; };
+		8379CF611FB83F7A009CD00F /* wabe hellbraun-strecke 5.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792C1F626D8500BC7C98 /* wabe hellbraun-strecke 5.gpx */; };
+		8379CF621FB83F7A009CD00F /* wabe orange-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340792D1F626D8500BC7C98 /* wabe orange-strecke 0.gpx */; };
+		8379CF631FB83F7A009CD00F /* wabe pink-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079381F626D8700BC7C98 /* wabe pink-strecke 1.gpx */; };
+		8379CF641FB83F7A009CD00F /* wabe pink-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079241F626D8400BC7C98 /* wabe pink-strecke 2.gpx */; };
+		8379CF651FB83F7A009CD00F /* wabe pink-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079271F626D8400BC7C98 /* wabe pink-strecke 3.gpx */; };
+		8379CF661FB83F7A009CD00F /* wabe pink-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340791F1F626D8300BC7C98 /* wabe pink-strecke 4.gpx */; };
+		8379CF671FB83F7A009CD00F /* wabe rosa-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079261F626D8400BC7C98 /* wabe rosa-strecke 1.gpx */; };
+		8379CF681FB83F7A009CD00F /* wabe rosa-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340793A1F626D8700BC7C98 /* wabe rosa-strecke 2.gpx */; };
+		8379CF691FB83F7A009CD00F /* wabe rosa-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340791E1F626D8300BC7C98 /* wabe rosa-strecke 3.gpx */; };
+		8379CF6A1FB83F7A009CD00F /* wabe rosa-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079301F626D8500BC7C98 /* wabe rosa-strecke 4.gpx */; };
+		8379CF6B1FB83F7A009CD00F /* wabe rosa-strecke 5.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079351F626D8600BC7C98 /* wabe rosa-strecke 5.gpx */; };
+		8379CF6C1FB83F7A009CD00F /* wabe rosa-strecke 6.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079281F626D8400BC7C98 /* wabe rosa-strecke 6.gpx */; };
+		8379CF6D1FB83F7A009CD00F /* wabe rot-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA71F61B227002176C6 /* wabe rot-strecke 1.gpx */; };
+		8379CF6E1FB83F7A009CD00F /* wabe rot-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA61F61B227002176C6 /* wabe rot-strecke 2.gpx */; };
+		8379CF6F1FB83F7A009CD00F /* wabe rot-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA51F61B227002176C6 /* wabe rot-strecke 3.gpx */; };
+		8379CF701FB83F7A009CD00F /* wabe rot-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */; };
+		8379CF711FB83F7A009CD00F /* wabe tuerkis-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E31F62679900BC7C98 /* wabe tuerkis-strecke 1.gpx */; };
+		8379CF721FB83F7A009CD00F /* wabe tuerkis-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E51F62679900BC7C98 /* wabe tuerkis-strecke 2.gpx */; };
+		8379CF731FB83F7A009CD00F /* wabe tuerkis-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E61F62679900BC7C98 /* wabe tuerkis-strecke 3.gpx */; };
+		8379CF741FB83F7A009CD00F /* wabe tuerkis-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E41F62679900BC7C98 /* wabe tuerkis-strecke 4.gpx */; };
+		8379CF751FB83F7A009CD00F /* wabe tuerkis-strecke 5.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078E71F62679900BC7C98 /* wabe tuerkis-strecke 5.gpx */; };
+		8379CF761FB83F7A009CD00F /* wabe tuerkis-strecke 6.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078EE1F6269C500BC7C98 /* wabe tuerkis-strecke 6.gpx */; };
+		8379CF771FB83F7A009CD00F /* wabe hellgruen-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F01F6269E000BC7C98 /* wabe hellgruen-strecke 1.gpx */; };
+		8379CF781FB83F7A009CD00F /* wabe hellgruen-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F11F6269E000BC7C98 /* wabe hellgruen-strecke 2.gpx */; };
+		8379CF791FB83F7A009CD00F /* wabe hellgruen-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F21F6269E000BC7C98 /* wabe hellgruen-strecke 3.gpx */; };
+		8379CF7A1FB83F7A009CD00F /* wabe hellgruen-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F41F6269E000BC7C98 /* wabe hellgruen-strecke 4.gpx */; };
+		8379CF7B1FB83F7A009CD00F /* wabe hellgruen-strecke 5.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F31F6269E000BC7C98 /* wabe hellgruen-strecke 5.gpx */; };
+		8379CF7C1FB83F7A009CD00F /* wabe hellgruen-strecke 7.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F51F6269E000BC7C98 /* wabe hellgruen-strecke 7.gpx */; };
+		8379CF7D1FB83F7A009CD00F /* wabe hellgruen-strecke 6.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078F61F626A1200BC7C98 /* wabe hellgruen-strecke 6.gpx */; };
+		8379CF7E1FB83F7A009CD00F /* wabe violett-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079021F626B1F00BC7C98 /* wabe violett-strecke 1.gpx */; };
+		8379CF7F1FB83F7A009CD00F /* wabe violett-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079031F626B1F00BC7C98 /* wabe violett-strecke 2.gpx */; };
+		8379CF801FB83F7A009CD00F /* wabe violett-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079041F626B1F00BC7C98 /* wabe violett-strecke 3.gpx */; };
+		8379CF811FB83F7A009CD00F /* wabe violett-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078FE1F626B1F00BC7C98 /* wabe violett-strecke 4.gpx */; };
+		8379CF821FB83F7A009CD00F /* wabe lila-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079061F626B1F00BC7C98 /* wabe lila-strecke 1.gpx */; };
+		8379CF831FB83F7A009CD00F /* wabe lila-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078FF1F626B1F00BC7C98 /* wabe lila-strecke 2.gpx */; };
+		8379CF841FB83F7A009CD00F /* wabe lila-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079081F626B1F00BC7C98 /* wabe lila-strecke 3.gpx */; };
+		8379CF851FB83F7A009CD00F /* wabe gruen-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079001F626B1F00BC7C98 /* wabe gruen-strecke 1.gpx */; };
+		8379CF861FB83F7A009CD00F /* wabe gruen-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079011F626B1F00BC7C98 /* wabe gruen-strecke 2.gpx */; };
+		8379CF871FB83F7A009CD00F /* wabe gruen-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079091F626B1F00BC7C98 /* wabe gruen-strecke 3.gpx */; };
+		8379CF881FB83F7A009CD00F /* wabe gruen-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340790A1F626B1F00BC7C98 /* wabe gruen-strecke 4.gpx */; };
+		8379CF891FB83F7A009CD00F /* wabe beige-strecke 1.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079051F626B1F00BC7C98 /* wabe beige-strecke 1.gpx */; };
+		8379CF8A1FB83F7A009CD00F /* wabe beige-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834079071F626B1F00BC7C98 /* wabe beige-strecke 2.gpx */; };
+		8379CF8C1FB83FD0009CD00F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF8B1FB83FD0009CD00F /* ViewController.swift */; };
+		8379CF8D1FB840A7009CD00F /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830E62E61F9799F400046F5B /* MapView.swift */; };
+		8379CF901FB84207009CD00F /* Model+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824D1F6302DF004070DA /* Model+UIKit.swift */; };
+		8379CF921FB8429E009CD00F /* Incremental+UIKit+AppKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF911FB8429E009CD00F /* Incremental+UIKit+AppKit.swift */; };
+		8379CF931FB842B2009CD00F /* Incremental+UIKit+AppKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF911FB8429E009CD00F /* Incremental+UIKit+AppKit.swift */; };
+		8379CF941FB843E0009CD00F /* Incremental_Mac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83C0FB041F74F5280041A802 /* Incremental_Mac.framework */; };
+		8379CF951FB843EF009CD00F /* Constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834004E41F7BA9EA0035984B /* Constraints.swift */; };
+		8379CF961FB845D8009CD00F /* Model+MapKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF281FB83D01009CD00F /* Model+MapKit.swift */; };
+		8379CF991FB84832009CD00F /* Incremental+NSGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF971FB847DE009CD00F /* Incremental+NSGestureRecognizer.swift */; };
 		837A8ABA1F72DACB00ED898C /* IncrementalArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837A8AB91F72DACB00ED898C /* IncrementalArray.swift */; };
 		8384EC601F8288FD003AAC56 /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8384EC5F1F8288FD003AAC56 /* NavigationController.swift */; };
 		83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824D1F6302DF004070DA /* Model+UIKit.swift */; };
@@ -114,7 +200,7 @@
 		83C0FB0F1F74F53C0041A802 /* Incremental.h in Headers */ = {isa = PBXBuildFile; fileRef = 83B2A26A1F692CFA00A6D9F9 /* Incremental.h */; };
 		83C0FB111F74F53C0041A802 /* IncrementalStdLib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */; };
 		83C0FB121F74F53C0041A802 /* IncrementalArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837A8AB91F72DACB00ED898C /* IncrementalArray.swift */; };
-		83C0FB141F74F5890041A802 /* Incremental+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C0FB131F74F5890041A802 /* Incremental+UIKit.swift */; };
+		83C0FB141F74F5890041A802 /* Incremental+UIGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C0FB131F74F5890041A802 /* Incremental+UIGestureRecognizer.swift */; };
 		83CC2E2B1F8E3B3C00F4302B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC2E2A1F8E3B3C00F4302B /* AppDelegate.swift */; };
 		83CC2E321F8E3B3D00F4302B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83CC2E311F8E3B3D00F4302B /* Assets.xcassets */; };
 		83CC2E351F8E3B3D00F4302B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83CC2E331F8E3B3D00F4302B /* LaunchScreen.storyboard */; };
@@ -138,6 +224,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		8379CF8E1FB840D4009CD00F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8340DF881F61B1F8002176C6 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 83C0FB031F74F5280041A802;
+			remoteInfo = Incremental_Mac;
+		};
 		83B2A26D1F692CFA00A6D9F9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8340DF881F61B1F8002176C6 /* Project object */;
@@ -294,6 +387,9 @@
 		8379CF351FB83E04009CD00F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.xib; name = Base; path = Base.lproj/MainMenu.xib; sourceTree = "<group>"; };
 		8379CF371FB83E04009CD00F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8379CF381FB83E04009CD00F /* GPXPreprocessing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = GPXPreprocessing.entitlements; sourceTree = "<group>"; };
+		8379CF8B1FB83FD0009CD00F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8379CF911FB8429E009CD00F /* Incremental+UIKit+AppKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+UIKit+AppKit.swift"; sourceTree = "<group>"; };
+		8379CF971FB847DE009CD00F /* Incremental+NSGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+NSGestureRecognizer.swift"; sourceTree = "<group>"; };
 		837A8AB91F72DACB00ED898C /* IncrementalArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalArray.swift; sourceTree = "<group>"; };
 		8384EC5F1F8288FD003AAC56 /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
@@ -308,7 +404,7 @@
 		83C0FB041F74F5280041A802 /* Incremental_Mac.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Incremental_Mac.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		83C0FB061F74F5280041A802 /* Incremental_Mac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Incremental_Mac.h; sourceTree = "<group>"; };
 		83C0FB071F74F5280041A802 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		83C0FB131F74F5890041A802 /* Incremental+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+UIKit.swift"; sourceTree = "<group>"; };
+		83C0FB131F74F5890041A802 /* Incremental+UIGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+UIGestureRecognizer.swift"; sourceTree = "<group>"; };
 		83CC2E281F8E3B3C00F4302B /* Todos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Todos.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83CC2E2A1F8E3B3C00F4302B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		83CC2E311F8E3B3D00F4302B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -345,6 +441,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8379CF941FB843E0009CD00F /* Incremental_Mac.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -387,6 +484,7 @@
 				834CE82B1F796D3500785B16 /* iOSPlayground.playground */,
 				83B082511F630835004070DA /* MacPlayground.playground */,
 				8340DF921F61B1F8002176C6 /* Laufpark */,
+				8379CF3C1FB83F2D009CD00F /* Shared Code */,
 				83B2A2691F692CFA00A6D9F9 /* Incremental */,
 				83C0FB051F74F5280041A802 /* Incremental_Mac */,
 				83CC2E291F8E3B3C00F4302B /* Todos */,
@@ -418,12 +516,8 @@
 				83B998281F7274C7007200D2 /* map.png */,
 				83B9982A1F7275B2007200D2 /* map@2x.png */,
 				834004E61F7BB4930035984B /* Icon@3x.png */,
-				8340DFA91F61B22D002176C6 /* gpx */,
 				8340DF931F61B1F8002176C6 /* AppDelegate.swift */,
 				8340DF951F61B1F8002176C6 /* ViewController.swift */,
-				8340DFAD1F61B2F6002176C6 /* Model.swift */,
-				83B0824D1F6302DF004070DA /* Model+UIKit.swift */,
-				8379CF281FB83D01009CD00F /* Model+MapKit.swift */,
 				8340DF9A1F61B1F8002176C6 /* Assets.xcassets */,
 				8340DF9F1F61B1F8002176C6 /* Info.plist */,
 				83099ADE1F630FC100D3EBB8 /* LineView.swift */,
@@ -528,12 +622,24 @@
 			isa = PBXGroup;
 			children = (
 				8379CF301FB83E04009CD00F /* AppDelegate.swift */,
+				8379CF8B1FB83FD0009CD00F /* ViewController.swift */,
 				8379CF321FB83E04009CD00F /* Assets.xcassets */,
 				8379CF341FB83E04009CD00F /* MainMenu.xib */,
 				8379CF371FB83E04009CD00F /* Info.plist */,
 				8379CF381FB83E04009CD00F /* GPXPreprocessing.entitlements */,
 			);
 			path = GPXPreprocessing;
+			sourceTree = "<group>";
+		};
+		8379CF3C1FB83F2D009CD00F /* Shared Code */ = {
+			isa = PBXGroup;
+			children = (
+				8340DFA91F61B22D002176C6 /* gpx */,
+				8340DFAD1F61B2F6002176C6 /* Model.swift */,
+				83B0824D1F6302DF004070DA /* Model+UIKit.swift */,
+				8379CF281FB83D01009CD00F /* Model+MapKit.swift */,
+			);
+			path = "Shared Code";
 			sourceTree = "<group>";
 		};
 		83B2A2691F692CFA00A6D9F9 /* Incremental */ = {
@@ -586,7 +692,9 @@
 		83FC89771F7B86A70020EED6 /* Incremental+UIKit */ = {
 			isa = PBXGroup;
 			children = (
-				83C0FB131F74F5890041A802 /* Incremental+UIKit.swift */,
+				8379CF911FB8429E009CD00F /* Incremental+UIKit+AppKit.swift */,
+				83C0FB131F74F5890041A802 /* Incremental+UIGestureRecognizer.swift */,
+				8379CF971FB847DE009CD00F /* Incremental+NSGestureRecognizer.swift */,
 				83FC89781F7B86BB0020EED6 /* TableView.swift */,
 				83FC897A1F7B86D90020EED6 /* StackView.swift */,
 				83FC897C1F7B871F0020EED6 /* Button.swift */,
@@ -662,6 +770,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				8379CF8F1FB840D4009CD00F /* PBXTargetDependency */,
 			);
 			name = GPXPreprocessing;
 			productName = GPXPreprocessing;
@@ -897,8 +1006,84 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8379CF4B1FB83F7A009CD00F /* wabe tuerkis-strecke 0.gpx in Resources */,
+				8379CF431FB83F7A009CD00F /* wabe braun-strecke 0.gpx in Resources */,
+				8379CF7D1FB83F7A009CD00F /* wabe hellgruen-strecke 6.gpx in Resources */,
+				8379CF5F1FB83F7A009CD00F /* wabe hellbraun-strecke 3.gpx in Resources */,
+				8379CF3F1FB83F7A009CD00F /* wabe pink-strecke 0.gpx in Resources */,
+				8379CF501FB83F7A009CD00F /* wabe braun-strecke 1.gpx in Resources */,
+				8379CF581FB83F7A009CD00F /* wabe grau-strecke 0.gpx in Resources */,
+				8379CF6A1FB83F7A009CD00F /* wabe rosa-strecke 4.gpx in Resources */,
+				8379CF741FB83F7A009CD00F /* wabe tuerkis-strecke 4.gpx in Resources */,
+				8379CF591FB83F7A009CD00F /* wabe hellblau-strecke 1.gpx in Resources */,
+				8379CF601FB83F7A009CD00F /* wabe hellbraun-strecke 4.gpx in Resources */,
+				8379CF541FB83F7A009CD00F /* wabe gelb-strecke 1.gpx in Resources */,
+				8379CF691FB83F7A009CD00F /* wabe rosa-strecke 3.gpx in Resources */,
+				8379CF471FB83F7A009CD00F /* wabe hellgruen-strecke 0.gpx in Resources */,
+				8379CF6C1FB83F7A009CD00F /* wabe rosa-strecke 6.gpx in Resources */,
+				8379CF721FB83F7A009CD00F /* wabe tuerkis-strecke 2.gpx in Resources */,
 				8379CF331FB83E04009CD00F /* Assets.xcassets in Resources */,
+				8379CF571FB83F7A009CD00F /* wabe gelb-strecke 4.gpx in Resources */,
+				8379CF761FB83F7A009CD00F /* wabe tuerkis-strecke 6.gpx in Resources */,
+				8379CF511FB83F7A009CD00F /* wabe braun-strecke 2.gpx in Resources */,
+				8379CF7C1FB83F7A009CD00F /* wabe hellgruen-strecke 7.gpx in Resources */,
+				8379CF441FB83F7A009CD00F /* wabe gruen-strecke 0.gpx in Resources */,
+				8379CF651FB83F7A009CD00F /* wabe pink-strecke 3.gpx in Resources */,
 				8379CF361FB83E04009CD00F /* MainMenu.xib in Resources */,
+				8379CF781FB83F7A009CD00F /* wabe hellgruen-strecke 2.gpx in Resources */,
+				8379CF6E1FB83F7A009CD00F /* wabe rot-strecke 2.gpx in Resources */,
+				8379CF811FB83F7A009CD00F /* wabe violett-strecke 4.gpx in Resources */,
+				8379CF681FB83F7A009CD00F /* wabe rosa-strecke 2.gpx in Resources */,
+				8379CF4D1FB83F7A009CD00F /* wabe blau-strecke 1.gpx in Resources */,
+				8379CF6F1FB83F7A009CD00F /* wabe rot-strecke 3.gpx in Resources */,
+				8379CF821FB83F7A009CD00F /* wabe lila-strecke 1.gpx in Resources */,
+				8379CF881FB83F7A009CD00F /* wabe gruen-strecke 4.gpx in Resources */,
+				8379CF8A1FB83F7A009CD00F /* wabe beige-strecke 2.gpx in Resources */,
+				8379CF5B1FB83F7A009CD00F /* wabe hellblau-strecke 3.gpx in Resources */,
+				8379CF621FB83F7A009CD00F /* wabe orange-strecke 0.gpx in Resources */,
+				8379CF611FB83F7A009CD00F /* wabe hellbraun-strecke 5.gpx in Resources */,
+				8379CF851FB83F7A009CD00F /* wabe gruen-strecke 1.gpx in Resources */,
+				8379CF861FB83F7A009CD00F /* wabe gruen-strecke 2.gpx in Resources */,
+				8379CF7E1FB83F7A009CD00F /* wabe violett-strecke 1.gpx in Resources */,
+				8379CF451FB83F7A009CD00F /* wabe hellblau-strecke 0.gpx in Resources */,
+				8379CF711FB83F7A009CD00F /* wabe tuerkis-strecke 1.gpx in Resources */,
+				8379CF521FB83F7A009CD00F /* wabe braun-strecke 3.gpx in Resources */,
+				8379CF841FB83F7A009CD00F /* wabe lila-strecke 3.gpx in Resources */,
+				8379CF871FB83F7A009CD00F /* wabe gruen-strecke 3.gpx in Resources */,
+				8379CF671FB83F7A009CD00F /* wabe rosa-strecke 1.gpx in Resources */,
+				8379CF531FB83F7A009CD00F /* wabe braun-strecke 4.gpx in Resources */,
+				8379CF801FB83F7A009CD00F /* wabe violett-strecke 3.gpx in Resources */,
+				8379CF5C1FB83F7A009CD00F /* wabe hellblau-strecke 4.gpx in Resources */,
+				8379CF791FB83F7A009CD00F /* wabe hellgruen-strecke 3.gpx in Resources */,
+				8379CF6B1FB83F7A009CD00F /* wabe rosa-strecke 5.gpx in Resources */,
+				8379CF491FB83F7A009CD00F /* wabe rosa-strecke 0.gpx in Resources */,
+				8379CF731FB83F7A009CD00F /* wabe tuerkis-strecke 3.gpx in Resources */,
+				8379CF401FB83F7A009CD00F /* wabe gelb-strecke 0.gpx in Resources */,
+				8379CF4F1FB83F7A009CD00F /* wabe blau-strecke 3.gpx in Resources */,
+				8379CF891FB83F7A009CD00F /* wabe beige-strecke 1.gpx in Resources */,
+				8379CF661FB83F7A009CD00F /* wabe pink-strecke 4.gpx in Resources */,
+				8379CF4A1FB83F7A009CD00F /* wabe rot-strecke 0.gpx in Resources */,
+				8379CF631FB83F7A009CD00F /* wabe pink-strecke 1.gpx in Resources */,
+				8379CF4C1FB83F7A009CD00F /* wabe violett-strecke 0.gpx in Resources */,
+				8379CF551FB83F7A009CD00F /* wabe gelb-strecke 2.gpx in Resources */,
+				8379CF461FB83F7A009CD00F /* wabe hellbraun-strecke 0.gpx in Resources */,
+				8379CF7A1FB83F7A009CD00F /* wabe hellgruen-strecke 4.gpx in Resources */,
+				8379CF771FB83F7A009CD00F /* wabe hellgruen-strecke 1.gpx in Resources */,
+				8379CF701FB83F7A009CD00F /* wabe rot-strecke 4.gpx in Resources */,
+				8379CF751FB83F7A009CD00F /* wabe tuerkis-strecke 5.gpx in Resources */,
+				8379CF7B1FB83F7A009CD00F /* wabe hellgruen-strecke 5.gpx in Resources */,
+				8379CF411FB83F7A009CD00F /* wabe beige-strecke 0.gpx in Resources */,
+				8379CF421FB83F7A009CD00F /* wabe blau-strecke 0.gpx in Resources */,
+				8379CF5D1FB83F7A009CD00F /* wabe hellbraun-strecke 1.gpx in Resources */,
+				8379CF5A1FB83F7A009CD00F /* wabe hellblau-strecke 2.gpx in Resources */,
+				8379CF6D1FB83F7A009CD00F /* wabe rot-strecke 1.gpx in Resources */,
+				8379CF831FB83F7A009CD00F /* wabe lila-strecke 2.gpx in Resources */,
+				8379CF481FB83F7A009CD00F /* wabe lila-strecke 0.gpx in Resources */,
+				8379CF561FB83F7A009CD00F /* wabe gelb-strecke 3.gpx in Resources */,
+				8379CF7F1FB83F7A009CD00F /* wabe violett-strecke 2.gpx in Resources */,
+				8379CF641FB83F7A009CD00F /* wabe pink-strecke 2.gpx in Resources */,
+				8379CF4E1FB83F7A009CD00F /* wabe blau-strecke 2.gpx in Resources */,
+				8379CF5E1FB83F7A009CD00F /* wabe hellbraun-strecke 2.gpx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -954,7 +1139,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8379CF8C1FB83FD0009CD00F /* ViewController.swift in Sources */,
 				8379CF311FB83E04009CD00F /* AppDelegate.swift in Sources */,
+				8379CF901FB84207009CD00F /* Model+UIKit.swift in Sources */,
+				8379CF961FB845D8009CD00F /* Model+MapKit.swift in Sources */,
+				8379CF3E1FB83F62009CD00F /* Model.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -962,12 +1151,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8379CF921FB8429E009CD00F /* Incremental+UIKit+AppKit.swift in Sources */,
 				83354DA01F6FE9A900F3C33A /* Incremental+NSObject.swift in Sources */,
 				830E62E71F9799F400046F5B /* MapView.swift in Sources */,
 				83FC93D31F7147250034E3B2 /* Helpers.swift in Sources */,
 				837A8ABA1F72DACB00ED898C /* IncrementalArray.swift in Sources */,
 				83FC89831F7B88F40020EED6 /* TextField.swift in Sources */,
-				83C0FB141F74F5890041A802 /* Incremental+UIKit.swift in Sources */,
+				83C0FB141F74F5890041A802 /* Incremental+UIGestureRecognizer.swift in Sources */,
 				83FC93D51F7154050034E3B2 /* IncrementalStdLib.swift in Sources */,
 				83FC89811F7B87680020EED6 /* ActivityIndicator.swift in Sources */,
 				8384EC601F8288FD003AAC56 /* NavigationController.swift in Sources */,
@@ -986,9 +1176,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				83C0FB0D1F74F53C0041A802 /* Incremental.swift in Sources */,
+				8379CF8D1FB840A7009CD00F /* MapView.swift in Sources */,
+				8379CF991FB84832009CD00F /* Incremental+NSGestureRecognizer.swift in Sources */,
 				83C0FB0E1F74F53C0041A802 /* Incremental+NSObject.swift in Sources */,
 				83C0FB121F74F53C0041A802 /* IncrementalArray.swift in Sources */,
+				8379CF951FB843EF009CD00F /* Constraints.swift in Sources */,
 				83C0FB111F74F53C0041A802 /* IncrementalStdLib.swift in Sources */,
+				8379CF931FB842B2009CD00F /* Incremental+UIKit+AppKit.swift in Sources */,
 				83C0FB0C1F74F53C0041A802 /* Helpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1014,6 +1208,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		8379CF8F1FB840D4009CD00F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 83C0FB031F74F5280041A802 /* Incremental_Mac */;
+			targetProxy = 8379CF8E1FB840D4009CD00F /* PBXContainerItemProxy */;
+		};
 		83B2A26E1F692CFA00A6D9F9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 83B2A2671F692CFA00A6D9F9 /* Incremental */;

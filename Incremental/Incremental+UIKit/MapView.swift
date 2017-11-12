@@ -6,7 +6,6 @@
 //  Copyright © 2017 objc.io. All rights reserved.
 //
 
-import UIKit
 import MapKit
 
 extension IBox where V: MKMapView {
@@ -58,4 +57,32 @@ public final class MapViewDelegate: NSObject, MKMapViewDelegate {
     public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
         return regionDidChangeAnimated(mapView)
     }
+}
+
+public func newMapView() -> IBox<MKMapView> {
+    let box = IBox(MKMapView())
+    let view = box.unbox
+    view.showsCompass = true
+    view.showsScale = true
+    view.showsUserLocation = true
+    view.mapType = .standard
+    view.isRotateEnabled = false
+    view.isPitchEnabled = false
+    return box
+}
+
+public func polygonRenderer(polygon: MKPolygon, strokeColor: I<IncColor>, fillColor: I<IncColor?>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) -> IBox<MKPolygonRenderer> {
+    let renderer = MKPolygonRenderer(polygon: polygon)
+    let box = IBox(renderer)
+    box.bind(strokeColor, to: \.strokeColor)
+    box.bind(alpha, to : \.alpha)
+    box.bind(lineWidth, to: \.lineWidth)
+    box.bind(fillColor, to: \.fillColor)
+    return box
+}
+
+public func annotation(location: I<CLLocationCoordinate2D>) -> IBox<MKPointAnnotation> {
+    let result = IBox(MKPointAnnotation())
+    result.bind(location, to: \.coordinate)
+    return result
 }

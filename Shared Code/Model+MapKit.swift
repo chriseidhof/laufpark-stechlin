@@ -28,3 +28,11 @@ extension Track {
         }
     }
 }
+
+extension MKPointAnnotation {
+    convenience init(coordinate: CLLocationCoordinate2D, title: String) {
+        self.init()
+        self.coordinate = coordinate
+        self.title = title
+    }
+}

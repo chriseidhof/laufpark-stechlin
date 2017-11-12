@@ -1,64 +1,59 @@
 //
-//  Incremental+UIKit.swift
+//  Incremental+UIKit+AppKit.swift
 //  Incremental
 //
-//  Created by Chris Eidhof on 22.09.17.
+//  Created by Chris Eidhof on 12.11.17.
 //  Copyright © 2017 objc.io. All rights reserved.
 //
 
-import Foundation
+#if os(OSX)
+    import Cocoa
+    public typealias IncColor = NSColor
+    public typealias IncView = NSView
+#else
+    import UIKit
+    public typealias IncView = UIView
+    public typealias IncColor = UIColor
+#endif
 
-extension UIView {
-    public func addSubview<V: UIView>(_ subview: V, constraints: [NSLayoutConstraint]) {
+
+#if os(OSX)
+    extension NSView {
+        func insertSubview(_ s: NSView, at index: Int) {
+            self.subviews.insert(s, at: index)
+        }
+    }
+#endif
+
+
+extension IncView {
+    public func addSubview<V: IncView>(_ subview: V, constraints: [NSLayoutConstraint]) {
         addSubview(subview)
         if !constraints.isEmpty {
             subview.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate(constraints)
         }
-
+        
     }
 }
 
-// todo dry
-public func panGestureRecognizer(_ panned: @escaping (UIPanGestureRecognizer) -> ()) -> IBox<UIPanGestureRecognizer> {
-    let recognizer = UIPanGestureRecognizer()
-    let targetAction = TargetAction { panned(recognizer) }
-    recognizer.addTarget(targetAction, action: #selector(TargetAction.action(_:)))
-    let result = IBox(recognizer)
-    result.disposables.append(targetAction)
-    return result
-}
 
-public func tapGestureRecognizer(_ tapped: @escaping (UITapGestureRecognizer) -> ()) -> IBox<UITapGestureRecognizer> {
-    let recognizer = UITapGestureRecognizer()
-    let targetAction = TargetAction { tapped(recognizer) }
-    recognizer.addTarget(targetAction, action: #selector(TargetAction.action(_:)))
-    let result = IBox(recognizer)
-    result.disposables.append(targetAction)
-    return result
-}
-
-extension IBox where V: UIView {
-    public func addGestureRecognizer<G: UIGestureRecognizer>(_ gestureRecognizer: IBox<G>) {
-        self.unbox.addGestureRecognizer(gestureRecognizer.unbox)
-        disposables.append(gestureRecognizer)
-    }
-
-    public func addSubview<S>(_ subview: IBox<S>, path: KeyPath<V,UIView>? = nil, constraints: [Constraint] = []) where S: UIView {
+extension IBox where V: IncView {
+    public func addSubview<S>(_ subview: IBox<S>, path: KeyPath<V,IncView>? = nil, constraints: [Constraint] = []) where S: IncView {
         disposables.append(subview)
-        let target: UIView = path.map { kp in unbox[keyPath: kp] } ?? unbox
+        let target: IncView = path.map { kp in unbox[keyPath: kp] } ?? unbox
         let evaluatedConstraints = constraints.map { $0(self.unbox, subview.unbox) }
         target.addSubview(subview.unbox, constraints: evaluatedConstraints.map { $0.unbox })
         disposables.append(evaluatedConstraints)
         
     }
     
-    private func insert<View: UIView>(_ subview: IBox<View>, at index: Int) {
+    private func insert<View: IncView>(_ subview: IBox<View>, at index: Int) {
         self.disposables.append(subview)
-        self.unbox.insertSubview(subview.unbox, at: index)
+        self.unbox.insertSubview(subview.unbox, at: index)        
     }
     
-    private func remove<View: UIView>(at index: Int, ofType: View.Type) {
+    private func remove<View: IncView>(at index: Int, ofType: View.Type) {
         let oldView = self.unbox.subviews[index] as! View
         guard let i = self.disposables.index(where: {
             if let oldDisposable = $0 as? IBox<View>, oldDisposable.unbox == oldView {
@@ -72,7 +67,7 @@ extension IBox where V: UIView {
         oldView.removeFromSuperview()
     }
     
-    public func bindSubviews<View: UIView>(_ iArray: I<ArrayWithHistory<IBox<View>>>) {
+    public func bindSubviews<View: IncView>(_ iArray: I<ArrayWithHistory<IBox<View>>>) {
         // todo replace with custom array observing
         disposables.append(iArray.observe { value in // todo owernship of self?
             assert(self.unbox.subviews.isEmpty)
@@ -93,7 +88,7 @@ extension IBox where V: UIView {
                         view.removeFromSuperview()
                         let offset = j > i ? -1 : 0
                         self.unbox.insertSubview(view, at: j + offset)
-
+                        
                     }
                     return ()
                 })
@@ -101,7 +96,7 @@ extension IBox where V: UIView {
         })
     }
     
-    public var cast: IBox<UIView> {
+    public var cast: IBox<IncView> {
         return map { $0 }
     }
 }
@@ -115,4 +110,3 @@ public class TargetAction: NSObject {
         callback()
     }
 }
-
