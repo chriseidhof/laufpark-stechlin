@@ -36,13 +36,16 @@ public final class MapViewDelegate: NSObject, MKMapViewDelegate {
     let rendererForOverlay: (_ mapView: MKMapView, _ overlay: MKOverlay) -> MKOverlayRenderer
     let viewForAnnotation: (_ mapView: MKMapView, _ annotation: MKAnnotation) -> MKAnnotationView?
     let regionDidChangeAnimated: (_ mapView: MKMapView) -> ()
+    let didSelectAnnotation: ((_ mapView: MKMapView, _ annotation: MKAnnotationView) -> ())?
     
     public init(rendererForOverlay: @escaping (_ mapView: MKMapView, _ overlay: MKOverlay) -> MKOverlayRenderer,
          viewForAnnotation: @escaping (_ mapView: MKMapView, _ annotation: MKAnnotation) -> MKAnnotationView?,
-         regionDidChangeAnimated: @escaping (_ mapView: MKMapView) -> ()) {
+         regionDidChangeAnimated: @escaping (_ mapView: MKMapView) -> (),
+         didSelectAnnotation: ((_ mapView: MKMapView, _ annotation: MKAnnotationView) -> ())? = nil) {
         self.rendererForOverlay = rendererForOverlay
         self.viewForAnnotation = viewForAnnotation
         self.regionDidChangeAnimated = regionDidChangeAnimated
+        self.didSelectAnnotation = didSelectAnnotation
     }
     
     
@@ -52,6 +55,10 @@ public final class MapViewDelegate: NSObject, MKMapViewDelegate {
     
     public func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
         return viewForAnnotation(mapView, annotation)
+    }
+    
+    public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
+        didSelectAnnotation?(mapView, view)
     }
     
     public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {

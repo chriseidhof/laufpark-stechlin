@@ -1,0 +1,3 @@
+[submodule "vendor/KDTree"]
+	path = vendor/KDTree
+	url = https://github.com/Bersaelor/KDTree.git

@@ -93,6 +93,16 @@ struct Coordinate: Codable {
     let longitude: Double
 }
 
+extension Coordinate: Equatable, Hashable {
+    static func ==(lhs: Coordinate, rhs: Coordinate) -> Bool {
+        return lhs.latitude == rhs.latitude
+    }
+    
+    var hashValue: Int {
+        return latitude.hashValue ^ longitude.hashValue
+    }
+}
+
 extension Coordinate {
     init(_ locationCoordinate: CLLocationCoordinate2D) {
         self.latitude = locationCoordinate.latitude
@@ -109,6 +119,19 @@ struct CoordinateWithElevation: Codable {
     let elevation: Double
 }
 
+extension Collection where Element == CLLocation {
+    var distance: CLLocationDistance {
+        guard let first = self.first else { return 0 }
+        
+        let (result, _) = reduce(into: (0 as CLLocationDistance, previous: first)) { r, coord in
+            let distance = coord.distance(from: r.1)
+            r.1 = coord
+            r.0 += distance
+        }
+        return result
+
+    }
+}
 struct Track: Codable {
     let coordinates: [CoordinateWithElevation]
     let color: Color
@@ -116,15 +139,7 @@ struct Track: Codable {
     let name: String
     
     var distance: CLLocationDistance {
-        guard let first = coordinates.first else { return 0 }
-        
-        let (result, _) = coordinates.reduce(into: (0 as CLLocationDistance, previous: CLLocation(first.coordinate.clLocationCoordinate))) { r, coord in
-            let loc = CLLocation(coord.coordinate.clLocationCoordinate)
-            let distance = loc.distance(from: r.1)
-            r.1 = loc
-            r.0 += distance
-        }
-        return result
+        return coordinates.map { CLLocation($0.coordinate.clLocationCoordinate) }.distance
     }
     
     var ascent: Double {
@@ -205,7 +220,8 @@ extension Track {
         ]
         var allTracks: [[Track]] = []
         allTracks = definitions.map { (color, count) in
-            let trackNames: [(Int, String)] = (0...count).map { ($0, "wabe \(color.name)-strecke \($0)") }
+            let begin = count == 0 ? 0 : 1
+            let trackNames: [(Int, String)] = (begin...count).map { ($0, "wabe \(color.name)-strecke \($0)") }
             return trackNames.map { numberAndName -> Track in
                 let reader = TrackReader(url: Bundle.main.url(forResource: numberAndName.1, withExtension: "gpx")!)!
                 return Track(color: color, number: numberAndName.0, name: reader.name, points: reader.points)
