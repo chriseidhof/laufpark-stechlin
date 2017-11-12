@@ -6,18 +6,22 @@
 //  Copyright © 2017 objc.io. All rights reserved.
 //
 
-import Foundation
-import UIKit
-import MapKit
+#if os(OSX)
+    import Cocoa
+    typealias LColor = NSColor
+#else
+    import UIKit
+    typealias LColor = UIColor
+#endif
 
-extension UIColor {
+extension LColor {
     convenience init(r: Int, g: Int, b: Int) {
         self.init(red: CGFloat(r)/255, green: CGFloat(g)/255, blue: CGFloat(b)/255, alpha: 1)
     }
 }
 
 extension Color {
-    var textColor: UIColor {
+    var textColor: LColor {
         switch self {
         case .yellow, .gray, .beige:
             return .black
@@ -25,7 +29,7 @@ extension Color {
             return .white
         }
     }
-    var uiColor: UIColor {
+    var uiColor: LColor {
         switch self {
         case .red:
             return UIColor(r: 255, g: 0, b: 0)
@@ -63,22 +67,4 @@ extension Color {
     }
 }
 
-extension Track {
-    var polygon: MKPolygon {
-        var coordinates = self.coordinates.map { $0.coordinate.clLocationCoordinate }
-        let result = MKPolygon(coordinates: &coordinates, count: coordinates.count)
-        return result
-    }
 
-    typealias ElevationProfile = [(distance: CLLocationDistance, elevation: Double)]
-    var elevationProfile: ElevationProfile {
-        let result = coordinates.diffed { l, r in
-            (CLLocation(l.coordinate.clLocationCoordinate).distance(from: CLLocation(r.coordinate.clLocationCoordinate)), r.elevation)
-        }
-        var distanceTotal = 0 as CLLocationDistance
-        return result.map { pair in
-            defer { distanceTotal += pair.0 }
-            return (distance: distanceTotal, elevation: pair.1)
-        }
-    }
-}
