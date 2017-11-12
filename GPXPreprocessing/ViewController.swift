@@ -113,9 +113,9 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
             if POI.all.contains(where: { $0.location == annotation.coordinate }) {
                 let result: MKAnnotationView
                 
-                result = MKAnnotationView(annotation: annotation, reuseIdentifier: nil)
+                result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
                 //result.image = NSImage(named: "partner")!
-                result.frame.size = CGSize(width: 32, height: 32)
+//                result.frame.size = CGSize(width: 32, height: 32)
                 
                 
                 result.canShowCallout = true
@@ -182,7 +182,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
 final class ViewController: NSViewController {
     @IBOutlet var _mapView: MKMapView!
     
-    let storedState = Input<StoredState>(StoredState(annotationsVisible: false, satellite: true, showConfiguration: false))
+    let storedState = Input<StoredState>(StoredState(annotationsVisible: true, satellite: true, showConfiguration: false))
     let state = Input(DisplayState(tracks: []))
     var rootView: IBox<NSView>!
     
@@ -190,6 +190,10 @@ final class ViewController: NSViewController {
         rootView = IBox(view)
         let setMapRect = addMapView(persistent: storedState, state: state, rootView: rootView)
         setMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)))
+        loadTracks()
+    }
+    
+    func loadTracks() {
         DispatchQueue(label: "async").async {
             let tracks = Track.load()
             DispatchQueue.main.async {
