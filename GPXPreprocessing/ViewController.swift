@@ -36,6 +36,8 @@ struct DisplayState: Equatable, Codable {
         return selection != nil
     }
     
+    var firstPoint: Coordinate?
+    
     var trackPosition: CGFloat? // 0...1
     
     init(tracks: [Track]) {
@@ -53,7 +55,7 @@ struct DisplayState: Equatable, Codable {
     }
     
     static func ==(lhs: DisplayState, rhs: DisplayState) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.firstPoint == rhs.firstPoint && lhs.graph == rhs.graph
     }
 }
 
@@ -109,8 +111,8 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     let mapView: IBox<MKMapView> = newMapView()
     rootView.addSubview(mapView, constraints: sizeToParent())
     
-    
-    var colors = cycle(elements: [NSColor.white]) //, .black, .blue, .brown, .cyan, .darkGray, .green, .magenta, .orange])
+    var color = NSColor.white
+//    var colors = cycle(elements: [NSColor.white]) //, .black, .blue, .brown, .cyan, .darkGray, .green, .magenta, .orange])
     // MapView
     mapView.delegate = MapViewDelegate(rendererForOverlay: { [unowned mapView] mapView_, overlay in
         if let polygon = overlay as? MKPolygon {
@@ -120,7 +122,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         } else if let l = overlay as? MKPolyline {
             let renderer = MKPolylineRenderer(polyline: l)
             renderer.lineWidth = 5
-            renderer.strokeColor = colors.next()!
+            renderer.strokeColor = color
             return renderer
         }
         return MKOverlayRenderer()
@@ -145,15 +147,37 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     }, regionDidChangeAnimated: { [unowned mapView] _ in
 //        print(mapView.unbox.region)
     }, didSelectAnnotation: { mapView, annotationView in
-        guard let coord = annotationView.annotation?.coordinate,
-            let entries = state.i.value.graph?.items[Coordinate(coord)] else { return }
+        guard let c = annotationView.annotation?.coordinate else { return }
+        let coord = Coordinate(c)
         
-        for entry in entries {
-            var points = [coord, entry.destination.clLocationCoordinate]
-            let line = MKPolyline(coordinates: points, count: points.count)
-            mapView.add(line)
-            print(entry)
+        state.change {
+            guard let g = $0.graph else { return }
+            if let p = $0.firstPoint {
+                print("going to find shortest path to \(coord)")
+                if let path = g.shortestPath(from: p, to: coord) {
+                    
+                    let coords: [CLLocationCoordinate2D] = path.path.reduce(into: [p.clLocationCoordinate], { result, el in
+                        result.append(el.destination.clLocationCoordinate)
+                    }) + [coord.clLocationCoordinate]
+                    print(path)
+                    color = .black
+                    mapView.removeOverlays(mapView.overlays.filter { $0 is MKPolyline })
+                    let line = MKPolyline(coordinates: coords, count: coords.count)
+                    mapView.add(line)
+                    
+                }
+                
+            } else {
+                $0.firstPoint = coord
+                print("Setting \(coord)")
+            }
         }
+//        for entry in entries {
+//            var points = [coord, entry.destination.clLocationCoordinate]
+//            let line = MKPolyline(coordinates: points, count: points.count)
+//            mapView.add(line)
+//            print(entry)
+//        }
     })
     mapView.disposables.append(state.i.map { $0.tracks }.observe { [unowned mapView] in
         mapView.unbox.removeOverlays(mapView.unbox.overlays)
@@ -175,6 +199,8 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     
 //    mapView.bind(annotations: vertices.map {  }, visible: I(constant: true))
     
+//    mapView.addGestureRecognizer(clickGestureRecognizer { [unowned mapView] sender in
+//    }
     /*
     mapView.addGestureRecognizer(clickGestureRecognizer { [unowned mapView] sender in
         let point = sender.location(in: mapView.unbox)
@@ -245,8 +271,7 @@ final class ViewController: NSViewController {
         setMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)))
         let mapView = self.view.subviews[0] as! MKMapView
         DispatchQueue(label: "async").async {
-            let tracks = Array(Track.load())
-            
+            let tracks = Array(Track.load())//.filter { $0.color == .red || $0.color == .yellow})
             DispatchQueue.main.async {
                 self.state.change {
                     $0.tracks = tracks
@@ -257,13 +282,16 @@ final class ViewController: NSViewController {
                         rect1 = MKMapRectUnion(rect1, rect2)
                     })
                     setMapRect(boundingBox)
-                    $0.graph = readGraph()
                     
                 }
             }
-            //buildGraph(tracks: tracks, mapView: mapView)
-//            let graph = readGraph()
-//            print(graph)
+            buildGraph(tracks: tracks, mapView: mapView)
+            let graph = readGraph()
+            DispatchQueue.main.async {
+                self.state.change {
+                    $0.graph = graph
+                }
+            }
             
         }
     }
@@ -279,11 +307,13 @@ func readGraph() -> Graph? {
 }
 
 extension Array where Element == [(TrackPoint, overlaps: [Box<Track>])] {
-    func mergeSmallGroups() -> [[(TrackPoint, [Box<Track>])]] {
+    func mergeSmallGroups() -> [[(TrackPoint, overlaps: [Box<Track>])]] {
         var result: Array = []
         for group in self {
             if !result.isEmpty && group.count < 10 {
-                result[result.endIndex-1].append(contentsOf: group)
+                let overlaps = result[result.endIndex-1][0].overlaps
+                let newGroup = group.map { ($0.0, overlaps: overlaps) }
+                result[result.endIndex-1].append(contentsOf: newGroup)
             } else {
                 result.append(group)
             }
@@ -314,11 +344,8 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
         
         let grouped: [[(TrackPoint, overlaps: [Box<Track>])]] = joinedPoints.group(by: { $0.overlaps == $1.overlaps })
             .mergeSmallGroups()
-        print(t.name)
-        grouped.forEach {
-            print($0[0].overlaps.map { $0.unbox.name }, $0.count)
-        }
-        print("---")
+            .joined()
+            .group(by: { $0.overlaps == $1.overlaps })
         
         for segment in grouped {
             let first = segment[0]
@@ -326,6 +353,8 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
             let to = segment.last!.0.point
             let distance = segment.map { $0.0.point }.distance
             graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(to.coordinate), distance: distance, trackName: first.0.track.unbox.name))
+            // add both directions
+            graph.add(from: Coordinate(to.coordinate), Graph.Entry(destination: Coordinate(from.coordinate), distance: distance, trackName: first.0.track.unbox.name + "(reversed)"))
         }
         
         
@@ -359,10 +388,18 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
     try! result.write(to: graphURL)
 }
 
-struct Graph: Codable {
+struct Graph: Codable, Equatable {
+    static func ==(lhs: Graph, rhs: Graph) -> Bool {
+        return lhs.items.keys == rhs.items.keys // todo hack hack
+    }
+    
     private(set) var items: [Coordinate:[Entry]] = [:]
 
-    struct Entry: Codable {
+    struct Entry: Codable, Equatable {
+        static func ==(lhs: Graph.Entry, rhs: Graph.Entry) -> Bool {
+            return lhs.destination == rhs.destination && lhs.distance == rhs.distance && lhs.trackName == rhs.trackName
+        }
+        
         let destination: Coordinate
         let distance: CLLocationDistance
         let trackName: String
@@ -373,6 +410,59 @@ struct Graph: Codable {
     }
     
     var vertices: [Coordinate] { return Array(items.keys) }
+    
+    func edges(from: Coordinate) -> [Entry] {
+        let c = CLLocation(from.clLocationCoordinate)
+        let close = items.keys.filter { $0 != from && CLLocation($0.clLocationCoordinate).distance(from: c) < 125 }.map {
+            Entry(destination: $0, distance: 0, trackName: "")
+        }
+        return close + (items[from] ?? [])
+    }
+    
+//    var edges: [(Coordinate, Entry)] {
+//        return items.flatMap({ (key, value) in
+//            value.map { (key, $0) }
+//        })
+//    }
+    
+
+}
+
+extension Double {
+    mutating func joinMin(_ other: Double) {
+        self = min(self, other)
+    }
+}
+
+extension Graph {
+    func shortestPath(from source: Coordinate, to target: Coordinate) -> (path: [Entry], distance: CLLocationDistance)? {
+        var known: Set<Coordinate> = []
+        var distances: [Coordinate:(path: [Entry], distance: CLLocationDistance)] = [:]
+        for edge in edges(from: source) {
+            distances[edge.destination] = (path: [edge], distance: edge.distance)
+        }
+        var last = source
+        while last != target {
+            let smallestKnownDistances = distances.sorted(by: { $0.value.distance < $1.value.distance })
+            guard let next = smallestKnownDistances.first(where: { !known.contains($0.key) }) else {
+                return nil // no path
+            }
+//            print(next)
+            let distVNext = distances[next.key]?.distance ?? .greatestFiniteMagnitude
+            for edge in edges(from: next.key) {
+                let x = distances[edge.destination]
+                let existing = x ?? (path: [edge], distance: .greatestFiniteMagnitude)
+                if distVNext + edge.distance < existing.distance {
+                    distances[edge.destination] = (path: next.value.path + [edge], distance: distVNext + edge.distance) // todo cse
+                }
+            }
+            last = next.key
+            known.insert(next.key)
+        }
+//        print(distances)
+//        print("---- going to return ----")
+        return distances[target]
+    }
 }
 
 extension Track {
