@@ -21,6 +21,28 @@ struct StoredState: Equatable, Codable {
     }
 }
 
+struct CoordinateAndTrack: Equatable, Codable { // tuples aren't codable
+    static func ==(lhs: CoordinateAndTrack, rhs: CoordinateAndTrack) -> Bool {
+        return lhs.coordinateIndex == rhs.coordinateIndex && lhs.track == rhs.track
+    }
+    
+    let coordinateIndex: Int
+    let track: Track
+    
+    var coordinate: Coordinate {
+        return track.coordinates[coordinateIndex].coordinate
+    }
+}
+
+struct Route: Equatable, Codable {
+    static func ==(lhs: Route, rhs: Route) -> Bool {
+        return lhs.points == rhs.points
+    }
+    
+    var points: [CoordinateAndTrack]
+}
+
+
 struct DisplayState: Equatable, Codable {
     var tracks: [Track]
     var graph: Graph? = nil
@@ -46,6 +68,8 @@ struct DisplayState: Equatable, Codable {
         self.tracks = tracks
     }
     
+    var route: Route? = nil
+    
     var draggedLocation: (Double, CLLocation)? {
         guard let track = selection,
             let location = trackPosition else { return nil }
@@ -55,7 +79,7 @@ struct DisplayState: Equatable, Codable {
     }
     
     static func ==(lhs: DisplayState, rhs: DisplayState) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.firstPoint == rhs.firstPoint && lhs.graph == rhs.graph
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.firstPoint == rhs.firstPoint && lhs.graph == rhs.graph && lhs.route == rhs.route
     }
 }
 
@@ -190,17 +214,113 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     
     mapView.bind(annotations: POI.all.map { poi in MKPointAnnotation(coordinate: poi.location, title: poi.name) }, visible: persistent[\.annotationsVisible])
     
-    let vertices = state.i.map { $0.graph?.vertices ?? [] }
-    mapView.observe(value: vertices, onChange: { mv, v in
-        mv.addAnnotations(v.map {
-            MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "")
-        })
-    })
+//    let vertices = state.i.map { $0.graph?.vertices ?? [] }
+//    mapView.observe(value: vertices, onChange: { mv, v in
+//        mv.addAnnotations(v.map {
+//            MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "")
+//        })
+//    })
     
 //    mapView.bind(annotations: vertices.map {  }, visible: I(constant: true))
     
 //    mapView.addGestureRecognizer(clickGestureRecognizer { [unowned mapView] sender in
 //    }
+    
+    mapView.disposables.append(state.i.map { $0.route }.observe { [unowned mapView] route in
+        mapView.unbox.removeAnnotations(mapView.unbox.annotations.filter { $0 is MKPointAnnotation })
+        mapView.unbox.removeOverlays(mapView.unbox.overlays.filter { $0 is MKPolyline })
+
+        guard let r = route, var graph = state.i.value.graph, !r.points.isEmpty else { return }
+        
+        var points = r.points
+        var previous = points.removeFirst()
+        if let previousVertex = previous.track.vertexAfter(coordinate: previous.coordinate, at: previous.coordinateIndex, graph: graph) {
+            graph.add(from: previous.coordinate, Graph.Entry(destination: previousVertex.0, distance: previousVertex.1, trackName: previous.track.name))
+        }
+        
+        if let nextVertex = previous.track.vertexBefore(coordinate: previous.coordinate, at: previous.coordinateIndex, graph: graph) {
+            graph.add(from: previous.coordinate, Graph.Entry(destination: nextVertex.0, distance: nextVertex.1, trackName: previous.track.name))
+        }
+        
+        
+        mapView.unbox.addAnnotation(MKPointAnnotation(coordinate: previous.coordinate.clLocationCoordinate, title: ""))
+        var totalDistance: CLLocationDistance = 0
+        
+        while !points.isEmpty {
+            let next = points.removeFirst()
+            if let vertexAfter = next.track.vertexAfter(coordinate: next.coordinate, at: next.coordinateIndex, graph: graph) {
+                graph.add(from: vertexAfter.0, Graph.Entry(destination: next.coordinate, distance: vertexAfter.1, trackName: next.track.name))
+            }
+            
+            if let vertexBefore = next.track.vertexBefore(coordinate: next.coordinate, at: next.coordinateIndex, graph: graph) {
+                graph.add(from: vertexBefore.0, Graph.Entry(destination: next.coordinate, distance: vertexBefore.1, trackName: next.track.name))
+            }
+            
+            
+            if let path = graph.shortestPath(from: previous.coordinate, to: next.coordinate) {
+                let coords: [CLLocationCoordinate2D] = path.path.reduce(into: [previous.coordinate.clLocationCoordinate], { result, el in
+                    result.append(el.destination.clLocationCoordinate)
+                })  + [next.coordinate.clLocationCoordinate]
+                color = .black
+                let line = MKPolyline(coordinates: coords, count: coords.count)
+                mapView.unbox.add(line)
+                print("found it: \(path.distance)")
+                totalDistance += path.distance
+            } else {
+                print("not found")
+                print(graph.vertices.contains(previous.coordinate))
+                print(graph.vertices.contains(next.coordinate))
+            }
+            mapView.unbox.addAnnotation(MKPointAnnotation(coordinate: next.coordinate.clLocationCoordinate, title: ""))
+            previous = next
+        }
+        print("total distance: \(totalDistance)")
+    })
+    mapView.addGestureRecognizer(clickGestureRecognizer { [unowned mapView] sender in
+        let point = sender.location(in: mapView.unbox)
+        let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
+        let mapPoint = MKMapPointForCoordinate(coordinate)
+        let possibilities = polygonToTrack.filter { (polygon, track) in
+            let renderer = mapView.unbox.renderer(for: polygon) as! MKPolygonRenderer
+            let point = renderer.point(for: mapPoint)
+            return renderer.path.contains(point) // todo we should not only do contains, but check if the point is close to the track. now we can only click inside.
+            // we could make a maprect out of mapPoint, and then check for intersection
+        }
+        
+        let region = MKCoordinateRegionMakeWithDistance(mapView.unbox.centerCoordinate, 1, 1)
+        let rect = mapView.unbox.convertRegion(region, toRectTo: mapView.unbox)
+        let meterPerPixel = Double(1/rect.width)
+        let tresholdPixels: Double = 10
+        let treshold = (meterPerPixel*tresholdPixels)*(meterPerPixel*tresholdPixels)
+        
+        func findPoint() -> (Track, Int, CoordinateWithElevation)? {
+            for p in possibilities {
+                for (index, point) in p.value.coordinates.enumerated() {
+                    let squaredDistance = point.coordinate.clLocationCoordinate.squaredDistanceApproximation(to: coordinate)
+                    if  squaredDistance < treshold {
+                        return (p.value, index, point) // todo don't return the first matchh but the best match!
+                    }
+                }
+            }
+            return nil
+        }
+        
+        if let graph = state.i.value.graph {
+            if let (track, ix, coord) = findPoint() {
+                state.change {
+                    let x = CoordinateAndTrack(coordinateIndex: ix, track: track)
+                    if $0.route == nil { $0.route = Route(points: []) }
+                    $0.route!.points.append(x)
+                }
+//                mapView.unbox.addAnnotation(MKPointAnnotation(coordinate: coord.coordinate.clLocationCoordinate, title: "POINT"))
+//                if let start = startVertex {
+//                    mapView.unbox.addAnnotation(MKPointAnnotation(coordinate: start.clLocationCoordinate, title: "START VERTEX"))
+//                }
+            }
+        }
+        
+//        print(possibilities.count)
+    })
     /*
     mapView.addGestureRecognizer(clickGestureRecognizer { [unowned mapView] sender in
         let point = sender.location(in: mapView.unbox)
@@ -244,6 +364,61 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     
     return { mapView.unbox.setVisibleMapRect($0, animated: true) }
 }
+
+extension CGRect {
+    init(centerX: CGFloat, centerY: CGFloat, width: CGFloat, height: CGFloat) {
+        let x = centerX - width/2
+        let y = centerY - height/2
+        self = CGRect(x: x, y: y, width: width, height: height)
+    }
+}
+
+extension Track {
+    
+    // todo methods are copy/pasted
+    func vertexBefore(coordinate: Coordinate, at index: Int, graph: Graph) -> (Coordinate, CLLocationDistance)? {
+        let vertices = Set(graph.vertices)
+        var startVertex: Coordinate?
+        var distanceToStartVertex: CLLocationDistance = 0
+        var previous: Coordinate = coordinate
+        for x in (0..<index).reversed() {
+            let coord = coordinates[x].coordinate
+            defer { previous = coord }
+            distanceToStartVertex += sqrt(coord.clLocationCoordinate.squaredDistanceApproximation(to: previous.clLocationCoordinate))
+            if graph.vertices.contains(coord) {
+                startVertex = coord
+                break
+            }
+        }
+        if let s = startVertex {
+            return (s, distanceToStartVertex)
+        } else {
+            return nil
+        }
+    }
+    
+    func vertexAfter(coordinate: Coordinate, at index: Int, graph: Graph) -> (Coordinate, CLLocationDistance)? {
+        let vertices = Set(graph.vertices)
+        var endVertex: Coordinate?
+        var distance: CLLocationDistance = 0
+        var previous: Coordinate = coordinate
+        for x in (index..<coordinates.endIndex) {
+            let coord = coordinates[x].coordinate
+            defer { previous = coord }
+            distance += sqrt(coord.clLocationCoordinate.squaredDistanceApproximation(to: previous.clLocationCoordinate))
+            if graph.vertices.contains(coord) {
+                endVertex = coord
+                break
+            }
+        }
+        if let s = endVertex {
+            return (s, distance)
+        } else {
+            return nil
+        }
+    }
+}
+
 
 extension Sequence {
     // Creates groups out of the array. Function is called for adjacent element, if true they're in the same group.
@@ -382,7 +557,7 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
             let distance = segment.map { $0.0.point }.distance
             graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(to.coordinate), distance: distance, trackName: first.0.track.unbox.name))
             // add both directions
-            graph.add(from: Coordinate(to.coordinate), Graph.Entry(destination: Coordinate(from.coordinate), distance: distance, trackName: first.0.track.unbox.name + "(reversed)"))
+            
         }
         
         
@@ -435,6 +610,7 @@ struct Graph: Codable, Equatable {
 
     mutating func add(from: Coordinate, _ entry: Entry) {
         items[from, default: []].append(entry)
+        items[entry.destination, default: []].append(Entry(destination: from, distance: entry.distance, trackName: entry.trackName))
     }
     
     var vertices: [Coordinate] { return Array(items.keys) }
@@ -448,6 +624,16 @@ struct Graph: Codable, Equatable {
         return close + (items[from] ?? [])
     }
     
+//    mutating func simplify() {
+//        for vertex in vertices {
+//            for otherVertex in vertices {
+//                if vertex == otherVertex { continue }
+//                if vertex.clLocationCoordinate.squaredDistanceApproximation(to: otherVertex.clLocationCoordinate) < 250*250 {
+//                    print("possible merge")
+//                }
+//            }
+//        }
+//    }
 //    var edges: [(Coordinate, Entry)] {
 //        return items.flatMap({ (key, value) in
 //            value.map { (key, $0) }
