@@ -159,12 +159,12 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
                     let coords: [CLLocationCoordinate2D] = path.path.reduce(into: [p.clLocationCoordinate], { result, el in
                         result.append(el.destination.clLocationCoordinate)
                     }) + [coord.clLocationCoordinate]
-                    print(path)
+//                    print(path)
                     color = .black
                     mapView.removeOverlays(mapView.overlays.filter { $0 is MKPolyline })
                     let line = MKPolyline(coordinates: coords, count: coords.count)
                     mapView.add(line)
-                    
+                    print("found it: \(path.distance)")
                 }
                 
             } else {
@@ -271,28 +271,25 @@ final class ViewController: NSViewController {
         setMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)))
         let mapView = self.view.subviews[0] as! MKMapView
         DispatchQueue(label: "async").async {
-            let tracks = Array(Track.load())//.filter { $0.color == .red || $0.color == .yellow})
+            let tracks = Array(Track.load()) //.filter { $0.color == .red || $0.color == .yellow || $0.color == .brown }
             DispatchQueue.main.async {
                 self.state.change {
                     $0.tracks = tracks
-//                    $0.selection = tracks[1]
                     var rects = $0.tracks.map { $0.polygon.boundingMapRect }
                     let first = rects.removeFirst()
                     let boundingBox = rects.reduce(into: first, { (rect1, rect2) in
                         rect1 = MKMapRectUnion(rect1, rect2)
                     })
                     setMapRect(boundingBox)
-                    
                 }
             }
-            buildGraph(tracks: tracks, mapView: mapView)
+//            buildGraph(tracks: tracks, mapView: mapView)
             let graph = readGraph()
             DispatchQueue.main.async {
                 self.state.change {
                     $0.graph = graph
                 }
             }
-            
         }
     }
 }
@@ -306,11 +303,18 @@ func readGraph() -> Graph? {
     return try? decoder.decode(Graph.self, from: data)
 }
 
+extension Array {
+    subscript(safe idx: Int)  -> Element? {
+        guard idx >= startIndex && idx < endIndex else { return nil }
+        return self[idx]
+    }
+}
+
 extension Array where Element == [(TrackPoint, overlaps: [Box<Track>])] {
-    func mergeSmallGroups() -> [[(TrackPoint, overlaps: [Box<Track>])]] {
+    func mergeSmallGroups(maxSize: Int) -> [[(TrackPoint, overlaps: [Box<Track>])]] {
         var result: Array = []
         for group in self {
-            if !result.isEmpty && group.count < 10 {
+            if !result.isEmpty && group.count <= maxSize {
                 let overlaps = result[result.endIndex-1][0].overlaps
                 let newGroup = group.map { ($0.0, overlaps: overlaps) }
                 result[result.endIndex-1].append(contentsOf: newGroup)
@@ -320,6 +324,23 @@ extension Array where Element == [(TrackPoint, overlaps: [Box<Track>])] {
         }
         return result
     }
+    func mergeSmallGroupsAlt(maxSize: Int) -> [[(TrackPoint, overlaps: [Box<Track>])]] {
+        var result: Array = []
+        for ix in self.indices {
+            let group = self[ix]
+            if group.count <= maxSize,
+                let previous = self[safe: ix-1], let next = self[safe: ix+1],
+                previous[0].overlaps == next[0].overlaps {
+                let overlaps = result[result.endIndex-1][0].overlaps
+                let newGroup = group.map { ($0.0, overlaps: overlaps) }
+                result[result.endIndex-1].append(contentsOf: newGroup)
+            } else {
+                result.append(group)
+            }
+        }
+        return result
+    }
+
 }
 
 
@@ -328,13 +349,16 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
     let tree = KDTree(values: tracks.flatMap { $0.kdPoints })
     
     for t in tracks {
-        let joinedPoints: [(TrackPoint, overlaps: [Box<Track>])] = t.kdPoints.map { point in
+        print(t.name)
+        let joinedPoints: [(TrackPoint, overlaps: [Box<Track>])] = t.kdPoints.enumerated().map { (ix, point) in
             var seen: [Box<Track>] = []
-            for neighbor in tree.nearestK(10, to: point, where: { neighbor in
-                neighbor.track != point.track
-            }) {
-                if !seen.contains(neighbor.track) {
-                    if point.squaredDistance(to: neighbor) > 30 { break }
+//            let maxDistance = max((t.kdPoints[safe: ix-1]?.point.distance(from: point.point) ?? 0) * 1.5, 30)
+//            let maxDistance: Double = 30*30
+            for neighbor in tree.nearestK(10, to: point) {
+                // todo should the distance be dependent on the distance between the current and previous point?
+//                print(sqrt(point.squaredDistance(to: neighbor)) * , point.point.distance(from: neighbor.point))
+                let maxDistanceSquared: Double = 100*100
+                if neighbor.track != point.track && !seen.contains(neighbor.track) && point.squaredDistance(to: neighbor) < maxDistanceSquared {
                     seen.append(neighbor.track)
                 }
             }
@@ -343,10 +367,14 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
         }
         
         let grouped: [[(TrackPoint, overlaps: [Box<Track>])]] = joinedPoints.group(by: { $0.overlaps == $1.overlaps })
-            .mergeSmallGroups()
+//            .mergeSmallGroups(maxSize: 1)
+//            .joined()
+//            .group(by: { $0.overlaps == $1.overlaps })
+            .mergeSmallGroupsAlt(maxSize: 10)
             .joined()
             .group(by: { $0.overlaps == $1.overlaps })
-        
+        grouped.map { ($0.first!.overlaps.map { $0.unbox.name }, $0.count) }.forEach { print($0) }
+        print("---")
         for segment in grouped {
             let first = segment[0]
             let from = first.0.point
@@ -364,11 +392,11 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
         DispatchQueue.main.async {
             guard let mapView = mapView else { return }
             //                 the overlapping lines
-            let lines = grouped.map { $0.map {$0.0 } }.map { (r: [TrackPoint]) -> MKPolyline in
-                let arr = r.map { $0.point.coordinate }
-                return MKPolyline(coordinates: arr, count: arr.count)
-            }
-            mapView.addOverlays(lines)
+//            let lines = grouped.map { $0.map {$0.0 } }.map { (r: [TrackPoint]) -> MKPolyline in
+//                let arr = r.map { $0.point.coordinate }
+//                return MKPolyline(coordinates: arr, count: arr.count)
+//            }
+//            mapView.addOverlays(lines)
             for segment in grouped {
                 let first = segment[0]
                 let title = ([first.0.track.unbox.name] + first.overlaps.map { $0.unbox.name }).joined(separator: ", ")
@@ -413,7 +441,8 @@ struct Graph: Codable, Equatable {
     
     func edges(from: Coordinate) -> [Entry] {
         let c = CLLocation(from.clLocationCoordinate)
-        let close = items.keys.filter { $0 != from && CLLocation($0.clLocationCoordinate).distance(from: c) < 125 }.map {
+        let squaredTreshold: Double = 250*250
+        let close = items.keys.filter { $0 != from && CLLocation($0.clLocationCoordinate).squaredDistance(to: c) < squaredTreshold }.map {
             Entry(destination: $0, distance: 0, trackName: "")
         }
         return close + (items[from] ?? [])
@@ -468,7 +497,7 @@ extension Graph {
 extension Track {
     var kdPoints: [TrackPoint] {
         let box = Box(self)
-        return coordinates.map { coordAndEle in
+        return (coordinates + [coordinates[0]]).map { coordAndEle in
             TrackPoint(track: box, point: CLLocation(coordAndEle.coordinate.clLocationCoordinate))
         }
     }
@@ -479,15 +508,40 @@ struct TrackPoint {
     let point: CLLocation
 }
 
+extension CLLocationCoordinate2D {
+    func squaredDistanceApproximation(to other: CLLocationCoordinate2D) -> Double {
+        let latMid = (latitude + other.latitude) / 2
+        let m_per_deg_lat: Double = 111132.954 - 559.822 * cos(2 * latMid) + 1.175 * cos(4.0 * latMid)
+        let m_per_deg_lon: Double = (Double.pi/180) * 6367449 * cos(latMid)
+        let deltaLat = fabs(latitude - other.latitude)
+        let deltaLon = fabs(longitude - other.longitude)
+        return pow(deltaLat * m_per_deg_lat,2) + pow(deltaLon * m_per_deg_lon, 2)
+    }
+}
+
+extension CLLocation {
+    var x: Double {
+        return coordinate.latitude/90
+    }
+    var y: Double {
+        return coordinate.longitude/180
+    }
+    func squaredDistance(to other: CLLocation) -> Double {
+        return coordinate.squaredDistanceApproximation(to: other.coordinate)
+    }
+}
+
+
+
 extension TrackPoint: KDTreePoint {
     static let dimensions = 2
     
     func kdDimension(_ dimension: Int) -> Double {
-        return dimension == 0 ? point.coordinate.latitude : point.coordinate.longitude
+        return dimension == 0 ? point.x : point.y
     }
     
     func squaredDistance(to otherPoint: TrackPoint) -> Double {
-        return point.distance(from: otherPoint.point)
+        return point.squaredDistance(to: otherPoint.point)
     }
     
     static func ==(lhs: TrackPoint, rhs: TrackPoint) -> Bool {
