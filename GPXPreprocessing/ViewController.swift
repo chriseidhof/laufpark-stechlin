@@ -105,14 +105,19 @@ extension CLLocationCoordinate2D: Equatable {
     }
 }
 
-func cycle<A>(elements: [A]) -> AnyIterator<A> {
-    var i = 0
-    return AnyIterator {
-        defer { i += 1 }
-        return elements[i % elements.count]
+extension Sequence {
+    var cycled: AnyIterator<Element> {
+        var current = makeIterator()
+        return AnyIterator {
+            guard let result = current.next() else {
+                current = self.makeIterator()
+                return current.next()
+            }
+            return result
+        }
+
     }
 }
-
 
 /// Returns a function that you can call to set the visible map rect
 func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<NSView>) -> ((MKMapRect) -> ()) {
@@ -236,10 +241,14 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         var previous = points.removeFirst()
         if let previousVertex = previous.track.vertexAfter(coordinate: previous.coordinate, at: previous.coordinateIndex, graph: graph) {
             graph.add(from: previous.coordinate, Graph.Entry(destination: previousVertex.0, distance: previousVertex.1, trackName: previous.track.name))
+        } else {
+            print("couldn't find after")
         }
         
         if let nextVertex = previous.track.vertexBefore(coordinate: previous.coordinate, at: previous.coordinateIndex, graph: graph) {
             graph.add(from: previous.coordinate, Graph.Entry(destination: nextVertex.0, distance: nextVertex.1, trackName: previous.track.name))
+        } else {
+            print("couldn't find before")
         }
         
         
@@ -247,13 +256,18 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         var totalDistance: CLLocationDistance = 0
         
         while !points.isEmpty {
+            
             let next = points.removeFirst()
             if let vertexAfter = next.track.vertexAfter(coordinate: next.coordinate, at: next.coordinateIndex, graph: graph) {
                 graph.add(from: vertexAfter.0, Graph.Entry(destination: next.coordinate, distance: vertexAfter.1, trackName: next.track.name))
+                print("found vertex after: \(vertexAfter.1)")
+                mapView.unbox.addAnnotation(MKPointAnnotation(coordinate: vertexAfter.0.clLocationCoordinate, title: "after"))
             }
             
             if let vertexBefore = next.track.vertexBefore(coordinate: next.coordinate, at: next.coordinateIndex, graph: graph) {
                 graph.add(from: vertexBefore.0, Graph.Entry(destination: next.coordinate, distance: vertexBefore.1, trackName: next.track.name))
+                print("found vertex before")
+                mapView.unbox.addAnnotation(MKPointAnnotation(coordinate: vertexBefore.0.clLocationCoordinate, title: "before"))
             }
             
             
@@ -277,6 +291,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         print("total distance: \(totalDistance)")
     })
     mapView.addGestureRecognizer(clickGestureRecognizer { [unowned mapView] sender in
+        
         let point = sender.location(in: mapView.unbox)
         let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
         let mapPoint = MKMapPointForCoordinate(coordinate)
@@ -381,11 +396,12 @@ extension Track {
         var startVertex: Coordinate?
         var distanceToStartVertex: CLLocationDistance = 0
         var previous: Coordinate = coordinate
-        for x in (0..<index).reversed() {
+        let indices = Array(0..<index)
+        for x in (indices + indices).reversed() {
             let coord = coordinates[x].coordinate
             defer { previous = coord }
-            distanceToStartVertex += sqrt(coord.clLocationCoordinate.squaredDistanceApproximation(to: previous.clLocationCoordinate))
-            if graph.vertices.contains(coord) {
+            distanceToStartVertex += CLLocation(coord.clLocationCoordinate).distance(from: CLLocation(previous.clLocationCoordinate))
+            if vertices.contains(coord) {
                 startVertex = coord
                 break
             }
@@ -402,11 +418,12 @@ extension Track {
         var endVertex: Coordinate?
         var distance: CLLocationDistance = 0
         var previous: Coordinate = coordinate
-        for x in (index..<coordinates.endIndex) {
+        let indices = Array(index..<coordinates.endIndex)
+        for x in indices + indices {
             let coord = coordinates[x].coordinate
             defer { previous = coord }
-            distance += sqrt(coord.clLocationCoordinate.squaredDistanceApproximation(to: previous.clLocationCoordinate))
-            if graph.vertices.contains(coord) {
+            distance += CLLocation(coord.clLocationCoordinate).distance(from: CLLocation(previous.clLocationCoordinate))
+            if vertices.contains(coord) {
                 endVertex = coord
                 break
             }
@@ -433,6 +450,15 @@ extension Sequence {
     }
 }
 
+func time<Result>(name: StaticString = #function, line: Int = #line, _ f: () -> Result) -> Result {
+    let startTime = DispatchTime.now()
+    let result = f()
+    let endTime = DispatchTime.now()
+    let diff = Double(endTime.uptimeNanoseconds - startTime.uptimeNanoseconds) / 1_000_000_000 as Double
+    print("\(name) (line \(line)): \(diff) sec")
+    return result
+}
+
 final class ViewController: NSViewController {
     @IBOutlet var _mapView: MKMapView!
     
@@ -447,6 +473,7 @@ final class ViewController: NSViewController {
         let mapView = self.view.subviews[0] as! MKMapView
         DispatchQueue(label: "async").async {
             let tracks = Array(Track.load()) //.filter { $0.color == .red || $0.color == .yellow || $0.color == .brown }
+            print(tracks[0].coordinates[0].coordinate.clLocationCoordinate)
             DispatchQueue.main.async {
                 self.state.change {
                     $0.tracks = tracks
@@ -458,7 +485,9 @@ final class ViewController: NSViewController {
                     setMapRect(boundingBox)
                 }
             }
-//            buildGraph(tracks: tracks, mapView: mapView)
+            time {
+//                buildGraph(tracks: tracks, mapView: mapView)
+            }
             let graph = readGraph()
             DispatchQueue.main.async {
                 self.state.change {
@@ -529,11 +558,11 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
             var seen: [Box<Track>] = []
 //            let maxDistance = max((t.kdPoints[safe: ix-1]?.point.distance(from: point.point) ?? 0) * 1.5, 30)
 //            let maxDistance: Double = 30*30
-            for neighbor in tree.nearestK(10, to: point) {
+            for neighbor in tree.nearestK(20, to: point) {
                 // todo should the distance be dependent on the distance between the current and previous point?
 //                print(sqrt(point.squaredDistance(to: neighbor)) * , point.point.distance(from: neighbor.point))
-                let maxDistanceSquared: Double = 100*100
-                if neighbor.track != point.track && !seen.contains(neighbor.track) && point.squaredDistance(to: neighbor) < maxDistanceSquared {
+                let maxDistance = 30 as Double
+                if neighbor.track != point.track && !seen.contains(neighbor.track) && point.distanceInMeters(to: neighbor) < maxDistance {
                     seen.append(neighbor.track)
                 }
             }
@@ -545,7 +574,7 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
 //            .mergeSmallGroups(maxSize: 1)
 //            .joined()
 //            .group(by: { $0.overlaps == $1.overlaps })
-            .mergeSmallGroupsAlt(maxSize: 10)
+            .mergeSmallGroupsAlt(maxSize: 4)
             .joined()
             .group(by: { $0.overlaps == $1.overlaps })
         grouped.map { ($0.first!.overlaps.map { $0.unbox.name }, $0.count) }.forEach { print($0) }
@@ -692,6 +721,9 @@ extension Track {
 struct TrackPoint {
     let track: Box<Track>
     let point: CLLocation
+    var mapPoint: MKMapPoint {
+        return MKMapPointForCoordinate(point.coordinate)
+    }
 }
 
 extension CLLocationCoordinate2D {
@@ -723,11 +755,20 @@ extension TrackPoint: KDTreePoint {
     static let dimensions = 2
     
     func kdDimension(_ dimension: Int) -> Double {
-        return dimension == 0 ? point.x : point.y
+        return dimension == 0 ? mapPoint.x : mapPoint.y
     }
     
     func squaredDistance(to otherPoint: TrackPoint) -> Double {
-        return point.squaredDistance(to: otherPoint.point)
+        //return self.point.squaredDistance(to: otherPoint.point)
+//        let result = MKMetersBetweenMapPoints(self.mapPoint, otherPoint.mapPoint)
+//        return result * result
+        let dx = mapPoint.x-otherPoint.mapPoint.x
+        let dy = mapPoint.y-otherPoint.mapPoint.y
+        return dx*dx + dy*dy
+    }
+    
+    func distanceInMeters(to other: TrackPoint) -> Double {
+        return MKMetersBetweenMapPoints(self.mapPoint, other.mapPoint)
     }
     
     static func ==(lhs: TrackPoint, rhs: TrackPoint) -> Bool {
