@@ -176,31 +176,15 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     }, regionDidChangeAnimated: { [unowned mapView] _ in
 //        print(mapView.unbox.region)
     }, didSelectAnnotation: { mapView, annotationView in
-        guard let c = annotationView.annotation?.coordinate else { return }
-        let coord = Coordinate(c)
-        
-        state.change {
-            guard let g = $0.graph else { return }
-            if let p = $0.firstPoint {
-                print("going to find shortest path to \(coord)")
-                if let path = g.shortestPath(from: p, to: coord) {
-                    
-                    let coords: [CLLocationCoordinate2D] = path.path.reduce(into: [p.clLocationCoordinate], { result, el in
-                        result.append(el.destination.clLocationCoordinate)
-                    }) + [coord.clLocationCoordinate]
-//                    print(path)
-                    color = .black
-                    mapView.removeOverlays(mapView.overlays.filter { $0 is MKPolyline })
-                    let line = MKPolyline(coordinates: coords, count: coords.count)
-                    mapView.add(line)
-                    print("found it: \(path.distance)")
-                }
-                
-            } else {
-                $0.firstPoint = coord
-                print("Setting \(coord)")
-            }
-        }
+        print(annotationView.annotation!.title)
+//        if let g = state.i.value.graph {
+//            let edges = g.edges(from: Coordinate(annotationView.annotation!.coordinate))
+//            for edge in edges {
+//                let coordinates = [annotationView.annotation!.coordinate, edge.destination.clLocationCoordinate]
+//                mapView.add(MKPolyline(coordinates: coordinates, count: coordinates.count))
+//            }
+//            print(edges)
+//        }
 //        for entry in entries {
 //            var points = [coord, entry.destination.clLocationCoordinate]
 //            let line = MKPolyline(coordinates: points, count: points.count)
@@ -290,8 +274,9 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         }
         print("total distance: \(totalDistance)")
     })
+
     mapView.addGestureRecognizer(clickGestureRecognizer { [unowned mapView] sender in
-        
+
         let point = sender.location(in: mapView.unbox)
         let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
         let mapPoint = MKMapPointForCoordinate(coordinate)
@@ -301,13 +286,13 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
             return renderer.path.contains(point) // todo we should not only do contains, but check if the point is close to the track. now we can only click inside.
             // we could make a maprect out of mapPoint, and then check for intersection
         }
-        
+
         let region = MKCoordinateRegionMakeWithDistance(mapView.unbox.centerCoordinate, 1, 1)
         let rect = mapView.unbox.convertRegion(region, toRectTo: mapView.unbox)
         let meterPerPixel = Double(1/rect.width)
         let tresholdPixels: Double = 10
         let treshold = (meterPerPixel*tresholdPixels)*(meterPerPixel*tresholdPixels)
-        
+
         func findPoint() -> (Track, Int, CoordinateWithElevation)? {
             for p in possibilities {
                 for (index, point) in p.value.coordinates.enumerated() {
@@ -319,7 +304,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
             }
             return nil
         }
-        
+
         if let graph = state.i.value.graph {
             if let (track, ix, coord) = findPoint() {
                 state.change {
@@ -333,7 +318,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
 //                }
             }
         }
-        
+
 //        print(possibilities.count)
     })
     /*
@@ -472,7 +457,7 @@ final class ViewController: NSViewController {
         setMapRect(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)))
         let mapView = self.view.subviews[0] as! MKMapView
         DispatchQueue(label: "async").async {
-            let tracks = Array(Track.load()) //.filter { $0.color == .red || $0.color == .yellow || $0.color == .brown }
+            let tracks = Array(Track.load()) //.filter { $0.color == .orange || $0.color == .blue }
             print(tracks[0].coordinates[0].coordinate.clLocationCoordinate)
             DispatchQueue.main.async {
                 self.state.change {
@@ -486,7 +471,7 @@ final class ViewController: NSViewController {
                 }
             }
             time {
-//                buildGraph(tracks: tracks, mapView: mapView)
+                buildGraph(tracks: tracks, mapView: mapView)
             }
             let graph = readGraph()
             DispatchQueue.main.async {
@@ -558,10 +543,10 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
             var seen: [Box<Track>] = []
 //            let maxDistance = max((t.kdPoints[safe: ix-1]?.point.distance(from: point.point) ?? 0) * 1.5, 30)
 //            let maxDistance: Double = 30*30
-            for neighbor in tree.nearestK(20, to: point) {
+            for neighbor in tree.nearestK(10, to: point) {
                 // todo should the distance be dependent on the distance between the current and previous point?
 //                print(sqrt(point.squaredDistance(to: neighbor)) * , point.point.distance(from: neighbor.point))
-                let maxDistance = 30 as Double
+                let maxDistance = 20 as Double
                 if neighbor.track != point.track && !seen.contains(neighbor.track) && point.distanceInMeters(to: neighbor) < maxDistance {
                     seen.append(neighbor.track)
                 }
@@ -574,7 +559,7 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
 //            .mergeSmallGroups(maxSize: 1)
 //            .joined()
 //            .group(by: { $0.overlaps == $1.overlaps })
-            .mergeSmallGroupsAlt(maxSize: 4)
+            .mergeSmallGroupsAlt(maxSize: 1)
             .joined()
             .group(by: { $0.overlaps == $1.overlaps })
         grouped.map { ($0.first!.overlaps.map { $0.unbox.name }, $0.count) }.forEach { print($0) }
@@ -585,8 +570,6 @@ func buildGraph(tracks: [Track], mapView: MKMapView?) {
             let to = segment.last!.0.point
             let distance = segment.map { $0.0.point }.distance
             graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(to.coordinate), distance: distance, trackName: first.0.track.unbox.name))
-            // add both directions
-            
         }
         
         
