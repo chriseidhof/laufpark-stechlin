@@ -358,6 +358,10 @@ extension I {
         return map(eq: ==, transform)
     }
 
+    public func map<B: Equatable, C: Equatable>(_ transform: @escaping (A) -> [(B, C)]) -> I<[(B,C)]> {
+        return map(eq: lift(==), transform)
+    }
+
     // convenience for optional tuples
     public func map<B: Equatable, C: Equatable>(_ transform: @escaping (A) -> (B, C)?) -> I<(B,C)?> {
         return map(eq: lift(==), transform)
@@ -374,6 +378,13 @@ public func lift<A>(_ f: @escaping (A,A) -> Bool) -> (A?,A?) -> Bool {
         }
     }
 }
+
+public func lift<A>(_ f: @escaping (A,A) -> Bool) -> ([A],[A]) -> Bool {
+    return { l, r in
+        l.count == r.count && !zip(l,r).lazy.map(f).contains(false)
+    }
+}
+
 
 
 extension I where A: Equatable {

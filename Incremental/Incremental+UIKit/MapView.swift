@@ -20,6 +20,31 @@ extension IBox where V: MKMapView {
 
     }
     
+    public func bind(annotations: I<[MKPointAnnotation]>) {
+        var previous: [MKPointAnnotation]? = nil
+        disposables.append(annotations.observe { [unowned self] value in
+            if let p = previous {
+                self.unbox.removeAnnotations(p)
+            }
+            self.unbox.addAnnotations(value)
+            previous = value
+        })
+        
+    }
+    
+    public func bind<O: MKOverlay>(overlays: I<[O]>) {
+        var previous: [O]? = nil
+        disposables.append(overlays.observe { [unowned self] value in
+            if let p = previous {
+                self.unbox.removeOverlays(p)
+            }
+            print("overlays: \(value.count)")
+            self.unbox.addOverlays(value)
+            previous = value
+        })
+        
+    }
+    
     public var delegate: MKMapViewDelegate? {
         get { return unbox.delegate }
         set {
