@@ -285,6 +285,8 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     }
     mapView.bind(overlays: lines)
     
+
+    
     mapView.observe(value: state.i.map { $0.route?.distance }, onChange: { print($1) })
 
     func addWaypoint(mapView: IBox<MKMapView>, sender: UITapGestureRecognizer) {

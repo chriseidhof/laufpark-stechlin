@@ -133,7 +133,7 @@ extension Collection where Element == CLLocation {
     }
 }
 struct Track: Codable {
-    let coordinates: [CoordinateWithElevation]
+    var coordinates: [CoordinateWithElevation]
     let color: Color
     let number: Int
     let name: String

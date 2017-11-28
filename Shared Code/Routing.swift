@@ -226,18 +226,7 @@ func buildGraph(tracks: [Track], url: URL) -> Graph {
         let first = t.coordinates[0].coordinate
         graph.add(from: last, Graph.Entry(destination: first, distance: CLLocation(last.clLocationCoordinate).distance(from: CLLocation(first.clLocationCoordinate)), trackName: t.name))
     }
-    
-    let orange = tracks.first { $0.name == "Orange 1" }!
-    for v in graph.vertices {
-        for e in graph.edges(from: v) {
-            if e.trackName == "Orange 1" {
-                let from = orange.coordinates.index(where: { $0.coordinate == v })
-                let to = orange.coordinates.index(where: { $0.coordinate == e.destination })
-                print("edge \(from) - \(to)")
-            }
-        }
-    }
-    
+        
     let json = JSONEncoder()
     let result = try! json.encode(graph)
     try! result.write(to: url)
@@ -258,6 +247,12 @@ struct TrackPoint {
     let point: CLLocation
     var mapPoint: MKMapPoint {
         return MKMapPointForCoordinate(point.coordinate)
+    }
+}
+
+extension TrackPoint: CustomStringConvertible {
+    var description: String {
+        return "TrackPoint(track: \(track.unbox.name), point: \(point.coordinate))"
     }
 }
 
