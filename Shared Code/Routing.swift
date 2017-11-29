@@ -46,11 +46,40 @@ extension Track {
                 result.append(c)
             }
         }
+        
+        // todo check segments?
+        if let sourceIndex = coordinates.index(where: { $0.coordinate == between }) {
+            return ([], between.clLocationCoordinate.squaredDistanceApproximation(to: destination.clLocationCoordinate).squareRoot())
+        } else if let destinationIndex = coordinates.index(where: { $0.coordinate == destination }) {
+            return ([], between.clLocationCoordinate.squaredDistanceApproximation(to: destination.clLocationCoordinate).squareRoot())
+        }
+        
+        print("TODO")
+        
         fatalError()
     }
 }
 
 extension Track {
+    var segments: AnySequence<Segment> {
+        let coordinates = self.coordinates.map { $0.coordinate.clLocationCoordinate }
+        return AnySequence(zip(coordinates, coordinates.dropFirst() + [coordinates.first!]))
+    }
+    
+    func segment(closeTo point: CLLocationCoordinate2D, maxDistance: Double) -> Segment? {
+        let distance = maxDistance*maxDistance
+        return segments.first {
+            point.squaredDistance(to: $0) < distance
+        }
+    }
+    
+    func segment(closestTo point: CLLocationCoordinate2D, maxDistance: Double) -> Segment? {
+        let distance = maxDistance*maxDistance
+        return segments.lazy.map {
+            (segment: $0, distance: point.squaredDistance(to: $0))
+        }.filter { $0.distance < distance }.sorted(by: { $0.distance < $1.distance }).first.map { $0.segment }
+    }
+
     func findPoint(closeTo: CLLocationCoordinate2D, tresholdInMeters: Double) -> (index: Int, point: CoordinateWithElevation)? {
         let target = CLLocation(closeTo)
         let withDistance: [(Int, CoordinateWithElevation, CLLocationDistance)] = coordinates.enumerated().map { (i,p) in
@@ -65,21 +94,22 @@ extension Track {
         var startVertex: Coordinate?
         var distanceToStartVertex: CLLocationDistance = 0
         var previous: Coordinate = coordinate
-        let indices = Array(0..<index) + Array(0..<index)
-        for x in reversed ? indices.reversed() : indices {
+        let indices: Array<Int>
+        if reversed {
+            indices = (Array(0..<coordinates.endIndex) + Array(0..<index)).reversed()
+        } else {
+            indices = Array(index..<coordinates.endIndex) + Array(0..<index)
+        }
+        for x in indices.dropFirst() {
             let coord = coordinates[x].coordinate
             defer { previous = coord }
             distanceToStartVertex += CLLocation(coord.clLocationCoordinate).distance(from: CLLocation(previous.clLocationCoordinate))
             if vertices.contains(coord) {
-                startVertex = coord
-                break
+                return (coord, distanceToStartVertex)
+
             }
         }
-        if let s = startVertex {
-            return (s, distanceToStartVertex)
-        } else {
-            return nil
-        }
+        return nil
     }
     
     func vertexBefore(coordinate: Coordinate, at index: Int, graph: Graph) -> (Coordinate, CLLocationDistance)? {
@@ -89,6 +119,17 @@ extension Track {
     func vertexAfter(coordinate: Coordinate, at index: Int, graph: Graph) -> (Coordinate, CLLocationDistance)? {
         return vertexHelper(coordinate: coordinate, at: index, graph: graph, reversed: false)
     }
+    
+    func vertexBefore(coordinate: Coordinate, graph: Graph) -> (Coordinate, CLLocationDistance)? {
+        let index = coordinates.index { $0.coordinate == coordinate }!
+        return vertexHelper(coordinate: coordinate, at: index, graph: graph, reversed: true)
+    }
+    
+    func vertexAfter(coordinate: Coordinate, graph: Graph) -> (Coordinate, CLLocationDistance)? {
+        let index = coordinates.index { $0.coordinate == coordinate }!
+        return vertexHelper(coordinate: coordinate, at: index, graph: graph, reversed: false)
+    }
+
 }
 
 func readGraph(url: URL) -> Graph? {

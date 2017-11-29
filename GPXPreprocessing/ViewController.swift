@@ -21,27 +21,77 @@ struct StoredState: Equatable, Codable {
     }
 }
 
+struct Path: Equatable, Codable {
+    let entries: [Graph.Entry]
+    let distance: CLLocationDistance
+    
+    static func ==(lhs: Path, rhs: Path) -> Bool {
+        return lhs.entries == rhs.entries && lhs.distance == rhs.distance
+    }
+}
+
 struct CoordinateAndTrack: Equatable, Codable { // tuples aren't codable
     static func ==(lhs: CoordinateAndTrack, rhs: CoordinateAndTrack) -> Bool {
-        return lhs.coordinateIndex == rhs.coordinateIndex && lhs.track == rhs.track
+        return lhs.coordinate == rhs.coordinate && lhs.track == rhs.track && lhs.pathFromPrevious == rhs.pathFromPrevious
     }
     
-    let coordinateIndex: Int
+    let coordinate: Coordinate
     let track: Track
-    
-    var coordinate: Coordinate {
-        return track.coordinates[coordinateIndex].coordinate
-    }
+    var pathFromPrevious: Path?
 }
 
 struct Route: Equatable, Codable {
     static func ==(lhs: Route, rhs: Route) -> Bool {
-        return lhs.points == rhs.points
+        return lhs.startingPoint == rhs.startingPoint && lhs.points == rhs.points
     }
     
-    var points: [CoordinateAndTrack]
+    let startingPoint: CoordinateAndTrack
+    var points: [CoordinateAndTrack] = []
+    
+    init(track: Track, coordinate: Coordinate) {
+        startingPoint = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: nil)
+    }
+    
+    mutating func add(coordinate: Coordinate, inTrack track: Track, graph: Graph) {
+        let previous = points.last ?? startingPoint
+        let path = graph.shortestPath(from: previous.coordinate, to: coordinate).map {
+            Path(entries: $0.path, distance: $0.distance)
+        }
+//        assert(path != nil)
+        let result = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: path)
+        points.append(result)
+    }
+    
+    var wayPoints: [Coordinate] {
+        return [startingPoint.coordinate] + points.map { $0.coordinate }
+    }
+    
+    var segments: [(Coordinate, Coordinate)] {
+        let coordinates = points.map { $0.coordinate }
+        return Array(zip([startingPoint.coordinate] + coordinates, coordinates))
+    }
+    
+    var distance: Double {
+        return points.map { $0.pathFromPrevious?.distance ?? 0 }.reduce(into: 0, +=)
+    }
+    
+    func allPoints(tracks: [Track]) -> [Coordinate] {
+        var result: [Coordinate] = [startingPoint.coordinate]
+        for wayPoint in points {
+            if let p = wayPoint.pathFromPrevious?.entries {
+                for entry in p {
+                    if entry.trackName != "Close" {
+                        let track = tracks.first { $0.name == entry.trackName }!
+                        result += track.points(between: result.last!, and: entry.destination).map { $0.coordinate }
+                    }
+                    result.append(entry.destination)
+                }
+            }
+            result.append(wayPoint.coordinate)
+        }
+        return result
+    }
 }
-
 
 struct DisplayState: Equatable, Codable {
     var tracks: [Track]
@@ -81,6 +131,59 @@ struct DisplayState: Equatable, Codable {
     
     static func ==(lhs: DisplayState, rhs: DisplayState) -> Bool {
         return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.firstPoint == rhs.firstPoint && lhs.graph == rhs.graph && lhs.route == rhs.route && lhs.tmpPoints == rhs.tmpPoints
+    }
+}
+
+
+extension DisplayState {
+    mutating func addWayPoint(track: Track, coordinate c2d: CLLocationCoordinate2D, segment: Segment) {
+        guard graph != nil else { return }
+        let coordinate = Coordinate(c2d)
+        let d = c2d.squaredDistance(to: segment).squareRoot()
+        assert(d < 0.1)
+        
+        let d0 = segment.0.squaredDistanceApproximation(to: c2d).squareRoot()
+        let d1 = segment.1.squaredDistanceApproximation(to: c2d).squareRoot()
+        
+        let segment0 = Coordinate(segment.0)
+        let segment1 = Coordinate(segment.1)
+        
+        func add(from: Coordinate, _ entry: Graph.Entry) {
+            graph!.add(from: from, entry)
+        }
+        add(from: coordinate, Graph.Entry(destination: segment0, distance: d0, trackName: track.name))
+        add(from: coordinate, Graph.Entry(destination: segment1, distance: d1, trackName: track.name))
+        
+        // todo add a vertex from segment.0 to the graph entry before and after
+        
+        if let vertex = track.vertexAfter(coordinate: segment0, graph: graph!) {
+            add(from: segment0, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
+        } else {
+            print("error")
+        }
+        if let vertex = track.vertexBefore(coordinate: segment0, graph: graph!) {
+            add(from: segment0, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
+        } else {
+            print("error")
+        }
+
+        if let vertex = track.vertexAfter(coordinate: segment1, graph: graph!) {
+            add(from: segment1, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
+        } else {
+            print("error")
+        }
+        if let vertex = track.vertexBefore(coordinate: segment1, graph: graph!) {
+            add(from: segment1, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
+        } else {
+            print("error")
+        }
+
+        
+        if route == nil {
+            route = Route(track: track, coordinate: coordinate)
+        } else {
+            route!.add(coordinate: coordinate, inTrack: track, graph: graph!)
+        }
     }
 }
 
@@ -176,6 +279,7 @@ extension Array {
     }
 }
 
+var debugMapView: MKMapView!
 
 /// Returns a function that you can call to set the visible map rect
 func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<NSView>) -> ((MKMapRect) -> ()) {
@@ -196,6 +300,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     }
     
     let mapView: IBox<MKMapView> = newMapView()
+    debugMapView = mapView.unbox
     rootView.addSubview(mapView, constraints: sizeToParent())
     
     
@@ -211,6 +316,11 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
             let renderer = MKPolylineRenderer(polyline: l)
             renderer.lineWidth = 5
             renderer.strokeColor = color
+            if l.title == "green" {
+                renderer.strokeColor = .green
+            } else if l.title == "blue" {
+                renderer.strokeColor = .blue
+            }
             return renderer
         }
         return MKOverlayRenderer()
@@ -234,13 +344,6 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     })
     
     mapView.bind(annotations: state.i.map { $0.tmpPoints.map { MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "" )} })
-    
-//    mapView.bind(annotations: state.i.map {
-//        if $0.tmpPoints.count == 3 {
-//
-//        }
-//    })
-
     mapView.disposables.append(state.i.map { $0.tracks }.observe { [unowned mapView] in
         mapView.unbox.removeOverlays(mapView.unbox.overlays)
         $0.forEach { track in
@@ -250,29 +353,73 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         }
     })
     
+    // Visualize graphs
     /*
-    mapView.addGestureRecognizer(clickGestureRecognizer { [unowned mapView] sender in
+    mapView.bind(overlays: state.i.map { $0.graph?.items.flatMap({ entry -> [MKPolyline] in
+        entry.value.map {
+            let coords = [entry.key.clLocationCoordinate, $0.destination.clLocationCoordinate]
+            let result = MKPolyline(coordinates: coords, count: 2)
+            result.title = "green"
+            return result
+        }
+    }) ?? [] })
+ */
+    
+    let waypoints: I<[Coordinate]> = state.i.map { $0.route?.wayPoints ?? [] }
+    let waypointAnnotations = waypoints.map { coordinates in
+        coordinates.map {
+            MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "")
+        }
+    }
+    mapView.bind(annotations: waypointAnnotations)
+    
+    
+    
+    let allPoints: I<[Coordinate]> = state.i.map { $0.route?.allPoints(tracks: $0.tracks) ?? [] }
+    let lines: I<[MKPolyline]> = allPoints.map {
+        if $0.isEmpty {
+            return []
+        } else {
+            let coords = $0.map { $0.clLocationCoordinate }
+            return [MKPolyline(coordinates: coords, count: coords.count)]
+        }
+    }
+    mapView.bind(overlays: lines)
+    
+    
+    
+    mapView.observe(value: state.i.map { $0.route?.distance }, onChange: { print($1) })
+    
+    func addWaypoint(mapView: IBox<MKMapView>, sender: NSClickGestureRecognizer) {
         let point = sender.location(in: mapView.unbox)
         let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
-        state.change {
-            if $0.tmpPoints.count == 4 {
-                $0.tmpPoints = []
-            }
-            $0.tmpPoints.append(Coordinate(coordinate))
-            if $0.tmpPoints.count == 3 {
-                let segment = ($0.tmpPoints[0].clLocationCoordinate, $0.tmpPoints[1].clLocationCoordinate)
-                let dest = $0.tmpPoints[2].clLocationCoordinate
-                $0.tmpPoints.append(Coordinate(dest.closestPointOn(segment: segment)))
-                print(dest.squaredDistance(to: segment).squareRoot())
+        let mapPoint = MKMapPointForCoordinate(coordinate)
+        
+        let region = MKCoordinateRegionMakeWithDistance(mapView.unbox.centerCoordinate, 1, 1)
+        let rect = mapView.unbox.convertRegion(region, toRectTo: mapView.unbox)
+        let meterPerPixel = Double(1/rect.width)
+        let tresholdPixels: Double = 40
+        let treshold = meterPerPixel*tresholdPixels
+        
+        let possibilities = polygonToTrack.filter { (polygon, track) in
+            polygon.boundingMapRect.contains(mapPoint)
+        }
+        
+        if let (track, segment) = possibilities.flatMap({ (_,track) in track.segment(closestTo: coordinate, maxDistance: treshold).map { (track, $0) }}).first {
+            state.change {
+                let pointOnSegment = coordinate.closestPointOn(segment: segment)
+                $0.addWayPoint(track: track, coordinate: pointOnSegment, segment: segment)
             }
         }
-    })
- */
+    }
+    
+    mapView.addGestureRecognizer(clickGestureRecognizer({ sender in
+        addWaypoint(mapView: mapView, sender: sender)
+    }))
+    
+
     mapView.bind(persistent.i.map { $0.satellite ? .hybrid : .standard }, to: \.mapType)
-    
-//    let allPoints: I<[(CLLocationCoordinate2D, String)]> = state.i.map { $0.tracks.flatMap { t in t.coordinates.map { ($0.coordinate.clLocationCoordinate, t.name) }}}
-//    mapView.bind(annotations: allPoints.map { $0.map { MKPointAnnotation(coordinate: $0.0, title: $0.1)}})
-    
+
     return { mapView.unbox.setVisibleMapRect($0, animated: true) }
 }
 
@@ -313,7 +460,6 @@ final class ViewController: NSViewController {
                 var copy = track
                 let before = copy.coordinates.count
                 copy.coordinates = track.coordinates.douglasPeucker(coordinate: { $0.coordinate.clLocationCoordinate }, squaredEpsilonInMeters: epsilon*epsilon)
-                print("before: \(before), after: \(copy.coordinates.count)")
                 return copy
             }
             
@@ -351,97 +497,85 @@ extension KDTreePoint {
     }
 }
 
+extension Track {
+    var boundingBox: MKMapRect {
+        return polygon.boundingMapRect
+    }
+}
+
+extension MKMapRect {
+    func intersects(_ other: MKMapRect) -> Bool {
+        return MKMapRectIntersectsRect(self, other)
+    }
+    
+    func contains(_ point: MKMapPoint) -> Bool {
+        return MKMapRectContainsPoint(self, point)
+    }
+}
+
 func buildGraphAlt(tracks: [Track], url: URL, mapView: MKMapView) -> Graph {
     var graph = Graph()
     let tree = KDTree(values: tracks.flatMap { $0.kdPoints })
-    let epsilonSquared: Double = 25*25
+    let maxDistance: Double = 25
+    
+    let boundingBoxes = Dictionary(tracks.map {
+        ($0.name, $0.boundingBox)
+    }, uniquingKeysWith: { $1 })
     
     for t in tracks {
         let kdPoints = t.kdPoints
+        let boundingBox = boundingBoxes[t.name]!
         
-        for p in kdPoints {
-            var seen: Set<String> = []
-            let close = tree.nearestK(20, to: p, where: { $0.track.unbox != p.track.unbox })
-            var result: String = ""
-            for c in close {
-                guard !seen.contains(c.track.unbox.name) else { continue }
-                let coordinates = c.track.unbox.coordinates
-                let index = coordinates.index { $0.coordinate.clLocationCoordinate == c.point.coordinate }!
-                let before = index - 1
-                let after = index + 1
-                var d1: Double = -1
-                var d2: Double = -1
-                if let b = coordinates[safe: before] {
-                    d1 = p.point.coordinate.squaredDistance(to: (c.point.coordinate, b.coordinate.clLocationCoordinate))
-                    if d1 < epsilonSquared {
-                        result.append(c.track.unbox.name)
-                        seen.insert(c.track.unbox.name)
+        let neighbors = tracks.filter { $0.name != t.name && boundingBox.intersects(boundingBoxes[$0.name]!) }
 
-                        continue
-                    }
-                } else if let b = coordinates[safe: after] {
-                    d2 = p.point.coordinate.squaredDistance(to: (c.point.coordinate, b.coordinate.clLocationCoordinate))
-                    if d2 < epsilonSquared {
-                        result.append(c.track.unbox.name)
-                        seen.insert(c.track.unbox.name)
-                        continue
-                    }
-                }
+        let joinedPoints: [(TrackPoint, overlaps: [(Box<Track>, Segment)])] = kdPoints.map { p in
+            let pointNeighbors = neighbors.flatMap { neighbor in
+                neighbor.segment(closeTo: p.point.coordinate, maxDistance: maxDistance).map { (Box(neighbor), $0) }
             }
-            DispatchQueue.main.async {
-                if result.isEmpty {
-                    mapView.addAnnotation(MKPointAnnotation(coordinate: p.point.coordinate, title: "y \(t.name)"))
-                } else {
-                    mapView.addAnnotation(MKPointAnnotation(coordinate: p.point.coordinate, title: "x"))
-                }
-            }
-            
+            return (p, pointNeighbors)
         }
         
-        // step 1: merge the really close points (epsilon*2)
+        let grouped: [[(TrackPoint, overlaps: [(Box<Track>, Segment)])]] = joinedPoints.group(by: { $0.overlaps.map { $0.0 }  == $1.overlaps.map { $0.0 } })
         
-//        for (p0,p1) in zip(kdPoints, kdPoints.dropFirst() + [kdPoints[0]]) {
-//            let close = tree.nearestK(10, to: p0).filter { $0.track.unbox != p0.track.unbox }.map { ($0, $0.squaredDistance(to: p0)) }.filter { $0.1 < epsilonSquared }
-//            print(close)
-//            DispatchQueue.main.async {
-//
-//            }
-//
-//            let neighbors = tree.elementsIn(p0.range(upTo: p1)).filter {
-//                $0.track.unbox != t
-//            }
-//            print(neighbors)
-//        }
-//        let joinedPoints: [(TrackPoint, overlaps: [Box<Track>])] = t.kdPoints.enumerated().map { (ix, point) in
-//            var seen: [Box<Track>] = []
-//            for neighbor in tree.nearestK(10, to: point) {
-//                let maxDistance = 20 as Double
-//                if neighbor.track != point.track && !seen.contains(neighbor.track) && point.distanceInMeters(to: neighbor) < maxDistance {
-//                    seen.append(neighbor.track)
-//                }
-//            }
-//            seen.sort(by: { $0.unbox.name < $1.unbox.name })
-//            return (point, overlaps: seen) // this also appends non-overlapping points
-//        }
-//
-//        let grouped: [[(TrackPoint, overlaps: [Box<Track>])]] = joinedPoints.group(by: { $0.overlaps == $1.overlaps })
-//        //            .mergeSmallGroupsAlt(maxSize: 1)
-//        //            .joined()
-//        //            .group(by: { $0.overlaps == $1.overlaps })
-//        //        grouped.map { ($0.first!.overlaps.map { $0.unbox.name }, $0.count) }.forEach { print($0) }
-//        for segment in grouped {
-//            let first = segment[0]
-//            let from = first.0.point
-//            let to = segment.last!.0.point
-//            let distance = segment.map { $0.0.point }.distance
-//            for t in segment[0].overlaps {
-//                graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(to.coordinate), distance: distance, trackName: t.unbox.name))
-//            }
-//
-//        }
-//        let last = t.coordinates.last!.coordinate
-//        let first = t.coordinates[0].coordinate
-//        graph.add(from: last, Graph.Entry(destination: first, distance: CLLocation(last.clLocationCoordinate).distance(from: CLLocation(first.clLocationCoordinate)), trackName: t.name))
+        var previous: Coordinate? = Coordinate(grouped.last!.last!.0.point.coordinate) // by starting with the last as the previous, we create a full loop
+        for group in grouped {
+            let first = group[0]
+
+            let from = first.0.point
+            let to = group.last!.0.point
+
+            if let p = previous {
+                let d = p.clLocationCoordinate.squaredDistanceApproximation(to: from.coordinate).squareRoot()
+                graph.add(from: p, Graph.Entry(destination: Coordinate(from.coordinate), distance: d, trackName: t.name))
+            }
+
+            previous = Coordinate(to.coordinate)
+
+            let distance = group.map { $0.0.point }.distance
+            graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(to.coordinate), distance: distance, trackName: t.name))
+            
+            // todo remove the duplication below
+            for o in group[0].overlaps {
+                let segment = o.1
+                let closest = from.coordinate.closestPointOn(segment: segment)
+                let distance = from.coordinate.squaredDistance(to: segment).squareRoot()
+                
+                graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(closest), distance: distance, trackName: "Close"))
+                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.0), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
+                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.1), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
+            }
+            
+            for o in group.last!.overlaps {
+                let segment = o.1
+                let closest = to.coordinate.closestPointOn(segment: segment)
+                let distance = to.coordinate.squaredDistance(to: segment).squareRoot()
+                
+                graph.add(from: Coordinate(to.coordinate), Graph.Entry(destination: Coordinate(closest), distance: distance, trackName: "Close"))
+                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.0), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
+                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.1), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
+            }
+
+        }
     }
     
     let json = JSONEncoder()
