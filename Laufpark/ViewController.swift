@@ -32,40 +32,12 @@ struct Path: Equatable, Codable {
 
 struct CoordinateAndTrack: Equatable, Codable { // tuples aren't codable
     static func ==(lhs: CoordinateAndTrack, rhs: CoordinateAndTrack) -> Bool {
-        return lhs.coordinateIndex == rhs.coordinateIndex && lhs.track == rhs.track && lhs.pathFromPrevious == rhs.pathFromPrevious
+        return lhs.coordinate == rhs.coordinate && lhs.track == rhs.track && lhs.pathFromPrevious == rhs.pathFromPrevious
     }
     
-    let coordinateIndex: Int
+    let coordinate: Coordinate
     let track: Track
     var pathFromPrevious: Path?
-    
-    var coordinate: Coordinate {
-        return track.coordinates[coordinateIndex].coordinate
-    }
-}
-
-extension DisplayState {
-    mutating func addWayPoint(track: Track, atIndex coordinateIndex: Int) {
-        guard graph != nil else { return }
-        let coordinate = track.coordinates[coordinateIndex].coordinate
-        
-        if let vertex = track.vertexAfter(coordinate: coordinate, at: coordinateIndex, graph: graph!) {
-            graph!.add(from: coordinate, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
-        } else {
-            fatalError()
-        }
-        if let vertex = track.vertexBefore(coordinate: coordinate, at: coordinateIndex, graph: graph!) {
-            graph!.add(from: coordinate, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
-        } else {
-            fatalError()
-        }
-        
-        if route == nil {
-            route = Route(track: track, coordinateIndex: coordinateIndex)
-        } else {
-            route!.add(coordinateAt: coordinateIndex, inTrack: track, graph: graph!)
-        }
-    }
 }
 
 struct Route: Equatable, Codable {
@@ -76,17 +48,17 @@ struct Route: Equatable, Codable {
     let startingPoint: CoordinateAndTrack
     var points: [CoordinateAndTrack] = []
     
-    init(track: Track, coordinateIndex: Int) {
-        startingPoint = CoordinateAndTrack(coordinateIndex: coordinateIndex, track: track, pathFromPrevious: nil)
+    init(track: Track, coordinate: Coordinate) {
+        startingPoint = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: nil)
     }
     
-    mutating func add(coordinateAt index: Int, inTrack track: Track, graph: Graph) {
+    mutating func add(coordinate: Coordinate, inTrack track: Track, graph: Graph) {
         let previous = points.last ?? startingPoint
-//        print(graph.edges(from: track.coordinates[index].coordinate))
-        let path = graph.shortestPath(from: previous.coordinate, to: track.coordinates[index].coordinate).map {
+        
+        let path: Path? = graph.shortestPath(from: previous.coordinate, to: coordinate).map {
             Path(entries: $0.path, distance: $0.distance)
         }
-        let result = CoordinateAndTrack(coordinateIndex: index, track: track, pathFromPrevious: path)
+        let result = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: path)
         points.append(result)
     }
     
@@ -103,21 +75,94 @@ struct Route: Equatable, Codable {
         return points.map { $0.pathFromPrevious?.distance ?? 0 }.reduce(into: 0, +=)
     }
     
-    func allPoints(tracks: [Track]) -> [Coordinate] {
-        var result: [Coordinate] = [startingPoint.coordinate]
+    func allPoints(tracks: [Track]) -> [CoordinateWithElevation] {
+        var result: [CoordinateWithElevation] = [startingPoint.track.interpolatedPoint(for: startingPoint.coordinate)!]
         for wayPoint in points {
             if let p = wayPoint.pathFromPrevious?.entries {
                 for entry in p {
                     if entry.trackName != "Close" {
                         let track = tracks.first { $0.name == entry.trackName }!
-                        result += track.points(between: result.last!, and: entry.destination).map { $0.coordinate }
+                        result += track.points(between: result.last!.coordinate, and: entry.destination)
                     }
-                    result.append(entry.destination)
+                    let dest = CoordinateWithElevation(coordinate: entry.destination, elevation: result.last!.elevation) // todo lookup
+                    result.append(dest)
+
                 }
             }
-            result.append(wayPoint.coordinate)
+            var wayp = wayPoint.track.interpolatedPoint(for: wayPoint.coordinate)
+            if wayp == nil {
+                print("error")
+                wayp = CoordinateWithElevation(coordinate: wayPoint.coordinate, elevation: result.last?.elevation ?? 0)
+            }
+            
+            result.append(wayp!)
         }
         return result
+    }
+    
+    mutating func removeLastWaypoint() {
+        guard !points.isEmpty else {
+            return
+        }
+        points.removeLast()
+    }
+}
+
+
+extension DisplayState {
+    mutating func removeLastWayPoint() {
+        if let r = route, r.wayPoints.count > 1 {
+            route!.removeLastWaypoint()
+        } else {
+            route = nil
+        }
+    }
+    mutating func addWayPoint(track: Track, coordinate c2d: CLLocationCoordinate2D, segment: Segment) {
+        guard graph != nil else { return }
+        let coordinate = Coordinate(c2d)
+        let d = c2d.squaredDistance(to: segment).squareRoot()
+        assert(d < 0.1)
+        
+        let d0 = segment.0.squaredDistanceApproximation(to: c2d).squareRoot()
+        let d1 = segment.1.squaredDistanceApproximation(to: c2d).squareRoot()
+        
+        let segment0 = Coordinate(segment.0)
+        let segment1 = Coordinate(segment.1)
+        
+        func add(from: Coordinate, _ entry: Graph.Entry) {
+            graph!.add(from: from, entry)
+        }
+        add(from: coordinate, Graph.Entry(destination: segment0, distance: d0, trackName: track.name))
+        add(from: coordinate, Graph.Entry(destination: segment1, distance: d1, trackName: track.name))
+        
+        if let vertex = track.vertexAfter(coordinate: segment0, graph: graph!) {
+            add(from: segment0, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
+        } else {
+            print("error")
+        }
+        if let vertex = track.vertexBefore(coordinate: segment0, graph: graph!) {
+            add(from: segment0, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
+        } else {
+            print("error")
+        }
+        
+        if let vertex = track.vertexAfter(coordinate: segment1, graph: graph!) {
+            add(from: segment1, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
+        } else {
+            print("error")
+        }
+        if let vertex = track.vertexBefore(coordinate: segment1, graph: graph!) {
+            add(from: segment1, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
+        } else {
+            print("error")
+        }
+        
+        
+        if route == nil {
+            route = Route(track: track, coordinate: coordinate)
+        } else {
+            route!.add(coordinate: coordinate, inTrack: track, graph: graph!)
+        }
     }
 }
 
@@ -136,6 +181,7 @@ struct DisplayState: Equatable, Codable {
     
 //    var tree: KDTree<TrackPoint>?
     var graph: Graph?
+    var graphBuildingProgress: Float = 0
 
     var hasSelection: Bool {
         return routing == false && selection != nil
@@ -158,7 +204,7 @@ struct DisplayState: Equatable, Codable {
     }
 
     static func ==(lhs: DisplayState, rhs: DisplayState) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.graph == rhs.graph && lhs.routing == rhs.routing && lhs.route == rhs.route
+        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.graph == rhs.graph && lhs.routing == rhs.routing && lhs.route == rhs.route && lhs.graphBuildingProgress == rhs.graphBuildingProgress
     }
 }
 
@@ -207,7 +253,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
             return result
         }
         return MKOverlayRenderer(overlay: overlay)
-        }, viewForAnnotation: { (mapView, annotation) -> MKAnnotationView? in
+    }, viewForAnnotation: { (mapView, annotation) -> MKAnnotationView? in
             guard annotation is MKPointAnnotation else { return nil }
             if POI.all.contains(where: { $0.location == annotation.coordinate }) {
                 let result: MKAnnotationView
@@ -235,6 +281,14 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
             }
     }, regionDidChangeAnimated: { [unowned mapView] _ in
 //        print(mapView.unbox.region)
+    }, didSelectAnnotation: { mapview, annotation in
+        state.change {
+            guard $0.routing, $0.route != nil else { return }
+            let first = $0.route!.wayPoints.first
+            if annotation.annotation?.coordinate == first?.clLocationCoordinate {
+                $0.route!.add(coordinate: Coordinate(first!.clLocationCoordinate), inTrack: $0.route!.startingPoint.track, graph: $0.graph!)
+            }
+        }
     })
     mapView.disposables.append(state.i.map { $0.tracks }.observe { [unowned mapView] in
         mapView.unbox.removeOverlays(mapView.unbox.overlays)
@@ -274,7 +328,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     
     
     
-    let allPoints: I<[Coordinate]> = state.i.map { $0.route?.allPoints(tracks: $0.tracks) ?? [] }
+    let allPoints: I<[Coordinate]> = state.i.map { $0.route?.allPoints(tracks: $0.tracks).map { $0.coordinate } ?? [] }
     let lines: I<[MKPolyline]> = allPoints.map {
         if $0.isEmpty {
             return []
@@ -287,10 +341,10 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     
 
     
-    mapView.observe(value: state.i.map { $0.route?.distance }, onChange: { print($1) })
+//    mapView.observe(value: state.i.map { $0.route?.distance }, onChange: { print($1) })
 
     func addWaypoint(mapView: IBox<MKMapView>, sender: UITapGestureRecognizer) {
-        let point = sender.location(ofTouch: 0, in: mapView.unbox)
+        let point = sender.location(in: mapView.unbox)
         let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
         let mapPoint = MKMapPointForCoordinate(coordinate)
         
@@ -301,21 +355,22 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         let treshold = meterPerPixel*tresholdPixels
         
         let possibilities = polygonToTrack.filter { (polygon, track) in
-            let renderer = mapView.unbox.renderer(for: polygon) as! MKPolygonRenderer
-            let point = renderer.point(for: mapPoint)
-            return renderer.path.contains(point) // todo we should not only do contains, but check if the point is close to the track. now we can only click inside.
-            // we could make a maprect out of mapPoint, and then check for intersection
+            polygon.boundingMapRect.contains(mapPoint)
         }
         
-        if let x = possibilities.flatMap({ (_,track) in
-            track.findPoint(closeTo: coordinate, tresholdInMeters: treshold).map { (track, $0) }
-        }).first {
+        if let (track, segment) = possibilities.flatMap({ (_,track) in track.segment(closestTo: coordinate, maxDistance: treshold).map { (track, $0) }}).first {
             state.change {
-                $0.addWayPoint(track: x.0, atIndex: x.1.index)
+                if let r = $0.route, r.startingPoint.coordinate.clLocationCoordinate.squaredDistanceApproximation(to: coordinate).squareRoot() < treshold {
+                    // close the route
+                    let endPoint = r.startingPoint.coordinate.clLocationCoordinate
+                    let segment = r.startingPoint.track.segment(closestTo: endPoint, maxDistance: treshold)!
+                    $0.addWayPoint(track: track, coordinate: r.startingPoint.coordinate.clLocationCoordinate, segment: segment)
+                } else {
+                    let pointOnSegment = coordinate.closestPointOn(segment: segment)
+                    $0.addWayPoint(track: track, coordinate: pointOnSegment, segment: segment)
+                }
             }
         }
-
-
     }
     
     
@@ -426,18 +481,51 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     trackInfo.unbox.heightAnchor.constraint(equalToConstant: trackInfoHeight).isActive = true
     
     rootView.addSubview(bottomView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: I(constant: blurredViewHeight), \.heightAnchor), equal(\.bottomAnchor, constant: bottomOffset, animation: Stylesheet.dampingAnimation)])
-
+    
     // Number View
     let trackNumber = trackNumberView(state.i.map { $0.selection} ?? Track(color: .blue, number: 0, name: "", points: []))
     rootView.addSubview(trackNumber)
     let yConstraint = bottomView.unbox.topAnchor.constraint(equalTo: trackNumber.unbox.centerYAnchor)
     let xConstraint = bottomView.unbox.rightAnchor.constraint(equalTo: trackNumber.unbox.centerXAnchor, constant: 42)
     NSLayoutConstraint.activate([xConstraint,yConstraint])
+    
+    let formatter = MKDistanceFormatter()
 
+    do { // Routing info view
+        // todo: compute the shortest path async
+        // todo: show the elevation graph
+        // todo: allow the user to save the route
+        let routeInfo: I<String> = state.i.map {
+            if $0.graph == nil {
+                return .loadingGraph
+            }
+            if let r = $0.route {
+                return formatter.string(fromDistance: r.distance)
+            } else {
+                return .tapAnyWhereToStart
+            }
+        }
+        let routingInfo = label(text: routeInfo, textColor: textColor.map { $0 })
+        let removeLastWayPointButton = button(title: I(constant: "↩️")) { state.change {
+            $0.removeLastWayPoint()
+        }}
+        let routeHasWaypoints = state.i.map { $0.route != nil && $0.route!.wayPoints.count > 0 }
+        removeLastWayPointButton.bind(!routeHasWaypoints, to: \.hidden)
+        let infoStack = stackView(arrangedSubviews: [routingInfo.cast, removeLastWayPointButton.cast], axis: .horizontal)
+        let progress = progressView(progress: state[\.graphBuildingProgress])
+        let hasGraph = state.i.map { $0.graph != nil }
+        progress.bind(hasGraph, to: \.hidden)
+        let routingStack = stackView(arrangedSubviews: [infoStack.cast, progress.cast])
+        let bottomRoutingView = blurredView(borderAnchor: equal(\.topAnchor), child: routingStack)
+        let bottomRoutingOffset: I<CGFloat> = if_(state.i[\.routing], then: 0, else: -50)
+
+        rootView.addSubview(bottomRoutingView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: I(constant: 50), \.heightAnchor), equal(\.bottomAnchor, constant: bottomRoutingOffset, animation: Stylesheet.dampingAnimation)])
+        rootView.observe(value: state[\.graphBuildingProgress], onChange: { print($1) })
+    }
 
     
     // Loading Indicator
-    let isLoading = state[\.loading] || state[\.routing] && (state.i.map { $0.graph } == nil)
+    let isLoading = state[\.loading] || (state[\.routing] && (state.i.map { $0.graph } == nil))
     let loadingIndicator = activityIndicator(style: darkMode.map { $0 ? .gray : .white }, animating: isLoading)
     rootView.addSubview(loadingIndicator, constraints: [equal(\.centerXAnchor), equal(\.centerXAnchor)])
     
@@ -456,6 +544,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
                 $0.route = nil
             } else {
                 $0.routing = true
+                $0.selection = nil
             }
         }
     })
@@ -482,14 +571,20 @@ class ViewController: UIViewController {
 
         super.init(nibName: nil, bundle: nil)
         
-//        if let g = readGraph(url: graphURL) {
-//            state.change { $0.graph = g }
-//        }
+        if let g = readGraph(url: graphURL) {
+            state.change { $0.graph = g }
+        }
         
+        var alreadyBuilding = false
         disposables.append(state.i.observe { [unowned self] newValue in
-            if newValue.routing && newValue.graph == nil {
+            if newValue.routing && newValue.graph == nil && !alreadyBuilding {
+                alreadyBuilding = true
                 DispatchQueue(label: "graph builder").async {
-                    let graph = time { buildGraph(tracks: newValue.tracks, url: self.graphURL) }
+                    let graph = time { buildGraph(tracks: newValue.tracks, url: self.graphURL, progress: { p in
+                        DispatchQueue.main.async {
+                            self.state.change { $0.graphBuildingProgress = p }
+                        }
+                    }) }
                     DispatchQueue.main.async { [unowned self] in
                         self.state.change { $0.graph = graph }
                     }
@@ -524,4 +619,10 @@ class ViewController: UIViewController {
             locationManager!.requestWhenInUseAuthorization()
         }
     }
+}
+
+extension String {
+    static let tapAnyWhereToStart = "Tap anywhere to start" // todo localize
+    static let route = "Create a Route" // todo localize
+    static let loadingGraph = "Loading..."
 }

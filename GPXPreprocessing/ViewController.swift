@@ -91,6 +91,11 @@ struct Route: Equatable, Codable {
         }
         return result
     }
+    
+    mutating func removeLastWaypoint() {
+        guard !points.isEmpty else { return }
+        points.removeLast()
+    }
 }
 
 struct DisplayState: Equatable, Codable {
@@ -223,62 +228,6 @@ extension Sequence {
     }
 }
 
-typealias Segment = (CLLocationCoordinate2D, CLLocationCoordinate2D)
-
-extension CLLocationCoordinate2D {
-    // stolen from https://github.com/mhawkins/GCRDPProcessor/blob/master/GCRDPProcessor/GCRDPProcessor.m
-    func closestPointOn(segment: Segment) -> CLLocationCoordinate2D {
-        let deltaLat = segment.1.latitude - segment.0.latitude
-        let deltaLon = segment.1.longitude - segment.0.longitude
-        
-        var u = CLLocationDegrees(
-            (latitude - segment.0.latitude) *
-                (segment.1.latitude - segment.0.latitude) +
-                (longitude - segment.0.longitude) *
-                (segment.1.longitude - segment.0.longitude)
-            ) / (pow(deltaLat, 2) + pow(deltaLon, 2))
-        
-        
-        u = max(0, min(u,1)) // clamp to 0...1
-        return CLLocationCoordinate2D(
-            latitude: segment.0.latitude + u * deltaLat,
-            longitude: segment.0.longitude + u * deltaLon
-        )
-    }
-    
-    func squaredDistance(to segment: Segment) -> Double {
-        return closestPointOn(segment: segment).squaredDistanceApproximation(to: self)
-    }
-}
-
-extension Array {
-    func douglasPeucker(coordinate: (Element) -> CLLocationCoordinate2D, squaredEpsilonInMeters e: Double) -> [Element] {
-        guard count > 2 else { return self }
-        
-        var distanceMax: Double = 0
-        var currentIndex = startIndex
-        let indexBeforEnd = index(before: endIndex)
-        let segment = (coordinate(self[startIndex]), coordinate(self[indexBeforEnd]))
-        for index in 1..<indexBeforEnd {
-            let current = self[index]
-            let distance = coordinate(current).squaredDistance(to: segment)
-            if distance > distanceMax {
-                distanceMax = distance
-                currentIndex = index
-            }
-        }
-        
-        if distanceMax > e {
-            var a1 = Array(self[0...currentIndex]).douglasPeucker(coordinate: coordinate, squaredEpsilonInMeters: e)
-            let a2 = Array(self[currentIndex..<endIndex]).douglasPeucker(coordinate:coordinate, squaredEpsilonInMeters: e)
-            a1.removeLast()
-            return a1 + a2
-        } else {
-            return [self[startIndex], self[indexBeforEnd]]
-        }
-    }
-}
-
 var debugMapView: MKMapView!
 
 /// Returns a function that you can call to set the visible map rect
@@ -340,7 +289,11 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     }, regionDidChangeAnimated: { [unowned mapView] _ in
 //        print(mapView.unbox.region)
     }, didSelectAnnotation: { mapView, annotationView in
-        print(annotationView.annotation!.title)
+        state.change {
+            if $0.route != nil && $0.route?.wayPoints.last?.clLocationCoordinate == annotationView.annotation?.coordinate {
+                $0.route!.removeLastWaypoint()
+            }
+        }
     })
     
     mapView.bind(annotations: state.i.map { $0.tmpPoints.map { MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "" )} })
@@ -441,7 +394,6 @@ func time<Result>(name: StaticString = #function, line: Int = #line, _ f: () -> 
     return result
 }
 
-let epsilon: Double = 3
 
 final class ViewController: NSViewController {
     @IBOutlet var _mapView: MKMapView!
@@ -475,7 +427,7 @@ final class ViewController: NSViewController {
                 }
             }
             time {
-                buildGraphAlt(tracks: tracks, url: graphURL, mapView: mapView)
+                buildGraph(tracks: tracks, url: graphURL, mapView: mapView)
             }
             let graph = readGraph(url: graphURL)
             DispatchQueue.main.async {
@@ -495,94 +447,6 @@ extension KDTreePoint {
             return v1 < v2 ? (v1, v2) : (v2, v1)
         }
     }
-}
-
-extension Track {
-    var boundingBox: MKMapRect {
-        return polygon.boundingMapRect
-    }
-}
-
-extension MKMapRect {
-    func intersects(_ other: MKMapRect) -> Bool {
-        return MKMapRectIntersectsRect(self, other)
-    }
-    
-    func contains(_ point: MKMapPoint) -> Bool {
-        return MKMapRectContainsPoint(self, point)
-    }
-}
-
-func buildGraphAlt(tracks: [Track], url: URL, mapView: MKMapView) -> Graph {
-    var graph = Graph()
-    let tree = KDTree(values: tracks.flatMap { $0.kdPoints })
-    let maxDistance: Double = 25
-    
-    let boundingBoxes = Dictionary(tracks.map {
-        ($0.name, $0.boundingBox)
-    }, uniquingKeysWith: { $1 })
-    
-    for t in tracks {
-        let kdPoints = t.kdPoints
-        let boundingBox = boundingBoxes[t.name]!
-        
-        let neighbors = tracks.filter { $0.name != t.name && boundingBox.intersects(boundingBoxes[$0.name]!) }
-
-        let joinedPoints: [(TrackPoint, overlaps: [(Box<Track>, Segment)])] = kdPoints.map { p in
-            let pointNeighbors = neighbors.flatMap { neighbor in
-                neighbor.segment(closeTo: p.point.coordinate, maxDistance: maxDistance).map { (Box(neighbor), $0) }
-            }
-            return (p, pointNeighbors)
-        }
-        
-        let grouped: [[(TrackPoint, overlaps: [(Box<Track>, Segment)])]] = joinedPoints.group(by: { $0.overlaps.map { $0.0 }  == $1.overlaps.map { $0.0 } })
-        
-        var previous: Coordinate? = Coordinate(grouped.last!.last!.0.point.coordinate) // by starting with the last as the previous, we create a full loop
-        for group in grouped {
-            let first = group[0]
-
-            let from = first.0.point
-            let to = group.last!.0.point
-
-            if let p = previous {
-                let d = p.clLocationCoordinate.squaredDistanceApproximation(to: from.coordinate).squareRoot()
-                graph.add(from: p, Graph.Entry(destination: Coordinate(from.coordinate), distance: d, trackName: t.name))
-            }
-
-            previous = Coordinate(to.coordinate)
-
-            let distance = group.map { $0.0.point }.distance
-            graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(to.coordinate), distance: distance, trackName: t.name))
-            
-            // todo remove the duplication below
-            for o in group[0].overlaps {
-                let segment = o.1
-                let closest = from.coordinate.closestPointOn(segment: segment)
-                let distance = from.coordinate.squaredDistance(to: segment).squareRoot()
-                
-                graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(closest), distance: distance, trackName: "Close"))
-                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.0), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
-                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.1), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
-            }
-            
-            for o in group.last!.overlaps {
-                let segment = o.1
-                let closest = to.coordinate.closestPointOn(segment: segment)
-                let distance = to.coordinate.squaredDistance(to: segment).squareRoot()
-                
-                graph.add(from: Coordinate(to.coordinate), Graph.Entry(destination: Coordinate(closest), distance: distance, trackName: "Close"))
-                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.0), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
-                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.1), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
-            }
-
-        }
-    }
-    
-    let json = JSONEncoder()
-    let result = try! json.encode(graph)
-    try! result.write(to: url)
-    
-    return graph
 }
 
 let graphURL = URL(fileURLWithPath: "/Users/chris/Downloads/graph.json")

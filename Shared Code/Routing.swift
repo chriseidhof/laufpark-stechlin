@@ -26,6 +26,67 @@ extension Sequence {
     }
 }
 
+typealias Segment = (CLLocationCoordinate2D, CLLocationCoordinate2D)
+
+extension CLLocationCoordinate2D {
+    func amount(segment: Segment) -> Double {
+        let deltaLat = segment.1.latitude - segment.0.latitude
+        let deltaLon = segment.1.longitude - segment.0.longitude
+        
+        var u = CLLocationDegrees(
+            (latitude - segment.0.latitude) *
+                (segment.1.latitude - segment.0.latitude) +
+                (longitude - segment.0.longitude) *
+                (segment.1.longitude - segment.0.longitude)
+            ) / (pow(deltaLat, 2) + pow(deltaLon, 2))
+        
+        
+        return max(0, min(u,1)) // clamp to 0...1
+    }
+    // stolen from https://github.com/mhawkins/GCRDPProcessor/blob/master/GCRDPProcessor/GCRDPProcessor.m
+    func closestPointOn(segment: Segment) -> CLLocationCoordinate2D {
+        let deltaLat = segment.1.latitude - segment.0.latitude
+        let deltaLon = segment.1.longitude - segment.0.longitude
+        
+        let u = amount(segment: segment)
+        return CLLocationCoordinate2D(
+            latitude: segment.0.latitude + u * deltaLat,
+            longitude: segment.0.longitude + u * deltaLon
+        )
+    }
+    
+    func squaredDistance(to segment: Segment) -> Double {
+        return closestPointOn(segment: segment).squaredDistanceApproximation(to: self)
+    }
+}
+
+extension Array {
+    func douglasPeucker(coordinate: (Element) -> CLLocationCoordinate2D, squaredEpsilonInMeters e: Double) -> [Element] {
+        guard count > 2 else { return self }
+        
+        var distanceMax: Double = 0
+        var currentIndex = startIndex
+        let indexBeforEnd = index(before: endIndex)
+        let segment = (coordinate(self[startIndex]), coordinate(self[indexBeforEnd]))
+        for index in 1..<indexBeforEnd {
+            let current = self[index]
+            let distance = coordinate(current).squaredDistance(to: segment)
+            if distance > distanceMax {
+                distanceMax = distance
+                currentIndex = index
+            }
+        }
+        
+        if distanceMax > e {
+            var a1 = Array(self[0...currentIndex]).douglasPeucker(coordinate: coordinate, squaredEpsilonInMeters: e)
+            let a2 = Array(self[currentIndex..<endIndex]).douglasPeucker(coordinate:coordinate, squaredEpsilonInMeters: e)
+            a1.removeLast()
+            return a1 + a2
+        } else {
+            return [self[startIndex], self[indexBeforEnd]]
+        }
+    }
+}
 extension Track {
     func points(between: Coordinate, and: Coordinate) -> [CoordinateWithElevation] {
         let (c1, d1) = points(between: between, and: and, reversed: false)
@@ -60,9 +121,16 @@ extension Track {
     }
 }
 
+typealias SegmentWithElevation = (CoordinateWithElevation, CoordinateWithElevation)
+
 extension Track {
     var segments: AnySequence<Segment> {
         let coordinates = self.coordinates.map { $0.coordinate.clLocationCoordinate }
+        return AnySequence(zip(coordinates, coordinates.dropFirst() + [coordinates.first!]))
+    }
+    
+    var segmentsWithElevation: AnySequence<SegmentWithElevation> {
+        let coordinates = self.coordinates
         return AnySequence(zip(coordinates, coordinates.dropFirst() + [coordinates.first!]))
     }
     
@@ -78,6 +146,23 @@ extension Track {
         return segments.lazy.map {
             (segment: $0, distance: point.squaredDistance(to: $0))
         }.filter { $0.distance < distance }.sorted(by: { $0.distance < $1.distance }).first.map { $0.segment }
+    }
+    
+    func segmentWithElevation(closestTo point: CLLocationCoordinate2D, maxDistance: Double) -> SegmentWithElevation? {
+        let distance = maxDistance*maxDistance
+        return segmentsWithElevation.lazy.map {
+            (segment: $0, distance: point.squaredDistance(to: ($0.0.coordinate.clLocationCoordinate, $0.1.coordinate.clLocationCoordinate)))
+        }.filter { $0.distance < distance }.sorted(by: { $0.distance < $1.distance }).first.map { $0.segment }
+    }
+    
+    func interpolatedPoint(for coord: Coordinate) -> CoordinateWithElevation? {
+        guard let segment = self.segmentWithElevation(closestTo: coord.clLocationCoordinate, maxDistance: epsilon) else { return nil }
+        let segmentCL = (segment.0.coordinate.clLocationCoordinate, segment.1.coordinate.clLocationCoordinate)
+        let amount = coord.clLocationCoordinate.amount(segment: segmentCL)
+        let coord = coord.clLocationCoordinate.closestPointOn(segment: segmentCL)
+        let deltaElevation = segment.1.elevation - segment.0.elevation
+        return CoordinateWithElevation(coordinate: Coordinate(coord), elevation: segment.0.elevation + amount * deltaElevation)
+        
     }
 
     func findPoint(closeTo: CLLocationCoordinate2D, tresholdInMeters: Double) -> (index: Int, point: CoordinateWithElevation)? {
@@ -121,12 +206,12 @@ extension Track {
     }
     
     func vertexBefore(coordinate: Coordinate, graph: Graph) -> (Coordinate, CLLocationDistance)? {
-        let index = coordinates.index { $0.coordinate == coordinate }!
+        guard let index = coordinates.index(where: { $0.coordinate == coordinate }) else { return nil }
         return vertexHelper(coordinate: coordinate, at: index, graph: graph, reversed: true)
     }
     
     func vertexAfter(coordinate: Coordinate, graph: Graph) -> (Coordinate, CLLocationDistance)? {
-        let index = coordinates.index { $0.coordinate == coordinate }!
+        guard let index = coordinates.index(where: { $0.coordinate == coordinate }) else { return nil }
         return vertexHelper(coordinate: coordinate, at: index, graph: graph, reversed: false)
     }
 
@@ -231,49 +316,100 @@ extension Graph {
     }
 }
 
-func buildGraph(tracks: [Track], url: URL) -> Graph {
-    var graph = Graph()
-    let tree = KDTree(values: tracks.flatMap { $0.kdPoints })
+extension Track {
+    var boundingBox: MKMapRect {
+        return polygon.boundingMapRect
+    }
+}
+
+extension MKMapRect {
+    func intersects(_ other: MKMapRect) -> Bool {
+        return MKMapRectIntersectsRect(self, other)
+    }
     
-    for t in tracks {
-        let joinedPoints: [(TrackPoint, overlaps: [Box<Track>])] = t.kdPoints.enumerated().map { (ix, point) in
-            var seen: [Box<Track>] = []
-            for neighbor in tree.nearestK(10, to: point) {
-                let maxDistance = 20 as Double
-                if neighbor.track != point.track && !seen.contains(neighbor.track) && point.distanceInMeters(to: neighbor) < maxDistance {
-                    seen.append(neighbor.track)
-                }
+    func contains(_ point: MKMapPoint) -> Bool {
+        return MKMapRectContainsPoint(self, point)
+    }
+}
+
+let epsilon: Double = 3
+
+func buildGraph(tracks: [Track], url: URL, progress: @escaping (Float) -> ()) -> Graph {
+    var graph = Graph()
+//    let tree = KDTree(values: tracks.flatMap { $0.kdPoints })
+    let maxDistance: Double = 25
+    
+    let boundingBoxes = Dictionary(tracks.map {
+        ($0.name, $0.boundingBox)
+    }, uniquingKeysWith: { $1 })
+    
+    
+    // todo we can parallelize this
+    for (trackIndex, t) in tracks.enumerated() {
+        print(trackIndex, tracks.count)
+        progress(Float(trackIndex) / Float(tracks.count))
+        let kdPoints = t.kdPoints
+        let boundingBox = boundingBoxes[t.name]!
+        
+        let neighbors = tracks.filter { $0.name != t.name && boundingBox.intersects(boundingBoxes[$0.name]!) }
+        
+        let joinedPoints: [(TrackPoint, overlaps: [(Box<Track>, Segment)])] = kdPoints.map { p in
+            let pointNeighbors = neighbors.flatMap { neighbor in
+                neighbor.segment(closeTo: p.point.coordinate, maxDistance: maxDistance).map { (Box(neighbor), $0) }
             }
-            seen.sort(by: { $0.unbox.name < $1.unbox.name })
-            return (point, overlaps: seen) // this also appends non-overlapping points
+            return (p, pointNeighbors)
         }
         
-        let grouped: [[(TrackPoint, overlaps: [Box<Track>])]] = joinedPoints.group(by: { $0.overlaps == $1.overlaps })
-//            .mergeSmallGroupsAlt(maxSize: 1)
-//            .joined()
-//            .group(by: { $0.overlaps == $1.overlaps })
-//        grouped.map { ($0.first!.overlaps.map { $0.unbox.name }, $0.count) }.forEach { print($0) }
-        for segment in grouped {
-            let first = segment[0]
+        let grouped: [[(TrackPoint, overlaps: [(Box<Track>, Segment)])]] = joinedPoints.group(by: { $0.overlaps.map { $0.0 }  == $1.overlaps.map { $0.0 } })
+        
+        var previous: Coordinate? = Coordinate(grouped.last!.last!.0.point.coordinate) // by starting with the last as the previous, we create a full loop
+        for group in grouped {
+            let first = group[0]
+            
             let from = first.0.point
-            let to = segment.last!.0.point
-            let distance = segment.map { $0.0.point }.distance
-            for t in segment[0].overlaps {
-                graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(to.coordinate), distance: distance, trackName: t.unbox.name))
+            let to = group.last!.0.point
+            
+            if let p = previous {
+                let d = p.clLocationCoordinate.squaredDistanceApproximation(to: from.coordinate).squareRoot()
+                graph.add(from: p, Graph.Entry(destination: Coordinate(from.coordinate), distance: d, trackName: t.name))
+            }
+            
+            previous = Coordinate(to.coordinate)
+            
+            let distance = group.map { $0.0.point }.distance
+            graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(to.coordinate), distance: distance, trackName: t.name))
+            
+            // todo remove the duplication below
+            for o in group[0].overlaps {
+                let segment = o.1
+                let closest = from.coordinate.closestPointOn(segment: segment)
+                let distance = from.coordinate.squaredDistance(to: segment).squareRoot()
+                
+                graph.add(from: Coordinate(from.coordinate), Graph.Entry(destination: Coordinate(closest), distance: distance, trackName: "Close"))
+                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.0), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
+                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.1), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
+            }
+            
+            for o in group.last!.overlaps {
+                let segment = o.1
+                let closest = to.coordinate.closestPointOn(segment: segment)
+                let distance = to.coordinate.squaredDistance(to: segment).squareRoot()
+                
+                graph.add(from: Coordinate(to.coordinate), Graph.Entry(destination: Coordinate(closest), distance: distance, trackName: "Close"))
+                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.0), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
+                graph.add(from: Coordinate(closest), Graph.Entry(destination: Coordinate(segment.1), distance: closest.squaredDistanceApproximation(to: segment.0).squareRoot(), trackName: "Close"))
             }
             
         }
-        let last = t.coordinates.last!.coordinate
-        let first = t.coordinates[0].coordinate
-        graph.add(from: last, Graph.Entry(destination: first, distance: CLLocation(last.clLocationCoordinate).distance(from: CLLocation(first.clLocationCoordinate)), trackName: t.name))
     }
-        
+    
     let json = JSONEncoder()
     let result = try! json.encode(graph)
     try! result.write(to: url)
     
     return graph
 }
+
 extension Track {
     var kdPoints: [TrackPoint] {
         let box = Box(self)

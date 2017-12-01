@@ -38,7 +38,6 @@ extension IBox where V: MKMapView {
             if let p = previous {
                 self.unbox.removeOverlays(p)
             }
-            print("overlays: \(value.count)")
             self.unbox.addOverlays(value)
             previous = value
         })

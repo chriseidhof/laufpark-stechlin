@@ -106,6 +106,7 @@
 		8340DFB01F61B40C002176C6 /* wabe rot-strecke 2.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA61F61B227002176C6 /* wabe rot-strecke 2.gpx */; };
 		8340DFB11F61B40C002176C6 /* wabe rot-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA51F61B227002176C6 /* wabe rot-strecke 3.gpx */; };
 		8340DFB21F61B40C002176C6 /* wabe rot-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */; };
+		8353F57B1FCF38E5007A132A /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8353F57A1FCF38E5007A132A /* ProgressIndicator.swift */; };
 		8379CF291FB83D01009CD00F /* Model+MapKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF281FB83D01009CD00F /* Model+MapKit.swift */; };
 		8379CF311FB83E04009CD00F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF301FB83E04009CD00F /* AppDelegate.swift */; };
 		8379CF331FB83E04009CD00F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8379CF321FB83E04009CD00F /* Assets.xcassets */; };
@@ -444,6 +445,7 @@
 		8340DFAB1F61B2C5002176C6 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		8340DFAD1F61B2F6002176C6 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		834CE82B1F796D3500785B16 /* iOSPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = iOSPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
+		8353F57A1FCF38E5007A132A /* ProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
 		8379CF281FB83D01009CD00F /* Model+MapKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+MapKit.swift"; sourceTree = "<group>"; };
 		8379CF2E1FB83E04009CD00F /* GPXPreprocessing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPXPreprocessing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8379CF301FB83E04009CD00F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -811,6 +813,7 @@
 				834004E41F7BA9EA0035984B /* Constraints.swift */,
 				8384EC5F1F8288FD003AAC56 /* NavigationController.swift */,
 				830E62E61F9799F400046F5B /* MapView.swift */,
+				8353F57A1FCF38E5007A132A /* ProgressIndicator.swift */,
 			);
 			path = "Incremental+UIKit";
 			sourceTree = "<group>";
@@ -1385,6 +1388,7 @@
 				83FC93D51F7154050034E3B2 /* IncrementalStdLib.swift in Sources */,
 				83FC89811F7B87680020EED6 /* ActivityIndicator.swift in Sources */,
 				8384EC601F8288FD003AAC56 /* NavigationController.swift in Sources */,
+				8353F57B1FCF38E5007A132A /* ProgressIndicator.swift in Sources */,
 				83B2A2751F692D0D00A6D9F9 /* Incremental.swift in Sources */,
 				834004E51F7BA9EA0035984B /* Constraints.swift in Sources */,
 				83FC89851F7B89A30020EED6 /* ViewController.swift in Sources */,
