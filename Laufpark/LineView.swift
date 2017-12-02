@@ -107,6 +107,7 @@ final class LineView: UIView {
         }
         
         // drawing the "cursor"
+        // todo this should be a separate uiview so that we don't need to redraw all the time
         if let position = position {
             let start = CGPoint(x: position*scaleX, y: 0)
             let end = CGPoint(x: position*scaleX, y: bounds.size.height-labelPadding)

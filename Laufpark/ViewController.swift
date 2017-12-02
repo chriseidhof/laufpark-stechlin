@@ -288,7 +288,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
             }
         }
         let routingInfo = label(text: routeInfo, textColor: textColor.map { $0 })
-        let removeLastWayPointButton = button(title: I(constant: "↩️")) { state.change {
+        let removeLastWayPointButton = button(title: I(constant: "↩️"), backgroundColor: I(constant: .clear)) { state.change {
             $0.removeLastWayPoint()
         }}
         let routeHasWaypoints = state.i.map { $0.route != nil && $0.route!.wayPoints.count > 0 }

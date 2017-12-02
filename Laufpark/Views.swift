@@ -22,6 +22,31 @@ enum Stylesheet {
     }
 }
 
+extension LineView.Point {
+    func distanceTo(segment: (LineView.Point, LineView.Point)) -> Double {
+        let a = x - segment.0.x
+        let b = y - segment.0.y
+        let c = segment.1.x - segment.0.x
+        let d = segment.1.x - segment.0.x
+        
+        let dot = a * c + b * d
+        let lenSq = c*c + d*d
+        let param = dot / lenSq
+        
+        let p: LineView.Point
+        if param < 0 || (segment.0 == segment.1) {
+            p = segment.0
+        } else if param > 1 {
+            p = segment.1
+        } else {
+            p = LineView.Point(x: segment.0.x + param * c, y: segment.0.y + param * d)
+        }
+        
+        let dx = x - p.x
+        let dy = y - p.y
+        return (dx*dx + dy*dy).squareRoot()        
+    }
+}
 
 func trackInfoView(position: I<CGFloat?>, points: I<[LineView.Point]>, track: I<Track?>, darkMode: I<Bool>) -> (IBox<UIView>, location: I<CGFloat>) {
     let pannedLocation: Input<CGFloat> = Input(0)
@@ -100,7 +125,7 @@ extension CLLocationCoordinate2D: Equatable {
 
 func lineView(position: I<CGFloat?>, points: I<[LineView.Point]>, strokeColor: I<UIColor>) -> IBox<LineView> {
     let box = IBox(LineView())
-    box.bind(position, to: \LineView.position)
+    box.bind(position, to: \.position)
     box.bind(points, to: \.points)
     box.bind(strokeColor, to: \.strokeColor)
     return box
