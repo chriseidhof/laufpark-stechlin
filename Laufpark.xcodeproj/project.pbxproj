@@ -24,18 +24,6 @@
 		83099AF91F63CDA400D3EBB8 /* wabe gelb-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AF81F63CDA100D3EBB8 /* wabe gelb-strecke 0.gpx */; };
 		83099AFB1F63CE8400D3EBB8 /* wabe pink-strecke 0.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 83099AFA1F63CE6E00D3EBB8 /* wabe pink-strecke 0.gpx */; };
 		830E62E71F9799F400046F5B /* MapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 830E62E61F9799F400046F5B /* MapView.swift */; };
-		832B05E11FB84C260075AE23 /* KDTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 832B05DF1FB84C260075AE23 /* KDTree.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		832B05E41FB84C260075AE23 /* KDTreeMac.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 832B05DD1FB84C260075AE23 /* KDTreeMac.framework */; };
-		832B05E61FB84C260075AE23 /* KDTreeMac.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 832B05DD1FB84C260075AE23 /* KDTreeMac.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		832B05F31FB84C390075AE23 /* KDTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EA1FB84C390075AE23 /* KDTree.swift */; };
-		832B05F41FB84C390075AE23 /* KDTreePoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EB1FB84C390075AE23 /* KDTreePoint.swift */; };
-		832B05F51FB84C390075AE23 /* CGPoint+KDTreePoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EC1FB84C390075AE23 /* CGPoint+KDTreePoint.swift */; };
-		832B05F61FB84C390075AE23 /* KDTree+NearestNeighbour.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05ED1FB84C390075AE23 /* KDTree+NearestNeighbour.swift */; };
-		832B05F71FB84C390075AE23 /* KDTree+Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EE1FB84C390075AE23 /* KDTree+Sequence.swift */; };
-		832B05F81FB84C390075AE23 /* KDTree+Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EF1FB84C390075AE23 /* KDTree+Equatable.swift */; };
-		832B05F91FB84C390075AE23 /* KDTree+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05F01FB84C390075AE23 /* KDTree+CustomStringConvertible.swift */; };
-		832B05FA1FB84C390075AE23 /* KDTree+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05F11FB84C390075AE23 /* KDTree+Codable.swift */; };
-		832B05FB1FB84C390075AE23 /* KDTree+RangeSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05F21FB84C390075AE23 /* KDTree+RangeSearch.swift */; };
 		83354DA01F6FE9A900F3C33A /* Incremental+NSObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */; };
 		83354DA21F6FEA5700F3C33A /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83354DA11F6FEA5700F3C33A /* Helpers.swift */; };
 		834004E51F7BA9EA0035984B /* Constraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 834004E41F7BA9EA0035984B /* Constraints.swift */; };
@@ -201,18 +189,6 @@
 		8384EC601F8288FD003AAC56 /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8384EC5F1F8288FD003AAC56 /* NavigationController.swift */; };
 		838C765F1FC182A700EB13F1 /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838C765E1FC182A700EB13F1 /* Routing.swift */; };
 		838C76601FC1837B00EB13F1 /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838C765E1FC182A700EB13F1 /* Routing.swift */; };
-		838C76651FC1845500EB13F1 /* CGPoint+KDTreePoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EC1FB84C390075AE23 /* CGPoint+KDTreePoint.swift */; };
-		838C76661FC1845500EB13F1 /* KDTree+Equatable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EF1FB84C390075AE23 /* KDTree+Equatable.swift */; };
-		838C76671FC1845500EB13F1 /* KDTree+RangeSearch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05F21FB84C390075AE23 /* KDTree+RangeSearch.swift */; };
-		838C76681FC1845500EB13F1 /* KDTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EA1FB84C390075AE23 /* KDTree.swift */; };
-		838C76691FC1845500EB13F1 /* KDTree+Codable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05F11FB84C390075AE23 /* KDTree+Codable.swift */; };
-		838C766A1FC1845500EB13F1 /* KDTreePoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EB1FB84C390075AE23 /* KDTreePoint.swift */; };
-		838C766B1FC1845500EB13F1 /* KDTree+NearestNeighbour.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05ED1FB84C390075AE23 /* KDTree+NearestNeighbour.swift */; };
-		838C766C1FC1845500EB13F1 /* KDTree+Sequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05EE1FB84C390075AE23 /* KDTree+Sequence.swift */; };
-		838C766D1FC1845500EB13F1 /* KDTree+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 832B05F01FB84C390075AE23 /* KDTree+CustomStringConvertible.swift */; };
-		838C76701FC1845500EB13F1 /* KDTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 832B05DF1FB84C260075AE23 /* KDTree.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		838C76791FC1849E00EB13F1 /* KDTreeiOS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 838C76751FC1845500EB13F1 /* KDTreeiOS.framework */; };
-		838C767A1FC18E2F00EB13F1 /* KDTreeiOS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 838C76751FC1845500EB13F1 /* KDTreeiOS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824D1F6302DF004070DA /* Model+UIKit.swift */; };
 		83B2A26C1F692CFA00A6D9F9 /* Incremental.h in Headers */ = {isa = PBXBuildFile; fileRef = 83B2A26A1F692CFA00A6D9F9 /* Incremental.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83B2A26F1F692CFA00A6D9F9 /* Incremental.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; };
@@ -251,26 +227,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		832B05E21FB84C260075AE23 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 8340DF881F61B1F8002176C6 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 832B05DC1FB84C260075AE23;
-			remoteInfo = KDTree;
-		};
 		8379CF8E1FB840D4009CD00F /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8340DF881F61B1F8002176C6 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 83C0FB031F74F5280041A802;
 			remoteInfo = Incremental_Mac;
-		};
-		838C76771FC1847C00EB13F1 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 8340DF881F61B1F8002176C6 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = 838C76631FC1845500EB13F1;
-			remoteInfo = KDTreeiOS;
 		};
 		83B2A26D1F692CFA00A6D9F9 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -309,7 +271,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				832B05E61FB84C260075AE23 /* KDTreeMac.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -320,7 +281,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				838C767A1FC18E2F00EB13F1 /* KDTreeiOS.framework in Embed Frameworks */,
 				83B2A2701F692CFA00A6D9F9 /* Incremental.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -358,18 +318,6 @@
 		83099AF81F63CDA100D3EBB8 /* wabe gelb-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe gelb-strecke 0.gpx"; sourceTree = "<group>"; };
 		83099AFA1F63CE6E00D3EBB8 /* wabe pink-strecke 0.gpx */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = "wabe pink-strecke 0.gpx"; sourceTree = "<group>"; };
 		830E62E61F9799F400046F5B /* MapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapView.swift; sourceTree = "<group>"; };
-		832B05DD1FB84C260075AE23 /* KDTreeMac.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KDTreeMac.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		832B05DF1FB84C260075AE23 /* KDTree.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KDTree.h; sourceTree = "<group>"; };
-		832B05E01FB84C260075AE23 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		832B05EA1FB84C390075AE23 /* KDTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KDTree.swift; path = vendor/KDTree/Sources/KDTree.swift; sourceTree = SOURCE_ROOT; };
-		832B05EB1FB84C390075AE23 /* KDTreePoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = KDTreePoint.swift; path = vendor/KDTree/Sources/KDTreePoint.swift; sourceTree = SOURCE_ROOT; };
-		832B05EC1FB84C390075AE23 /* CGPoint+KDTreePoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "CGPoint+KDTreePoint.swift"; path = "vendor/KDTree/Sources/CGPoint+KDTreePoint.swift"; sourceTree = SOURCE_ROOT; };
-		832B05ED1FB84C390075AE23 /* KDTree+NearestNeighbour.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "KDTree+NearestNeighbour.swift"; path = "vendor/KDTree/Sources/KDTree+NearestNeighbour.swift"; sourceTree = SOURCE_ROOT; };
-		832B05EE1FB84C390075AE23 /* KDTree+Sequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "KDTree+Sequence.swift"; path = "vendor/KDTree/Sources/KDTree+Sequence.swift"; sourceTree = SOURCE_ROOT; };
-		832B05EF1FB84C390075AE23 /* KDTree+Equatable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "KDTree+Equatable.swift"; path = "vendor/KDTree/Sources/KDTree+Equatable.swift"; sourceTree = SOURCE_ROOT; };
-		832B05F01FB84C390075AE23 /* KDTree+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "KDTree+CustomStringConvertible.swift"; path = "vendor/KDTree/Sources/KDTree+CustomStringConvertible.swift"; sourceTree = SOURCE_ROOT; };
-		832B05F11FB84C390075AE23 /* KDTree+Codable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "KDTree+Codable.swift"; path = "vendor/KDTree/Sources/KDTree+Codable.swift"; sourceTree = SOURCE_ROOT; };
-		832B05F21FB84C390075AE23 /* KDTree+RangeSearch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "KDTree+RangeSearch.swift"; path = "vendor/KDTree/Sources/KDTree+RangeSearch.swift"; sourceTree = SOURCE_ROOT; };
 		83354D9F1F6FE9A900F3C33A /* Incremental+NSObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+NSObject.swift"; sourceTree = "<group>"; };
 		83354DA11F6FEA5700F3C33A /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		834004E41F7BA9EA0035984B /* Constraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Constraints.swift; sourceTree = "<group>"; };
@@ -459,7 +407,6 @@
 		837A8AB91F72DACB00ED898C /* IncrementalArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalArray.swift; sourceTree = "<group>"; };
 		8384EC5F1F8288FD003AAC56 /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		838C765E1FC182A700EB13F1 /* Routing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routing.swift; sourceTree = "<group>"; };
-		838C76751FC1845500EB13F1 /* KDTreeiOS.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = KDTreeiOS.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		838C76761FC1845600EB13F1 /* KDTree copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "KDTree copy-Info.plist"; path = "/Users/chris/Development/Swift/Laufpark/KDTree copy-Info.plist"; sourceTree = "<absolute>"; };
 		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
 		83B0824F1F63052D004070DA /* Incremental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incremental.swift; sourceTree = "<group>"; };
@@ -497,18 +444,10 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		832B05D91FB84C260075AE23 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8340DF8D1F61B1F8002176C6 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				838C76791FC1849E00EB13F1 /* KDTreeiOS.framework in Frameworks */,
 				8340DFAC1F61B2C5002176C6 /* MapKit.framework in Frameworks */,
 				83B2A26F1F692CFA00A6D9F9 /* Incremental.framework in Frameworks */,
 			);
@@ -519,14 +458,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8379CF941FB843E0009CD00F /* Incremental_Mac.framework in Frameworks */,
-				832B05E41FB84C260075AE23 /* KDTreeMac.framework in Frameworks */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		838C766E1FC1845500EB13F1 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -563,24 +494,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		832B05DE1FB84C260075AE23 /* KDTree */ = {
-			isa = PBXGroup;
-			children = (
-				832B05EC1FB84C390075AE23 /* CGPoint+KDTreePoint.swift */,
-				832B05EA1FB84C390075AE23 /* KDTree.swift */,
-				832B05F11FB84C390075AE23 /* KDTree+Codable.swift */,
-				832B05F01FB84C390075AE23 /* KDTree+CustomStringConvertible.swift */,
-				832B05EF1FB84C390075AE23 /* KDTree+Equatable.swift */,
-				832B05ED1FB84C390075AE23 /* KDTree+NearestNeighbour.swift */,
-				832B05F21FB84C390075AE23 /* KDTree+RangeSearch.swift */,
-				832B05EE1FB84C390075AE23 /* KDTree+Sequence.swift */,
-				832B05EB1FB84C390075AE23 /* KDTreePoint.swift */,
-				832B05DF1FB84C260075AE23 /* KDTree.h */,
-				832B05E01FB84C260075AE23 /* Info.plist */,
-			);
-			path = KDTree;
-			sourceTree = "<group>";
-		};
 		8340DF871F61B1F8002176C6 = {
 			isa = PBXGroup;
 			children = (
@@ -593,7 +506,6 @@
 				83CC2E291F8E3B3C00F4302B /* Todos */,
 				83CC2E441F8E3C4800F4302B /* IncrementalElm */,
 				8379CF2F1FB83E04009CD00F /* GPXPreprocessing */,
-				832B05DE1FB84C260075AE23 /* KDTree */,
 				8340DF911F61B1F8002176C6 /* Products */,
 				8340DFAA1F61B2C5002176C6 /* Frameworks */,
 				83C0FAFE1F74F5060041A802 /* Incremental copy-Info.plist */,
@@ -610,8 +522,6 @@
 				83CC2E281F8E3B3C00F4302B /* Todos.app */,
 				83CC2E431F8E3C4800F4302B /* IncrementalElm.framework */,
 				8379CF2E1FB83E04009CD00F /* GPXPreprocessing.app */,
-				832B05DD1FB84C260075AE23 /* KDTreeMac.framework */,
-				838C76751FC1845500EB13F1 /* KDTreeiOS.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -821,22 +731,6 @@
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
-		832B05DA1FB84C260075AE23 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				832B05E11FB84C260075AE23 /* KDTree.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		838C766F1FC1845500EB13F1 /* Headers */ = {
-			isa = PBXHeadersBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				838C76701FC1845500EB13F1 /* KDTree.h in Headers */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		83B2A2651F692CFA00A6D9F9 /* Headers */ = {
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
@@ -865,24 +759,6 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		832B05DC1FB84C260075AE23 /* KDTreeMac */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 832B05E91FB84C260075AE23 /* Build configuration list for PBXNativeTarget "KDTreeMac" */;
-			buildPhases = (
-				832B05D81FB84C260075AE23 /* Sources */,
-				832B05D91FB84C260075AE23 /* Frameworks */,
-				832B05DA1FB84C260075AE23 /* Headers */,
-				832B05DB1FB84C260075AE23 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = KDTreeMac;
-			productName = KDTree;
-			productReference = 832B05DD1FB84C260075AE23 /* KDTreeMac.framework */;
-			productType = "com.apple.product-type.framework";
-		};
 		8340DF8F1F61B1F8002176C6 /* Laufpark */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8340DFA21F61B1F8002176C6 /* Build configuration list for PBXNativeTarget "Laufpark" */;
@@ -895,7 +771,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				838C76781FC1847C00EB13F1 /* PBXTargetDependency */,
 				83B2A26E1F692CFA00A6D9F9 /* PBXTargetDependency */,
 			);
 			name = Laufpark;
@@ -916,30 +791,11 @@
 			);
 			dependencies = (
 				8379CF8F1FB840D4009CD00F /* PBXTargetDependency */,
-				832B05E31FB84C260075AE23 /* PBXTargetDependency */,
 			);
 			name = GPXPreprocessing;
 			productName = GPXPreprocessing;
 			productReference = 8379CF2E1FB83E04009CD00F /* GPXPreprocessing.app */;
 			productType = "com.apple.product-type.application";
-		};
-		838C76631FC1845500EB13F1 /* KDTreeiOS */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = 838C76721FC1845500EB13F1 /* Build configuration list for PBXNativeTarget "KDTreeiOS" */;
-			buildPhases = (
-				838C76641FC1845500EB13F1 /* Sources */,
-				838C766E1FC1845500EB13F1 /* Frameworks */,
-				838C766F1FC1845500EB13F1 /* Headers */,
-				838C76711FC1845500EB13F1 /* Resources */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-			);
-			name = KDTreeiOS;
-			productName = KDTree;
-			productReference = 838C76751FC1845500EB13F1 /* KDTreeiOS.framework */;
-			productType = "com.apple.product-type.framework";
 		};
 		83B2A2671F692CFA00A6D9F9 /* Incremental */ = {
 			isa = PBXNativeTarget;
@@ -1026,11 +882,6 @@
 				LastUpgradeCheck = 0900;
 				ORGANIZATIONNAME = objc.io;
 				TargetAttributes = {
-					832B05DC1FB84C260075AE23 = {
-						CreatedOnToolsVersion = 9.0;
-						LastSwiftMigration = 0900;
-						ProvisioningStyle = Automatic;
-					};
 					8340DF8F1F61B1F8002176C6 = {
 						CreatedOnToolsVersion = 9.0;
 						SystemCapabilities = {
@@ -1047,9 +898,6 @@
 								enabled = 0;
 							};
 						};
-					};
-					838C76631FC1845500EB13F1 = {
-						ProvisioningStyle = Automatic;
 					};
 					83B2A2671F692CFA00A6D9F9 = {
 						CreatedOnToolsVersion = 9.0;
@@ -1088,20 +936,11 @@
 				83CC2E271F8E3B3C00F4302B /* Todos */,
 				83CC2E421F8E3C4800F4302B /* IncrementalElm */,
 				8379CF2D1FB83E04009CD00F /* GPXPreprocessing */,
-				832B05DC1FB84C260075AE23 /* KDTreeMac */,
-				838C76631FC1845500EB13F1 /* KDTreeiOS */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		832B05DB1FB84C260075AE23 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8340DF8E1F61B1F8002176C6 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1273,13 +1112,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		838C76711FC1845500EB13F1 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		83B2A2661F692CFA00A6D9F9 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1313,22 +1145,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		832B05D81FB84C260075AE23 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				832B05F51FB84C390075AE23 /* CGPoint+KDTreePoint.swift in Sources */,
-				832B05F81FB84C390075AE23 /* KDTree+Equatable.swift in Sources */,
-				832B05FB1FB84C390075AE23 /* KDTree+RangeSearch.swift in Sources */,
-				832B05F31FB84C390075AE23 /* KDTree.swift in Sources */,
-				832B05FA1FB84C390075AE23 /* KDTree+Codable.swift in Sources */,
-				832B05F41FB84C390075AE23 /* KDTreePoint.swift in Sources */,
-				832B05F61FB84C390075AE23 /* KDTree+NearestNeighbour.swift in Sources */,
-				832B05F71FB84C390075AE23 /* KDTree+Sequence.swift in Sources */,
-				832B05F91FB84C390075AE23 /* KDTree+CustomStringConvertible.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8340DF8C1F61B1F8002176C6 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -1355,22 +1171,6 @@
 				8379CF901FB84207009CD00F /* Model+UIKit.swift in Sources */,
 				8379CF961FB845D8009CD00F /* Model+MapKit.swift in Sources */,
 				8379CF3E1FB83F62009CD00F /* Model.swift in Sources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		838C76641FC1845500EB13F1 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				838C76651FC1845500EB13F1 /* CGPoint+KDTreePoint.swift in Sources */,
-				838C76661FC1845500EB13F1 /* KDTree+Equatable.swift in Sources */,
-				838C76671FC1845500EB13F1 /* KDTree+RangeSearch.swift in Sources */,
-				838C76681FC1845500EB13F1 /* KDTree.swift in Sources */,
-				838C76691FC1845500EB13F1 /* KDTree+Codable.swift in Sources */,
-				838C766A1FC1845500EB13F1 /* KDTreePoint.swift in Sources */,
-				838C766B1FC1845500EB13F1 /* KDTree+NearestNeighbour.swift in Sources */,
-				838C766C1FC1845500EB13F1 /* KDTree+Sequence.swift in Sources */,
-				838C766D1FC1845500EB13F1 /* KDTree+CustomStringConvertible.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1436,20 +1236,10 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		832B05E31FB84C260075AE23 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 832B05DC1FB84C260075AE23 /* KDTreeMac */;
-			targetProxy = 832B05E21FB84C260075AE23 /* PBXContainerItemProxy */;
-		};
 		8379CF8F1FB840D4009CD00F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = 83C0FB031F74F5280041A802 /* Incremental_Mac */;
 			targetProxy = 8379CF8E1FB840D4009CD00F /* PBXContainerItemProxy */;
-		};
-		838C76781FC1847C00EB13F1 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = 838C76631FC1845500EB13F1 /* KDTreeiOS */;
-			targetProxy = 838C76771FC1847C00EB13F1 /* PBXContainerItemProxy */;
 		};
 		83B2A26E1F692CFA00A6D9F9 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1493,63 +1283,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		832B05E71FB84C260075AE23 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = SL7736T2Z4;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = KDTree/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.KDTree;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		832B05E81FB84C260075AE23 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "Mac Developer";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = SL7736T2Z4;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = KDTree/Info.plist;
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.KDTree;
-				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
-				SDKROOT = macosx;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Release;
-		};
 		8340DFA01F61B1F8002176C6 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1726,65 +1459,6 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SWIFT_VERSION = 4.0;
-			};
-			name = Release;
-		};
-		838C76731FC1845500EB13F1 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = SL7736T2Z4;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = "KDTree copy-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.KDTree;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos11.0;
-				SKIP_INSTALL = YES;
-				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 4.0;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
-			};
-			name = Debug;
-		};
-		838C76741FC1845500EB13F1 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CLANG_ENABLE_MODULES = YES;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
-				CODE_SIGN_STYLE = Automatic;
-				COMBINE_HIDPI_IMAGES = YES;
-				CURRENT_PROJECT_VERSION = 1;
-				DEFINES_MODULE = YES;
-				DEVELOPMENT_TEAM = SL7736T2Z4;
-				DYLIB_COMPATIBILITY_VERSION = 1;
-				DYLIB_CURRENT_VERSION = 1;
-				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				FRAMEWORK_VERSION = A;
-				INFOPLIST_FILE = "KDTree copy-Info.plist";
-				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks @loader_path/Frameworks";
-				MACOSX_DEPLOYMENT_TARGET = 10.12;
-				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.KDTree;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos11.0;
-				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
-				VERSIONING_SYSTEM = "apple-generic";
-				VERSION_INFO_PREFIX = "";
 			};
 			name = Release;
 		};
@@ -1978,15 +1652,6 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		832B05E91FB84C260075AE23 /* Build configuration list for PBXNativeTarget "KDTreeMac" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				832B05E71FB84C260075AE23 /* Debug */,
-				832B05E81FB84C260075AE23 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		8340DF8B1F61B1F8002176C6 /* Build configuration list for PBXProject "Laufpark" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -2010,15 +1675,6 @@
 			buildConfigurations = (
 				8379CF3A1FB83E04009CD00F /* Debug */,
 				8379CF3B1FB83E04009CD00F /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		838C76721FC1845500EB13F1 /* Build configuration list for PBXNativeTarget "KDTreeiOS" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				838C76731FC1845500EB13F1 /* Debug */,
-				838C76741FC1845500EB13F1 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

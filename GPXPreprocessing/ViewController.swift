@@ -9,7 +9,6 @@
 import Cocoa
 import MapKit
 import Incremental_Mac
-import KDTree
 
 struct StoredState: Equatable, Codable {
     var annotationsVisible: Bool = false

@@ -9,7 +9,6 @@
 import UIKit
 import MapKit
 import Incremental
-import KDTreeiOS
 
 struct StoredState: Equatable, Codable {
     var annotationsVisible: Bool = false
@@ -179,7 +178,6 @@ struct DisplayState: Equatable, Codable {
         }
     }
     
-//    var tree: KDTree<TrackPoint>?
     var graph: Graph?
     var graphBuildingProgress: Float = 0
 

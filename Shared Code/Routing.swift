@@ -7,11 +7,6 @@
 //
 
 import MapKit
-#if os(iOS)
-    import KDTreeiOS
-#else
-    import KDTree
-#endif
 
 extension Sequence {
     // Creates groups out of the array. Function is called for adjacent element, if true they're in the same group.
@@ -33,7 +28,7 @@ extension CLLocationCoordinate2D {
         let deltaLat = segment.1.latitude - segment.0.latitude
         let deltaLon = segment.1.longitude - segment.0.longitude
         
-        var u = CLLocationDegrees(
+        let u = CLLocationDegrees(
             (latitude - segment.0.latitude) *
                 (segment.1.latitude - segment.0.latitude) +
                 (longitude - segment.0.longitude) *
@@ -336,7 +331,6 @@ let epsilon: Double = 3
 
 func buildGraph(tracks: [Track], url: URL, progress: @escaping (Float) -> ()) -> Graph {
     var graph = Graph()
-//    let tree = KDTree(values: tracks.flatMap { $0.kdPoints })
     let maxDistance: Double = 25
     
     let boundingBoxes = Dictionary(tracks.map {
@@ -458,13 +452,7 @@ extension CLLocation {
 
 
 
-extension TrackPoint: KDTreePoint {
-    static let dimensions = 2
-    
-    func kdDimension(_ dimension: Int) -> Double {
-        return dimension == 0 ? mapPoint.x : mapPoint.y
-    }
-    
+extension TrackPoint {    
     func squaredDistance(to otherPoint: TrackPoint) -> Double {
         // This should really be squared distance according to the coordinate system (and we shouldn't use any methods on CLLocation/MKMapPoint) for the k-d tree to work correctly.
         let dx = mapPoint.x-otherPoint.mapPoint.x
