@@ -8,6 +8,74 @@
 
 import MapKit
 
+struct Route: Equatable, Codable {
+    static func ==(lhs: Route, rhs: Route) -> Bool {
+        return lhs.startingPoint == rhs.startingPoint && lhs.points == rhs.points
+    }
+    
+    let startingPoint: CoordinateAndTrack
+    var points: [CoordinateAndTrack] = []
+    
+    init(track: Track, coordinate: Coordinate) {
+        startingPoint = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: nil)
+    }
+    
+    mutating func add(coordinate: Coordinate, inTrack track: Track, graph: Graph) {
+        let previous = points.last ?? startingPoint
+        
+        let path: Path? = graph.shortestPath(from: previous.coordinate, to: coordinate).map {
+            Path(entries: $0.path, distance: $0.distance)
+        }
+        let result = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: path)
+        points.append(result)
+    }
+    
+    var wayPoints: [Coordinate] {
+        return [startingPoint.coordinate] + points.map { $0.coordinate }
+    }
+    
+    var segments: [(Coordinate, Coordinate)] {
+        let coordinates = points.map { $0.coordinate }
+        return Array(zip([startingPoint.coordinate] + coordinates, coordinates))
+    }
+    
+    var distance: Double {
+        return points.map { $0.pathFromPrevious?.distance ?? 0 }.reduce(into: 0, +=)
+    }
+    
+    func allPoints(tracks: [Track]) -> [CoordinateWithElevation] {
+        var result: [CoordinateWithElevation] = [startingPoint.track.interpolatedPoint(for: startingPoint.coordinate)!]
+        for wayPoint in points {
+            if let p = wayPoint.pathFromPrevious?.entries {
+                for entry in p {
+                    if entry.trackName != "Close" {
+                        let track = tracks.first { $0.name == entry.trackName }!
+                        result += track.points(between: result.last!.coordinate, and: entry.destination)
+                    }
+                    let dest = CoordinateWithElevation(coordinate: entry.destination, elevation: result.last!.elevation) // todo lookup
+                    result.append(dest)
+                    
+                }
+            }
+            var wayp = wayPoint.track.interpolatedPoint(for: wayPoint.coordinate)
+            if wayp == nil {
+                print("error")
+                wayp = CoordinateWithElevation(coordinate: wayPoint.coordinate, elevation: result.last?.elevation ?? 0)
+            }
+            
+            result.append(wayp!)
+        }
+        return result
+    }
+    
+    mutating func removeLastWaypoint() {
+        guard !points.isEmpty else {
+            return
+        }
+        points.removeLast()
+    }
+}
+
 extension Sequence {
     // Creates groups out of the array. Function is called for adjacent element, if true they're in the same group.
     func group(by inSameGroup: (Element, Element) -> Bool) -> [[Element]] {
@@ -225,26 +293,6 @@ extension Array {
     }
 }
 
-extension Array where Element == [(TrackPoint, overlaps: [Box<Track>])] {
-    func mergeSmallGroupsAlt(maxSize: Int) -> [[(TrackPoint, overlaps: [Box<Track>])]] {
-        var result: Array = []
-        for ix in self.indices {
-            let group = self[ix]
-            if group.count <= maxSize,
-                let previous = self[safe: ix-1], let next = self[safe: ix+1],
-                previous[0].overlaps == next[0].overlaps {
-                let overlaps = result[result.endIndex-1][0].overlaps
-                let newGroup = group.map { ($0.0, overlaps: overlaps) }
-                result[result.endIndex-1].append(contentsOf: newGroup)
-            } else {
-                result.append(group)
-            }
-        }
-        return result
-    }
-    
-}
-
 struct Graph: Codable, Equatable {
     static func ==(lhs: Graph, rhs: Graph) -> Bool {
         return lhs.items.keys == rhs.items.keys // todo hack hack
@@ -270,16 +318,7 @@ struct Graph: Codable, Equatable {
     var vertices: [Coordinate] { return Array(items.keys) }
     
     func edges(from: Coordinate) -> [Entry] {
-        let existing = items[from] ?? []
-//        let existingDestinations = Set(existing.map { $0.destination })
-//        let c = CLLocation(from.clLocationCoordinate)
-////        let squaredTreshold: Double = 150*150
-////        let close = items.keys.filter { $0 != from && existingDestinations.contains($0) && CLLocation($0.clLocationCoordinate).squaredDistance(to: c) < squaredTreshold }.map {
-////            //let distance =
-////            return Entry(destination: $0, distance: c.distance(from: CLLocation($0.clLocationCoordinate)), trackName: "Close")
-////        }
-//        return close + (items[from] ?? [])
-        return existing
+        return items[from] ?? []
     }
 }
 

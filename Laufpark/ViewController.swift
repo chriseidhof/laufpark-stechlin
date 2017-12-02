@@ -39,74 +39,6 @@ struct CoordinateAndTrack: Equatable, Codable { // tuples aren't codable
     var pathFromPrevious: Path?
 }
 
-struct Route: Equatable, Codable {
-    static func ==(lhs: Route, rhs: Route) -> Bool {
-        return lhs.startingPoint == rhs.startingPoint && lhs.points == rhs.points
-    }
-    
-    let startingPoint: CoordinateAndTrack
-    var points: [CoordinateAndTrack] = []
-    
-    init(track: Track, coordinate: Coordinate) {
-        startingPoint = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: nil)
-    }
-    
-    mutating func add(coordinate: Coordinate, inTrack track: Track, graph: Graph) {
-        let previous = points.last ?? startingPoint
-        
-        let path: Path? = graph.shortestPath(from: previous.coordinate, to: coordinate).map {
-            Path(entries: $0.path, distance: $0.distance)
-        }
-        let result = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: path)
-        points.append(result)
-    }
-    
-    var wayPoints: [Coordinate] {
-        return [startingPoint.coordinate] + points.map { $0.coordinate }
-    }
-    
-    var segments: [(Coordinate, Coordinate)] {
-        let coordinates = points.map { $0.coordinate }
-        return Array(zip([startingPoint.coordinate] + coordinates, coordinates))
-    }
-    
-    var distance: Double {
-        return points.map { $0.pathFromPrevious?.distance ?? 0 }.reduce(into: 0, +=)
-    }
-    
-    func allPoints(tracks: [Track]) -> [CoordinateWithElevation] {
-        var result: [CoordinateWithElevation] = [startingPoint.track.interpolatedPoint(for: startingPoint.coordinate)!]
-        for wayPoint in points {
-            if let p = wayPoint.pathFromPrevious?.entries {
-                for entry in p {
-                    if entry.trackName != "Close" {
-                        let track = tracks.first { $0.name == entry.trackName }!
-                        result += track.points(between: result.last!.coordinate, and: entry.destination)
-                    }
-                    let dest = CoordinateWithElevation(coordinate: entry.destination, elevation: result.last!.elevation) // todo lookup
-                    result.append(dest)
-
-                }
-            }
-            var wayp = wayPoint.track.interpolatedPoint(for: wayPoint.coordinate)
-            if wayp == nil {
-                print("error")
-                wayp = CoordinateWithElevation(coordinate: wayPoint.coordinate, elevation: result.last?.elevation ?? 0)
-            }
-            
-            result.append(wayp!)
-        }
-        return result
-    }
-    
-    mutating func removeLastWaypoint() {
-        guard !points.isEmpty else {
-            return
-        }
-        points.removeLast()
-    }
-}
-
 
 extension DisplayState {
     mutating func removeLastWayPoint() {
@@ -116,14 +48,12 @@ extension DisplayState {
             route = nil
         }
     }
+    
     mutating func addWayPoint(track: Track, coordinate c2d: CLLocationCoordinate2D, segment: Segment) {
         guard graph != nil else { return }
-        let coordinate = Coordinate(c2d)
-        let d = c2d.squaredDistance(to: segment).squareRoot()
-        assert(d < 0.1)
         
-        let d0 = segment.0.squaredDistanceApproximation(to: c2d).squareRoot()
-        let d1 = segment.1.squaredDistanceApproximation(to: c2d).squareRoot()
+        let coordinate = Coordinate(c2d)
+        assert(c2d.squaredDistance(to: segment).squareRoot() < 0.1)
         
         let segment0 = Coordinate(segment.0)
         let segment1 = Coordinate(segment.1)
@@ -131,8 +61,8 @@ extension DisplayState {
         func add(from: Coordinate, _ entry: Graph.Entry) {
             graph!.add(from: from, entry)
         }
-        add(from: coordinate, Graph.Entry(destination: segment0, distance: d0, trackName: track.name))
-        add(from: coordinate, Graph.Entry(destination: segment1, distance: d1, trackName: track.name))
+        add(from: coordinate, Graph.Entry(destination: segment0, distance: segment.0.squaredDistanceApproximation(to: c2d).squareRoot(), trackName: track.name))
+        add(from: coordinate, Graph.Entry(destination: segment1, distance: segment.1.squaredDistanceApproximation(to: c2d).squareRoot(), trackName: track.name))
         
         if let vertex = track.vertexAfter(coordinate: segment0, graph: graph!) {
             add(from: segment0, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
@@ -216,6 +146,12 @@ func uiSwitch(initial: I<Bool>, valueChange: @escaping (_ isOn: Bool) -> ()) -> 
     return result
 }
 
+extension MKPolyline {
+    convenience init(_ coords: [CLLocationCoordinate2D]) {
+        self.init(coordinates: coords, count: coords.count)
+    }
+}
+
 /// Returns a function that you can call to set the visible map rect
 func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
     var polygonToTrack: [MKPolygon:Track] = [:]
@@ -268,8 +204,6 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
                     result.image = UIImage(named: "partner")!
                     result.frame.size = CGSize(width: 32, height: 32)
                 }
-                
-                
                 result.canShowCallout = true
                 return result
             } else {
@@ -278,16 +212,9 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
                 return result
             }
     }, regionDidChangeAnimated: { [unowned mapView] _ in
-//        print(mapView.unbox.region)
     }, didSelectAnnotation: { mapview, annotation in
-        state.change {
-            guard $0.routing, $0.route != nil else { return }
-            let first = $0.route!.wayPoints.first
-            if annotation.annotation?.coordinate == first?.clLocationCoordinate {
-                $0.route!.add(coordinate: Coordinate(first!.clLocationCoordinate), inTrack: $0.route!.startingPoint.track, graph: $0.graph!)
-            }
-        }
     })
+    
     mapView.disposables.append(state.i.map { $0.tracks }.observe { [unowned mapView] in
         mapView.unbox.removeOverlays(mapView.unbox.overlays)
         $0.forEach { track in
@@ -296,16 +223,16 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
             mapView.unbox.add(polygon)
         }
     })
+    
     mapView.bind(annotations: POI.all.map { poi in MKPointAnnotation(coordinate: poi.location, title: poi.name) }, visible: persistent[\.annotationsVisible])
+    
     func selectTrack(mapView: IBox<MKMapView>, sender: UITapGestureRecognizer) {
         let point = sender.location(ofTouch: 0, in: mapView.unbox)
         let mapPoint = MKMapPointForCoordinate(mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox))
         let possibilities = polygonToTrack.filter { (polygon, track) in
-            let renderer = mapView.unbox.renderer(for: polygon) as! MKPolygonRenderer
-            let point = renderer.point(for: mapPoint)
-            return renderer.path.contains(point)
+            polygon.boundingMapRect.contains(mapPoint)
         }
-        
+
         // in case of multiple matches, toggle between the selections, and start out with the smallest route
         if let s = state.i[\.selection].value ?? nil, possibilities.count > 1 && possibilities.values.contains(s) {
             state.change {
@@ -316,69 +243,60 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         }
     }
     
-    let waypoints: I<[Coordinate]> = state.i.map { $0.route?.wayPoints ?? [] }
-    let waypointAnnotations = waypoints.map { coordinates in
-        coordinates.map {
-            MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "")
+    do { // routing
+        let waypoints: I<[Coordinate]> = state.i.map { $0.route?.wayPoints ?? [] }
+        let waypointAnnotations = waypoints.map { coordinates in
+            coordinates.map {
+                MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "")
+            }
         }
-    }
-    mapView.bind(annotations: waypointAnnotations)
-    
-    
-    
-    let allPoints: I<[Coordinate]> = state.i.map { $0.route?.allPoints(tracks: $0.tracks).map { $0.coordinate } ?? [] }
-    let lines: I<[MKPolyline]> = allPoints.map {
-        if $0.isEmpty {
-            return []
-        } else {
-            let coords = $0.map { $0.clLocationCoordinate }
-            return [MKPolyline(coordinates: coords, count: coords.count)]
+        mapView.bind(annotations: waypointAnnotations)
+        
+        let allRoutePoints: I<[Coordinate]> = state.i.map { $0.route?.allPoints(tracks: $0.tracks).map { $0.coordinate } ?? [] }
+        let lines: I<[MKPolyline]> = allRoutePoints.map {
+            $0.isEmpty ? [] : [MKPolyline($0.map { $0.clLocationCoordinate })]
         }
-    }
-    mapView.bind(overlays: lines)
-    
-
-    
-//    mapView.observe(value: state.i.map { $0.route?.distance }, onChange: { print($1) })
-
-    func addWaypoint(mapView: IBox<MKMapView>, sender: UITapGestureRecognizer) {
-        let point = sender.location(in: mapView.unbox)
-        let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
-        let mapPoint = MKMapPointForCoordinate(coordinate)
+        mapView.bind(overlays: lines)
         
-        let region = MKCoordinateRegionMakeWithDistance(mapView.unbox.centerCoordinate, 1, 1)
-        let rect = mapView.unbox.convertRegion(region, toRectTo: mapView.unbox)
-        let meterPerPixel = Double(1/rect.width)
-        let tresholdPixels: Double = 40
-        let treshold = meterPerPixel*tresholdPixels
-        
-        let possibilities = polygonToTrack.filter { (polygon, track) in
-            polygon.boundingMapRect.contains(mapPoint)
-        }
-        
-        if let (track, segment) = possibilities.flatMap({ (_,track) in track.segment(closestTo: coordinate, maxDistance: treshold).map { (track, $0) }}).first {
-            state.change {
-                if let r = $0.route, r.startingPoint.coordinate.clLocationCoordinate.squaredDistanceApproximation(to: coordinate).squareRoot() < treshold {
-                    // close the route
-                    let endPoint = r.startingPoint.coordinate.clLocationCoordinate
-                    let segment = r.startingPoint.track.segment(closestTo: endPoint, maxDistance: treshold)!
-                    $0.addWayPoint(track: track, coordinate: r.startingPoint.coordinate.clLocationCoordinate, segment: segment)
-                } else {
-                    let pointOnSegment = coordinate.closestPointOn(segment: segment)
-                    $0.addWayPoint(track: track, coordinate: pointOnSegment, segment: segment)
+        func addWaypoint(mapView: IBox<MKMapView>, sender: UITapGestureRecognizer) {
+            let point = sender.location(in: mapView.unbox)
+            let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
+            let mapPoint = MKMapPointForCoordinate(coordinate)
+            
+            let region = MKCoordinateRegionMakeWithDistance(mapView.unbox.centerCoordinate, 1, 1)
+            let rect = mapView.unbox.convertRegion(region, toRectTo: mapView.unbox)
+            let meterPerPixel = Double(1/rect.width)
+            let tresholdPixels: Double = 40
+            let treshold = meterPerPixel*tresholdPixels
+            
+            let possibilities = polygonToTrack.filter { (polygon, track) in
+                polygon.boundingMapRect.contains(mapPoint)
+            }
+            
+            if let (track, segment) = possibilities.flatMap({ (_,track) in track.segment(closestTo: coordinate, maxDistance: treshold).map { (track, $0) }}).first {
+                state.change {
+                    if let r = $0.route, r.startingPoint.coordinate.clLocationCoordinate.squaredDistanceApproximation(to: coordinate).squareRoot() < treshold {
+                        // close the route
+                        let endPoint = r.startingPoint.coordinate.clLocationCoordinate
+                        let segment = r.startingPoint.track.segment(closestTo: endPoint, maxDistance: treshold)!
+                        $0.addWayPoint(track: track, coordinate: r.startingPoint.coordinate.clLocationCoordinate, segment: segment)
+                    } else {
+                        let pointOnSegment = coordinate.closestPointOn(segment: segment)
+                        $0.addWayPoint(track: track, coordinate: pointOnSegment, segment: segment)
+                    }
                 }
             }
         }
+        
+        
+        mapView.addGestureRecognizer(tapGestureRecognizer { [unowned mapView] sender in
+            if state.i.value.routing {
+                addWaypoint(mapView: mapView, sender: sender)
+            } else {
+                selectTrack(mapView: mapView, sender: sender)
+            }
+        })
     }
-    
-    
-    mapView.addGestureRecognizer(tapGestureRecognizer { [unowned mapView] sender in
-        if state.i.value.routing {
-            addWaypoint(mapView: mapView, sender: sender)
-        } else {
-            selectTrack(mapView: mapView, sender: sender)
-        }
-    })
     mapView.bind(persistent.i.map { $0.satellite ? .hybrid : .standard }, to: \.mapType)
 
     let draggedLocation = state.i.map { $0.draggedLocation }
