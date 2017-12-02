@@ -10,142 +10,6 @@ import UIKit
 import MapKit
 import Incremental
 
-struct StoredState: Equatable, Codable {
-    var annotationsVisible: Bool = false
-    var satellite: Bool = false
-    var showConfiguration: Bool = false
-
-    static func ==(lhs: StoredState, rhs: StoredState) -> Bool {
-        return lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite && lhs.showConfiguration == rhs.showConfiguration
-    }
-}
-
-struct Path: Equatable, Codable {
-    let entries: [Graph.Entry]
-    let distance: CLLocationDistance
-    
-    static func ==(lhs: Path, rhs: Path) -> Bool {
-        return lhs.entries == rhs.entries && lhs.distance == rhs.distance
-    }
-}
-
-struct CoordinateAndTrack: Equatable, Codable { // tuples aren't codable
-    static func ==(lhs: CoordinateAndTrack, rhs: CoordinateAndTrack) -> Bool {
-        return lhs.coordinate == rhs.coordinate && lhs.track == rhs.track && lhs.pathFromPrevious == rhs.pathFromPrevious
-    }
-    
-    let coordinate: Coordinate
-    let track: Track
-    var pathFromPrevious: Path?
-}
-
-
-extension DisplayState {
-    mutating func removeLastWayPoint() {
-        if let r = route, r.wayPoints.count > 1 {
-            route!.removeLastWaypoint()
-        } else {
-            route = nil
-        }
-    }
-    
-    mutating func addWayPoint(track: Track, coordinate c2d: CLLocationCoordinate2D, segment: Segment) {
-        guard graph != nil else { return }
-        
-        let coordinate = Coordinate(c2d)
-        assert(c2d.squaredDistance(to: segment).squareRoot() < 0.1)
-        
-        let segment0 = Coordinate(segment.0)
-        let segment1 = Coordinate(segment.1)
-        
-        func add(from: Coordinate, _ entry: Graph.Entry) {
-            graph!.add(from: from, entry)
-        }
-        add(from: coordinate, Graph.Entry(destination: segment0, distance: segment.0.squaredDistanceApproximation(to: c2d).squareRoot(), trackName: track.name))
-        add(from: coordinate, Graph.Entry(destination: segment1, distance: segment.1.squaredDistanceApproximation(to: c2d).squareRoot(), trackName: track.name))
-        
-        if let vertex = track.vertexAfter(coordinate: segment0, graph: graph!) {
-            add(from: segment0, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
-        } else {
-            print("error")
-        }
-        if let vertex = track.vertexBefore(coordinate: segment0, graph: graph!) {
-            add(from: segment0, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
-        } else {
-            print("error")
-        }
-        
-        if let vertex = track.vertexAfter(coordinate: segment1, graph: graph!) {
-            add(from: segment1, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
-        } else {
-            print("error")
-        }
-        if let vertex = track.vertexBefore(coordinate: segment1, graph: graph!) {
-            add(from: segment1, Graph.Entry(destination: vertex.0, distance: vertex.1, trackName: track.name))
-        } else {
-            print("error")
-        }
-        
-        
-        if route == nil {
-            route = Route(track: track, coordinate: coordinate)
-        } else {
-            route!.add(coordinate: coordinate, inTrack: track, graph: graph!)
-        }
-    }
-}
-
-struct DisplayState: Equatable, Codable {
-    var tracks: [Track]
-    var loading: Bool { return tracks.isEmpty }
-    
-    var routing: Bool = false
-    var route: Route?
-    
-    var selection: Track? {
-        didSet {
-            trackPosition = nil
-        }
-    }
-    
-    var graph: Graph?
-    var graphBuildingProgress: Float = 0
-
-    var hasSelection: Bool {
-        return routing == false && selection != nil
-    }
-
-    var trackPosition: CGFloat? // 0...1
-    
-    init(tracks: [Track]) {
-        selection = nil
-        trackPosition = nil
-        self.tracks = tracks
-    }
-    
-    var draggedLocation: (Double, CLLocation)? {
-        guard let track = selection,
-            let location = trackPosition else { return nil }
-        let distance = Double(location) * track.distance
-        guard let point = track.point(at: distance) else { return nil }
-        return (distance: distance, location: point)
-    }
-
-    static func ==(lhs: DisplayState, rhs: DisplayState) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.graph == rhs.graph && lhs.routing == rhs.routing && lhs.route == rhs.route && lhs.graphBuildingProgress == rhs.graphBuildingProgress
-    }
-}
-
-func uiSwitch(initial: I<Bool>, valueChange: @escaping (_ isOn: Bool) -> ()) -> IBox<UISwitch> {
-    let view = UISwitch()
-    let result = IBox(view)
-    result.handle(.valueChanged) { [unowned view] in
-        valueChange(view.isOn)
-    }
-    result.bind(initial, to: \.isOn)
-    return result
-}
-
 extension MKPolyline {
     convenience init(_ coords: [CLLocationCoordinate2D]) {
         self.init(coordinates: coords, count: coords.count)
@@ -230,7 +94,9 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         let point = sender.location(ofTouch: 0, in: mapView.unbox)
         let mapPoint = MKMapPointForCoordinate(mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox))
         let possibilities = polygonToTrack.filter { (polygon, track) in
-            polygon.boundingMapRect.contains(mapPoint)
+            let renderer = mapView.unbox.renderer(for: polygon) as! MKPolygonRenderer
+            let point = renderer.point(for: mapPoint)
+            return renderer.path.contains(point)
         }
 
         // in case of multiple matches, toggle between the selections, and start out with the smallest route
@@ -342,7 +208,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     func switchWith(label text: String, value: I<Bool>, textColor: I<UIColor>, action: @escaping (Bool) -> ()) -> IBox<UIView> {
         let switchLabel = label(text: I(constant: text), textColor: textColor.map { $0 }, font: I(constant: Stylesheet.smallFont) )
         switchLabel.unbox.textAlignment = .left
-        let switch_ = uiSwitch(initial: value, valueChange: action)
+        let switch_ = uiSwitch(value: value, valueChange: action)
         let stack = stackView(arrangedSubviews: [switch_.cast, switchLabel.cast], axis: .vertical)
         return stack.cast
     }

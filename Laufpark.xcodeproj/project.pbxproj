@@ -95,6 +95,8 @@
 		8340DFB11F61B40C002176C6 /* wabe rot-strecke 3.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA51F61B227002176C6 /* wabe rot-strecke 3.gpx */; };
 		8340DFB21F61B40C002176C6 /* wabe rot-strecke 4.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 8340DFA81F61B227002176C6 /* wabe rot-strecke 4.gpx */; };
 		8353F57B1FCF38E5007A132A /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8353F57A1FCF38E5007A132A /* ProgressIndicator.swift */; };
+		8358C6901FD29F3F005A257D /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8358C68F1FD29F3F005A257D /* State.swift */; };
+		8358C6921FD29F82005A257D /* Switch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8358C6911FD29F82005A257D /* Switch.swift */; };
 		8379CF291FB83D01009CD00F /* Model+MapKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF281FB83D01009CD00F /* Model+MapKit.swift */; };
 		8379CF311FB83E04009CD00F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF301FB83E04009CD00F /* AppDelegate.swift */; };
 		8379CF331FB83E04009CD00F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8379CF321FB83E04009CD00F /* Assets.xcassets */; };
@@ -394,6 +396,8 @@
 		8340DFAD1F61B2F6002176C6 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		834CE82B1F796D3500785B16 /* iOSPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = iOSPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		8353F57A1FCF38E5007A132A /* ProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
+		8358C68F1FD29F3F005A257D /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
+		8358C6911FD29F82005A257D /* Switch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Switch.swift; sourceTree = "<group>"; };
 		8379CF281FB83D01009CD00F /* Model+MapKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+MapKit.swift"; sourceTree = "<group>"; };
 		8379CF2E1FB83E04009CD00F /* GPXPreprocessing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPXPreprocessing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8379CF301FB83E04009CD00F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -540,6 +544,7 @@
 				83099ADE1F630FC100D3EBB8 /* LineView.swift */,
 				8306185A1F6E765300F70583 /* Views.swift */,
 				83354DA11F6FEA5700F3C33A /* Helpers.swift */,
+				8358C68F1FD29F3F005A257D /* State.swift */,
 			);
 			path = Laufpark;
 			sourceTree = "<group>";
@@ -724,6 +729,7 @@
 				8384EC5F1F8288FD003AAC56 /* NavigationController.swift */,
 				830E62E61F9799F400046F5B /* MapView.swift */,
 				8353F57A1FCF38E5007A132A /* ProgressIndicator.swift */,
+				8358C6911FD29F82005A257D /* Switch.swift */,
 			);
 			path = "Incremental+UIKit";
 			sourceTree = "<group>";
@@ -1152,6 +1158,7 @@
 				8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */,
 				83354DA21F6FEA5700F3C33A /* Helpers.swift in Sources */,
 				83099ADF1F630FC100D3EBB8 /* LineView.swift in Sources */,
+				8358C6901FD29F3F005A257D /* State.swift in Sources */,
 				8306185B1F6E765300F70583 /* Views.swift in Sources */,
 				8340DF961F61B1F8002176C6 /* ViewController.swift in Sources */,
 				838C765F1FC182A700EB13F1 /* Routing.swift in Sources */,
@@ -1196,6 +1203,7 @@
 				83FC897D1F7B871F0020EED6 /* Button.swift in Sources */,
 				83FC897F1F7B87480020EED6 /* Label.swift in Sources */,
 				83FC897B1F7B86D90020EED6 /* StackView.swift in Sources */,
+				8358C6921FD29F82005A257D /* Switch.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
