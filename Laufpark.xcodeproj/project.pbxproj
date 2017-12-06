@@ -411,7 +411,6 @@
 		837A8AB91F72DACB00ED898C /* IncrementalArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalArray.swift; sourceTree = "<group>"; };
 		8384EC5F1F8288FD003AAC56 /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		838C765E1FC182A700EB13F1 /* Routing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routing.swift; sourceTree = "<group>"; };
-		838C76761FC1845600EB13F1 /* KDTree copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "KDTree copy-Info.plist"; path = "/Users/chris/Development/Swift/Laufpark/KDTree copy-Info.plist"; sourceTree = "<absolute>"; };
 		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
 		83B0824F1F63052D004070DA /* Incremental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incremental.swift; sourceTree = "<group>"; };
 		83B082511F630835004070DA /* MacPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MacPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -513,7 +512,6 @@
 				8340DF911F61B1F8002176C6 /* Products */,
 				8340DFAA1F61B2C5002176C6 /* Frameworks */,
 				83C0FAFE1F74F5060041A802 /* Incremental copy-Info.plist */,
-				838C76761FC1845600EB13F1 /* KDTree copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};
