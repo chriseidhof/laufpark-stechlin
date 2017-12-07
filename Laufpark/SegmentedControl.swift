@@ -62,20 +62,42 @@ func segmentedControl(segments: I<[SegmentedControl.Segment]>, value: I<Int>, te
     return c
 }
 
-func segment(_ image: UIImage, title: String, textColor: UIColor, size: CGSize) -> UIView {
-    let view = UIView(frame: CGRect(x: 0, y: 0, width: size.width, height: size.height))
-    let imageView = UIImageView(image: image)
-    let label = UILabel()
+final class SegmentView: UIView {
+    var label: UILabel = UILabel()
+    var imageView = UIImageView()
+    var textColor: UIColor {
+        get { return label.textColor }
+        set {
+            label.textColor = newValue
+            imageView.tintColor = newValue
+        }
+    }
+    var size: CGSize = .zero
+    
+    override var intrinsicContentSize: CGSize {
+        return size
+    }
+}
+
+func segment(_ image: UIImage, title: String, textColor: UIColor, size: CGSize) -> SegmentView {
+    let view = SegmentView(frame: CGRect(x: 0, y: 0, width: size.width, height: size.height))
+    view.size = size
+    let imageView = view.imageView
+    imageView.image = image
+    let label = view.label
     label.text = title.uppercased()
     label.font = .preferredFont(forTextStyle: .caption1)
     label.textColor = textColor
     view.addSubview(imageView)
     view.addSubview(label)
+    view.label = label
     
-    imageView.frame.alignTo(horizontal: .center, vertical: .top, of: view.frame)
+    imageView.frame = image.size.align(horizontal: .center, vertical: .top, in: view.frame)
     label.frame = label.intrinsicContentSize.align(horizontal: .center, vertical: .bottom, in: view.frame)
     return view
 }
+
+let segmentSize = CGSize(width: 46, height: 55)
 
 public final class SegmentedControl: UIControl {
     public struct Segment: Equatable {
@@ -93,7 +115,6 @@ public final class SegmentedControl: UIControl {
             sendActions(for: .valueChanged)
         }
     }
-    let segmentSize = CGSize(width: 46, height: 55)
     let indicatorSpacing: CGFloat = 3
     let indicatorHeight: CGFloat = 2
     let spacing: CGFloat = 20

@@ -234,6 +234,20 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         }
     })
     
+    func headerButton(title: String, image: UIImage, color: I<UIColor>, action: @escaping () -> ()) -> IBox<UIView> {
+        let button = IBox(segment(image.withRenderingMode(.alwaysTemplate), title: title, textColor: color.value, size: CGSize(width: 55, height: 55))) //todo fix for color scheme change)
+        button.unbox.isUserInteractionEnabled = true
+        button.bind(color, to: \.textColor)
+        button.addGestureRecognizer(tapGestureRecognizer { _ in
+            action()
+        })
+        return button.cast
+    }
+    
+    let routeColor = if_(state[\.routing], then: I(constant: Stylesheet.blue), else: textColor)
+    let routeButton = headerButton(title: "Strecke", image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }}
+    let closeButton = headerButton(title: "Schließen", image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } })
+    
     let selectionColor = state.i[\.selection].map { $0?.color.uiColor } ?? if_(persistent.i.map { $0.satellite }, then: UIColor.white, else: .black)
     
     func border() -> IBox<UIView> {
@@ -249,7 +263,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     func blurredView<V: UIView>(borderAnchor: @escaping Constraint, child: IBox<V>, inset: CGFloat = 10) -> IBox<UIVisualEffectView> {
         let result = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
         result.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), borderAnchor])
-        result.addSubview(child, path: \.contentView, constraints: [equal(\.leftAnchor, constant: I(constant: -inset)), equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: I(constant: -inset)), equal(\.rightAnchor, constant: I(constant: inset))])        
+        result.addSubview(child, path: \.contentView, constraints: [equal(\.leftAnchor, constant: I(constant: -inset)), equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: I(constant: -inset)), equal(\.rightAnchor, constant: I(constant: inset))])
         return result
     }
     
@@ -258,14 +272,15 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     let blurredTopViewHeight: CGFloat = 140
     let topOffset: I<CGFloat> = if_(persistent.i[\.showConfiguration], then: 0, else: blurredTopViewHeight + 1)
     
-    let topStackview = stackView(arrangedSubviews: [/*accomodation.cast, */ satellite.cast], axis: .horizontal)
-    let topView = blurredView(borderAnchor: equal(\.bottomAnchor), child: topStackview, inset: 25)
+    let topStackview = stackView(arrangedSubviews: [/*accomodation.cast, */ satellite.cast, routeButton.cast, closeButton.cast], axis: .horizontal)
+    let topContainr = IBox(UIView())
+    topContainr.addSubview(topStackview, constraints: [equal(\.topAnchor), equal(\.rightAnchor), equal(\.leftAnchor), equal(\.bottomAnchor)])
+    let topView = blurredView(borderAnchor: equal(\.bottomAnchor), child: topContainr, inset: 25)
     
     rootView.addSubview(topView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equal(\.topAnchor, constant: topOffset, animation: Stylesheet.dampingAnimation), equalTo(constant: I(constant: blurredTopViewHeight), \.heightAnchor)])
-
-    topStackview.unbox.alignment = .leading
-    topStackview.unbox.distribution = .fillProportionally
     
+    topStackview.unbox.alignment = .top
+    topStackview.unbox.distribution = .equalSpacing
     
     // Blurred Bottom View (Showing the current track)
     let bottomView = blurredView(borderAnchor: equal(\.topAnchor), child: trackInfo)
@@ -301,6 +316,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
             }
         }
         let routingInfo = label(text: routeInfo, textColor: textColor.map { $0 })
+        routingInfo.unbox.adjustsFontSizeToFitWidth = true
         let removeLastWayPointButton = button(title: I(constant: "↩️"), backgroundColor: I(constant: .clear)) { state.change {
             $0.removeLastWayPoint()
         }}
@@ -334,22 +350,26 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     })
     toggleMapButton.unbox.layer.cornerRadius = 3
     rootView.addSubview(toggleMapButton.cast, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -inset), equal(\.trailingAnchor, 10)])
+    toggleMapButton.bind(persistent.i.map { $0.showConfiguration }, to: \.hidden)
+    toggleMapButton.unbox.widthAnchor.constraint(equalToConstant: 40).isActive = true
+    toggleMapButton.unbox.heightAnchor.constraint(equalToConstant: 40).isActive = true
+	
     
-    // Toggle Routing Button
-    let toggleRoutingButton = button(type: .custom, title: I(constant: "Route"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: {
-        state.change {
-            if $0.routing {
-                $0.routing = false
-                $0.route = nil
-            } else {
-                $0.routing = true
-                $0.selection = nil
-            }
-        }
-    })
-    toggleRoutingButton.unbox.layer.cornerRadius = 3
-    // todo: the layout is a bit of a hack.
-    rootView.addSubview(toggleRoutingButton.cast, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -(inset + 50)), equal(\.trailingAnchor, 10)])
+//    // Toggle Routing Button
+//    let toggleRoutingButton = button(type: .custom, title: I(constant: "Route"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: {
+//        state.change {
+//            if $0.routing {
+//                $0.routing = false
+//                $0.route = nil
+//            } else {
+//                $0.routing = true
+//                $0.selection = nil
+//            }
+//        }
+//    })
+//    toggleRoutingButton.unbox.layer.cornerRadius = 3
+//    // todo: the layout is a bit of a hack.
+//    rootView.addSubview(toggleRoutingButton.cast, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -(inset + 50)), equal(\.trailingAnchor, 10)])
     
     return setMapRect
 }
@@ -379,13 +399,8 @@ class ViewController: UIViewController {
             if newValue.routing && newValue.graph == nil && !alreadyBuilding {
                 alreadyBuilding = true
                 DispatchQueue(label: "graph builder").async {
-                    let simplifiedTracks = newValue.tracks.map { (track: Track) -> Track in
-                        var copy = track
-                        copy.coordinates = track.coordinates.douglasPeucker(coordinate: { $0.coordinate.clLocationCoordinate }, squaredEpsilonInMeters: epsilon*epsilon)
-                        return copy
-                    }
 
-                    let graph = time { buildGraph(tracks: simplifiedTracks, url: self.graphURL, progress: { p in
+                    let graph = time { buildGraph(tracks: newValue.tracks, url: self.graphURL, progress: { p in
                         DispatchQueue.main.async {
                             self.state.change { $0.graphBuildingProgress = p }
                         }
@@ -427,7 +442,7 @@ class ViewController: UIViewController {
 }
 
 extension String {
-    static let tapAnyWhereToStart = "Tap anywhere to start" // todo localize
-    static let route = "Create a Route" // todo localize
-    static let loadingGraph = "Loading..."
+    static let tapAnyWhereToStart = "Tippe auf die Karte um einen Startpunkt festzulegen" // todo localize
+//    static let route = "Create a Route" // todo localize
+    static let loadingGraph = "Laden..." // todo localize
 }

@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 
 struct StoredState: Equatable, Codable {
-    var annotationsVisible: Bool = true
+    var annotationsVisible: Bool = false
     var satellite: Bool = false
     var showConfiguration: Bool = false
     
@@ -98,7 +98,15 @@ struct DisplayState: Equatable, Codable {
     var tracks: [Track]
     var loading: Bool { return tracks.isEmpty }
     
-    var routing: Bool = false
+    var routing: Bool = false {
+        didSet {
+            if routing {
+                selection = nil
+            } else {
+                route = nil
+            }
+        }
+    }
     var route: Route?
     
     var selection: Track? {

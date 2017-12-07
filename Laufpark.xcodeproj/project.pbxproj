@@ -191,6 +191,9 @@
 		8384EC601F8288FD003AAC56 /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8384EC5F1F8288FD003AAC56 /* NavigationController.swift */; };
 		838C765F1FC182A700EB13F1 /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838C765E1FC182A700EB13F1 /* Routing.swift */; };
 		838C76601FC1837B00EB13F1 /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838C765E1FC182A700EB13F1 /* Routing.swift */; };
+		83B018191FD9D0520079D08F /* btn_route@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B018181FD9D0520079D08F /* btn_route@2x.png */; };
+		83B0181B1FD9D4320079D08F /* btn_close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B0181A1FD9D4320079D08F /* btn_close@2x.png */; };
+		83B0181D1FD9DAAC0079D08F /* credits.txt in Resources */ = {isa = PBXBuildFile; fileRef = 83B0181C1FD9DAAC0079D08F /* credits.txt */; };
 		83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824D1F6302DF004070DA /* Model+UIKit.swift */; };
 		83B2A26C1F692CFA00A6D9F9 /* Incremental.h in Headers */ = {isa = PBXBuildFile; fileRef = 83B2A26A1F692CFA00A6D9F9 /* Incremental.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83B2A26F1F692CFA00A6D9F9 /* Incremental.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; };
@@ -414,6 +417,9 @@
 		837A8AB91F72DACB00ED898C /* IncrementalArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalArray.swift; sourceTree = "<group>"; };
 		8384EC5F1F8288FD003AAC56 /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		838C765E1FC182A700EB13F1 /* Routing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routing.swift; sourceTree = "<group>"; };
+		83B018181FD9D0520079D08F /* btn_route@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_route@2x.png"; sourceTree = "<group>"; };
+		83B0181A1FD9D4320079D08F /* btn_close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_close@2x.png"; sourceTree = "<group>"; };
+		83B0181C1FD9DAAC0079D08F /* credits.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = credits.txt; sourceTree = "<group>"; };
 		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
 		83B0824F1F63052D004070DA /* Incremental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incremental.swift; sourceTree = "<group>"; };
 		83B082511F630835004070DA /* MacPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MacPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -537,6 +543,8 @@
 		8340DF921F61B1F8002176C6 /* Laufpark */ = {
 			isa = PBXGroup;
 			children = (
+				83B0181A1FD9D4320079D08F /* btn_close@2x.png */,
+				83B018181FD9D0520079D08F /* btn_route@2x.png */,
 				834004E71F7BBDB70035984B /* partner.png */,
 				83B998281F7274C7007200D2 /* map.png */,
 				83B9982A1F7275B2007200D2 /* map@2x.png */,
@@ -552,6 +560,7 @@
 				8306185A1F6E765300F70583 /* Views.swift */,
 				83354DA11F6FEA5700F3C33A /* Helpers.swift */,
 				83CA5A781FD845BF00AC1840 /* SegmentedControl.swift */,
+				83B0181C1FD9DAAC0079D08F /* credits.txt */,
 			);
 			path = Laufpark;
 			sourceTree = "<group>";
@@ -973,6 +982,7 @@
 				8340794A1F626EC600BC7C98 /* wabe hellblau-strecke 3.gpx in Resources */,
 				8340795B1F626EC600BC7C98 /* wabe rosa-strecke 6.gpx in Resources */,
 				834078FA1F626A2600BC7C98 /* wabe hellgruen-strecke 4.gpx in Resources */,
+				83B0181B1FD9D4320079D08F /* btn_close@2x.png in Resources */,
 				83099AF51F63CD7900D3EBB8 /* wabe rot-strecke 0.gpx in Resources */,
 				834079121F626B2300BC7C98 /* wabe lila-strecke 2.gpx in Resources */,
 				834079151F626B2300BC7C98 /* wabe violett-strecke 2.gpx in Resources */,
@@ -1000,6 +1010,7 @@
 				834079101F626B2300BC7C98 /* wabe gruen-strecke 4.gpx in Resources */,
 				834079471F626EC600BC7C98 /* wabe grau-strecke 0.gpx in Resources */,
 				834079481F626EC600BC7C98 /* wabe hellblau-strecke 1.gpx in Resources */,
+				83B0181D1FD9DAAC0079D08F /* credits.txt in Resources */,
 				834079131F626B2300BC7C98 /* wabe lila-strecke 3.gpx in Resources */,
 				8340794F1F626EC600BC7C98 /* wabe hellbraun-strecke 4.gpx in Resources */,
 				8340DFB01F61B40C002176C6 /* wabe rot-strecke 2.gpx in Resources */,
@@ -1035,6 +1046,7 @@
 				834079521F626EC600BC7C98 /* wabe pink-strecke 1.gpx in Resources */,
 				834079451F626EC600BC7C98 /* wabe gelb-strecke 3.gpx in Resources */,
 				8340793E1F626EC600BC7C98 /* wabe blau-strecke 3.gpx in Resources */,
+				83B018191FD9D0520079D08F /* btn_route@2x.png in Resources */,
 				834079551F626EC600BC7C98 /* wabe pink-strecke 4.gpx in Resources */,
 				83CA5A7D1FD846D900AC1840 /* btn_satellite.png in Resources */,
 				83099AF11F63CD7900D3EBB8 /* wabe hellbraun-strecke 0.gpx in Resources */,
