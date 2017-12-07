@@ -21,22 +21,6 @@ enum VerticalAlignment {
     case bottom
 }
 
-func segmentedControl(segments: I<[SegmentedControl.Segment]>, value: I<Int>, textColor: I<UIColor>, selectedTextColor: I<UIColor>, onChange: @escaping (Int) -> ()) -> IBox<SegmentedControl> {
-    let c = IBox(SegmentedControl())
-    c.bind(segments, to: \SegmentedControl.segments)
-    c.bind(textColor, to: \.textColor)
-    c.bind(selectedTextColor, to: \.selectedTextColor)
-    c.observe(value: value) { (c, v) in
-        c.selectedSegmentIndex = v
-    }
-    let ta = TargetAction { [unowned c] in
-        onChange(c.unbox.selectedSegmentIndex!)
-    }
-    c.unbox.addTarget(ta, action: #selector(TargetAction.action(_:)), for: .valueChanged)
-    c.disposables.append(ta)
-    return c
-}
-
 extension CGSize {
     func align(horizontal: HorizontalAlignment = .left, vertical: VerticalAlignment = .top, in frame: CGRect) -> CGRect {
         var result = CGRect(origin: .zero, size: self)
@@ -61,6 +45,23 @@ extension CGRect {
     }
 }
 
+
+func segmentedControl(segments: I<[SegmentedControl.Segment]>, value: I<Int>, textColor: I<UIColor>, selectedTextColor: I<UIColor>, onChange: @escaping (Int) -> ()) -> IBox<SegmentedControl> {
+    let c = IBox(SegmentedControl())
+    c.bind(segments, to: \SegmentedControl.segments)
+    c.bind(textColor, to: \.textColor)
+    c.bind(selectedTextColor, to: \.selectedTextColor)
+    c.observe(value: value) { (c, v) in
+        c.selectedSegmentIndex = v
+    }
+    let ta = TargetAction { [unowned c] in
+        onChange(c.unbox.selectedSegmentIndex!)
+    }
+    c.unbox.addTarget(ta, action: #selector(TargetAction.action(_:)), for: .valueChanged)
+    c.disposables.append(ta)
+    return c
+}
+
 func segment(_ image: UIImage, title: String, textColor: UIColor, size: CGSize) -> UIView {
     let view = UIView(frame: CGRect(x: 0, y: 0, width: size.width, height: size.height))
     let imageView = UIImageView(image: image)
@@ -71,7 +72,7 @@ func segment(_ image: UIImage, title: String, textColor: UIColor, size: CGSize) 
     view.addSubview(imageView)
     view.addSubview(label)
     
-    imageView.frame = image.size.align(horizontal: .center, vertical: .top, in: view.frame)
+    imageView.frame.alignTo(horizontal: .center, vertical: .top, of: view.frame)
     label.frame = label.intrinsicContentSize.align(horizontal: .center, vertical: .bottom, in: view.frame)
     return view
 }
