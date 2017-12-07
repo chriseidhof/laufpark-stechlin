@@ -38,6 +38,10 @@ public func ??<A: Equatable>(l: I<A?>, r: A) -> I<A> {
     return l.map { $0 ?? r }
 }
 
+public func ??<A: Equatable>(l: I<A?>, r: I<A>) -> I<A> {
+    return l.zip2(r, { $0 ?? $1 })
+}
+
 public prefix func !(l: I<Bool>) -> I<Bool> {
     return l.map { !$0 }
 }

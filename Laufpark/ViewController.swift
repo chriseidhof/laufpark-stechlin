@@ -30,8 +30,8 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         return polygonRenderer(polygon: polygon,
                                strokeColor: I(constant: lineColor),
                                fillColor: fillColor.map { $0 },
-                               alpha: if_(shouldHighlight, then: I(constant: 1.0), else: if_(darkMode, then: 0.7, else: 1.0)),
-                               lineWidth: if_(shouldHighlight, then: I(constant: 3.0), else: if_(darkMode, then: 1.0, else: 1.0)))
+                               alpha: I(constant: 1.0),
+                               lineWidth: if_(shouldHighlight, then: 3.0, else: 1.0))
     }
     
     let mapView: IBox<MKMapView> = newMapView()
@@ -214,27 +214,39 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     }
     
     let textColor = darkMode.map { $0 ? UIColor.white : .black }
+    let diminishedTextColor = darkMode.map { $0 ? UIColor.lightGray : .darkGray }
     
     // Configuration View
-    let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), value: persistent[\.annotationsVisible], textColor: textColor, action: { value in persistent.change {
-        $0.annotationsVisible = value
-        }})
-    let satellite = switchWith(label: NSLocalizedString("Satellit", comment: ""), value: persistent[\.satellite], textColor: textColor, action: { value in persistent.change {
-        $0.satellite = value
-        }})
+//    let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), value: persistent[\.annotationsVisible], textColor: textColor, action: { value in persistent.change {
+//        $0.annotationsVisible = value
+//        }})
+//    let satellite = switchWith(label: NSLocalizedString("Satellit", comment: ""), value: persistent[\.satellite], textColor: textColor, action: { value in persistent.change {
+//        $0.satellite = value
+//        }})
     
+    // todo localize
+    
+    
+    let satelliteValue = persistent.i.map { $0.satellite ? 1 : 0 }
+    let satellite = segmentedControl(segments: I(constant: [.init(image: #imageLiteral(resourceName: "btn_map.png"), title: "Karte"), .init(image: #imageLiteral(resourceName: "btn_satellite.png"), title: "Satellit")]), value: satelliteValue, textColor: diminishedTextColor, selectedTextColor: textColor, onChange: { value in
+        persistent.change {
+            $0.satellite = value == 1
+        }
+    })
+    
+    let selectionColor = state.i[\.selection].map { $0?.color.uiColor } ?? if_(persistent.i.map { $0.satellite }, then: UIColor.white, else: .black)
     
     func border() -> IBox<UIView> {
         let _border = UIView()
         _border.heightAnchor.constraint(equalToConstant: 1).isActive = true
         let border = IBox(_border)
-        border.bind(state.i[\.selection].map { $0?.color.uiColor ?? .white }, to: \.backgroundColor)
+        border.bind(selectionColor, to: \.backgroundColor)
         return border
     }
     
     let inset: CGFloat = 10
 
-    func blurredView<V: UIView>(borderAnchor: @escaping Constraint, child: IBox<V>) -> IBox<UIVisualEffectView> {
+    func blurredView<V: UIView>(borderAnchor: @escaping Constraint, child: IBox<V>, inset: CGFloat = 10) -> IBox<UIVisualEffectView> {
         let result = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
         result.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), borderAnchor])
         result.addSubview(child, path: \.contentView, constraints: [equal(\.leftAnchor, constant: I(constant: -inset)), equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: I(constant: -inset)), equal(\.rightAnchor, constant: I(constant: inset))])        
@@ -243,12 +255,13 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     
     
     // Blurred Top View (Configuration)
-    let topOffset: I<CGFloat> = if_(persistent.i[\.showConfiguration], then: 0, else: 100 + 1)
+    let blurredTopViewHeight: CGFloat = 140
+    let topOffset: I<CGFloat> = if_(persistent.i[\.showConfiguration], then: 0, else: blurredTopViewHeight + 1)
     
-    let topStackview = stackView(arrangedSubviews: [accomodation, satellite], axis: .horizontal)
-    let topView = blurredView(borderAnchor: equal(\.bottomAnchor), child: topStackview)
+    let topStackview = stackView(arrangedSubviews: [/*accomodation.cast, */ satellite.cast], axis: .horizontal)
+    let topView = blurredView(borderAnchor: equal(\.bottomAnchor), child: topStackview, inset: 25)
     
-    rootView.addSubview(topView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equal(\.topAnchor, constant: topOffset, animation: Stylesheet.dampingAnimation), equalTo(constant: I(constant: 100), \.heightAnchor)])
+    rootView.addSubview(topView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equal(\.topAnchor, constant: topOffset, animation: Stylesheet.dampingAnimation), equalTo(constant: I(constant: blurredTopViewHeight), \.heightAnchor)])
 
     topStackview.unbox.alignment = .leading
     topStackview.unbox.distribution = .fillProportionally
@@ -295,13 +308,16 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         removeLastWayPointButton.bind(!routeHasWaypoints, to: \.hidden)
         let infoStack = stackView(arrangedSubviews: [routingInfo.cast, removeLastWayPointButton.cast], axis: .horizontal)
         let progress = progressView(progress: state[\.graphBuildingProgress])
+//        progress.unbox.heightAnchor.constraint(equalToConstant: 1)
         let hasGraph = state.i.map { $0.graph != nil }
         progress.bind(hasGraph, to: \.hidden)
         let routingStack = stackView(arrangedSubviews: [infoStack.cast, progress.cast])
         let bottomRoutingView = blurredView(borderAnchor: equal(\.topAnchor), child: routingStack)
-        let bottomRoutingOffset: I<CGFloat> = if_(state.i[\.routing], then: 0, else: -50)
+        
+        let bottomHeight: I<CGFloat> = if_(hasGraph, then: 50, else: 70)
+        let bottomRoutingOffset: I<CGFloat> = if_(state.i[\.routing], then: I(constant: 0), else: -bottomHeight)
 
-        rootView.addSubview(bottomRoutingView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: I(constant: 50), \.heightAnchor), equal(\.bottomAnchor, constant: bottomRoutingOffset, animation: Stylesheet.dampingAnimation)])
+        rootView.addSubview(bottomRoutingView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: bottomHeight, \.heightAnchor), equal(\.bottomAnchor, constant: bottomRoutingOffset, animation: Stylesheet.dampingAnimation)])
         rootView.observe(value: state[\.graphBuildingProgress], onChange: { print($1) })
     }
 
@@ -310,6 +326,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     let isLoading = state[\.loading] || (state[\.routing] && (state.i.map { $0.graph } == nil))
     let loadingIndicator = activityIndicator(style: darkMode.map { $0 ? .gray : .white }, animating: isLoading)
     rootView.addSubview(loadingIndicator, constraints: [equal(\.centerXAnchor), equal(\.centerXAnchor)])
+    
     
     // Toggle Map Button
     let toggleMapButton = button(type: .custom, title: I(constant: "…"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: {
@@ -362,7 +379,13 @@ class ViewController: UIViewController {
             if newValue.routing && newValue.graph == nil && !alreadyBuilding {
                 alreadyBuilding = true
                 DispatchQueue(label: "graph builder").async {
-                    let graph = time { buildGraph(tracks: newValue.tracks, url: self.graphURL, progress: { p in
+                    let simplifiedTracks = newValue.tracks.map { (track: Track) -> Track in
+                        var copy = track
+                        copy.coordinates = track.coordinates.douglasPeucker(coordinate: { $0.coordinate.clLocationCoordinate }, squaredEpsilonInMeters: epsilon*epsilon)
+                        return copy
+                    }
+
+                    let graph = time { buildGraph(tracks: simplifiedTracks, url: self.graphURL, progress: { p in
                         DispatchQueue.main.async {
                             self.state.change { $0.graphBuildingProgress = p }
                         }

@@ -206,6 +206,9 @@
 		83C0FB111F74F53C0041A802 /* IncrementalStdLib.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC93D41F7154050034E3B2 /* IncrementalStdLib.swift */; };
 		83C0FB121F74F53C0041A802 /* IncrementalArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 837A8AB91F72DACB00ED898C /* IncrementalArray.swift */; };
 		83C0FB141F74F5890041A802 /* Incremental+UIGestureRecognizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83C0FB131F74F5890041A802 /* Incremental+UIGestureRecognizer.swift */; };
+		83CA5A791FD845BF00AC1840 /* SegmentedControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CA5A781FD845BF00AC1840 /* SegmentedControl.swift */; };
+		83CA5A7C1FD846D900AC1840 /* btn_map.png in Resources */ = {isa = PBXBuildFile; fileRef = 83CA5A7A1FD846D900AC1840 /* btn_map.png */; };
+		83CA5A7D1FD846D900AC1840 /* btn_satellite.png in Resources */ = {isa = PBXBuildFile; fileRef = 83CA5A7B1FD846D900AC1840 /* btn_satellite.png */; };
 		83CC2E2B1F8E3B3C00F4302B /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC2E2A1F8E3B3C00F4302B /* AppDelegate.swift */; };
 		83CC2E321F8E3B3D00F4302B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83CC2E311F8E3B3D00F4302B /* Assets.xcassets */; };
 		83CC2E351F8E3B3D00F4302B /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 83CC2E331F8E3B3D00F4302B /* LaunchScreen.storyboard */; };
@@ -424,6 +427,9 @@
 		83C0FB061F74F5280041A802 /* Incremental_Mac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Incremental_Mac.h; sourceTree = "<group>"; };
 		83C0FB071F74F5280041A802 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83C0FB131F74F5890041A802 /* Incremental+UIGestureRecognizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Incremental+UIGestureRecognizer.swift"; sourceTree = "<group>"; };
+		83CA5A781FD845BF00AC1840 /* SegmentedControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SegmentedControl.swift; sourceTree = "<group>"; };
+		83CA5A7A1FD846D900AC1840 /* btn_map.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_map.png; sourceTree = "<group>"; };
+		83CA5A7B1FD846D900AC1840 /* btn_satellite.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = btn_satellite.png; sourceTree = "<group>"; };
 		83CC2E281F8E3B3C00F4302B /* Todos.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Todos.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		83CC2E2A1F8E3B3C00F4302B /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		83CC2E311F8E3B3D00F4302B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -535,14 +541,17 @@
 				83B998281F7274C7007200D2 /* map.png */,
 				83B9982A1F7275B2007200D2 /* map@2x.png */,
 				834004E61F7BB4930035984B /* Icon@3x.png */,
+				83CA5A7A1FD846D900AC1840 /* btn_map.png */,
+				83CA5A7B1FD846D900AC1840 /* btn_satellite.png */,
 				8340DF931F61B1F8002176C6 /* AppDelegate.swift */,
+				8358C68F1FD29F3F005A257D /* State.swift */,
 				8340DF951F61B1F8002176C6 /* ViewController.swift */,
 				8340DF9A1F61B1F8002176C6 /* Assets.xcassets */,
 				8340DF9F1F61B1F8002176C6 /* Info.plist */,
 				83099ADE1F630FC100D3EBB8 /* LineView.swift */,
 				8306185A1F6E765300F70583 /* Views.swift */,
 				83354DA11F6FEA5700F3C33A /* Helpers.swift */,
-				8358C68F1FD29F3F005A257D /* State.swift */,
+				83CA5A781FD845BF00AC1840 /* SegmentedControl.swift */,
 			);
 			path = Laufpark;
 			sourceTree = "<group>";
@@ -1027,7 +1036,9 @@
 				834079451F626EC600BC7C98 /* wabe gelb-strecke 3.gpx in Resources */,
 				8340793E1F626EC600BC7C98 /* wabe blau-strecke 3.gpx in Resources */,
 				834079551F626EC600BC7C98 /* wabe pink-strecke 4.gpx in Resources */,
+				83CA5A7D1FD846D900AC1840 /* btn_satellite.png in Resources */,
 				83099AF11F63CD7900D3EBB8 /* wabe hellbraun-strecke 0.gpx in Resources */,
+				83CA5A7C1FD846D900AC1840 /* btn_map.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1155,6 +1166,7 @@
 			files = (
 				8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */,
 				83354DA21F6FEA5700F3C33A /* Helpers.swift in Sources */,
+				83CA5A791FD845BF00AC1840 /* SegmentedControl.swift in Sources */,
 				83099ADF1F630FC100D3EBB8 /* LineView.swift in Sources */,
 				8358C6901FD29F3F005A257D /* State.swift in Sources */,
 				8306185B1F6E765300F70583 /* Views.swift in Sources */,

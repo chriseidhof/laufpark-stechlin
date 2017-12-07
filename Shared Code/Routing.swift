@@ -353,7 +353,9 @@ struct Graph: Codable, Equatable {
 }
 
 extension Graph {
+    /// Dijkstra's shortest path.
     func shortestPath(from source: Coordinate, to target: Coordinate) -> (path: [Entry], distance: CLLocationDistance)? {
+        // TODO experiment with a faster implementation, this is the "naive" impl straight from wikipedia.
         var known: Set<Coordinate> = []
         var distances: [Coordinate:(path: [Entry], distance: CLLocationDistance)] = [:]
         for edge in edges(from: source) {

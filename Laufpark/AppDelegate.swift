@@ -12,11 +12,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window?.rootViewController = mapViewController
         window?.makeKeyAndVisible()
         DispatchQueue(label: "Track Loading").async {
-            let tracks = Track.load().map { (track: Track) -> Track in
-                var copy = track
-                copy.coordinates = track.coordinates.douglasPeucker(coordinate: { $0.coordinate.clLocationCoordinate }, squaredEpsilonInMeters: epsilon*epsilon)
-                return copy
-            }
+            let tracks = Track.load()
             DispatchQueue.main.async {
                 self.mapViewController?.setTracks(tracks)
             }
