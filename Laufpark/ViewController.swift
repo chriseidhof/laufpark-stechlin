@@ -26,7 +26,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         let isSelected = state.i[\.selection].map { $0 == track }
         let shouldHighlight = !state.i[\.hasSelection] || isSelected
         let lineColor = polygonToTrack[polygon]!.color.uiColor
-        let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.2), else: lineColor.withAlphaComponent(0.1))
+        let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.4), else: lineColor.withAlphaComponent(0.3))
         return polygonRenderer(polygon: polygon,
                                strokeColor: I(constant: lineColor),
                                fillColor: fillColor.map { $0 },
@@ -214,7 +214,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     }
     
     let textColor = darkMode.map { $0 ? UIColor.white : .black }
-    let diminishedTextColor = darkMode.map { $0 ? UIColor.lightGray : .darkGray }
+//    let diminishedTextColor = darkMode.map { $0 ? UIColor.lightGray : .darkGray }
     
     // Configuration View
 //    let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), value: persistent[\.annotationsVisible], textColor: textColor, action: { value in persistent.change {
@@ -228,7 +228,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     
     
     let satelliteValue = persistent.i.map { $0.satellite ? 1 : 0 }
-    let satellite = segmentedControl(segments: I(constant: [.init(image: #imageLiteral(resourceName: "btn_map.png"), title: "Karte"), .init(image: #imageLiteral(resourceName: "btn_satellite.png"), title: "Satellit")]), value: satelliteValue, textColor: diminishedTextColor, selectedTextColor: textColor, onChange: { value in
+    let satellite = segmentedControl(segments: I(constant: [.init(image: #imageLiteral(resourceName: "btn_map.png"), title: "Karte"), .init(image: #imageLiteral(resourceName: "btn_satellite.png"), title: "Satellit")]), value: satelliteValue, textColor: textColor, selectedTextColor: textColor, onChange: { value in
         persistent.change {
             $0.satellite = value == 1
         }
@@ -245,8 +245,9 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     }
     
     let routeColor = if_(state[\.routing], then: I(constant: Stylesheet.blue), else: textColor)
-    let routeButton = headerButton(title: "Strecke", image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }}
-    let closeButton = headerButton(title: "Schließen", image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } })
+    let routeButton = headerButton(title: "Planer", image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }} // todo localize
+    let closeButton = headerButton(title: "Schließen", image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } }) // todo localize
+
     
     let selectionColor = state.i[\.selection].map { $0?.color.uiColor } ?? if_(persistent.i.map { $0.satellite }, then: UIColor.white, else: .black)
     

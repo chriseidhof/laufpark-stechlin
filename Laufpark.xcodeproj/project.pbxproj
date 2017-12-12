@@ -195,6 +195,8 @@
 		83B018191FD9D0520079D08F /* btn_route@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B018181FD9D0520079D08F /* btn_route@2x.png */; };
 		83B0181B1FD9D4320079D08F /* btn_close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B0181A1FD9D4320079D08F /* btn_close@2x.png */; };
 		83B0181D1FD9DAAC0079D08F /* credits.txt in Resources */ = {isa = PBXBuildFile; fileRef = 83B0181C1FD9DAAC0079D08F /* credits.txt */; };
+		83B018201FD9DF3E0079D08F /* btn_satellite@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B0181E1FD9DF3E0079D08F /* btn_satellite@2x.png */; };
+		83B018211FD9DF3E0079D08F /* btn_map@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B0181F1FD9DF3E0079D08F /* btn_map@2x.png */; };
 		83B0824E1F6302DF004070DA /* Model+UIKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83B0824D1F6302DF004070DA /* Model+UIKit.swift */; };
 		83B2A26C1F692CFA00A6D9F9 /* Incremental.h in Headers */ = {isa = PBXBuildFile; fileRef = 83B2A26A1F692CFA00A6D9F9 /* Incremental.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		83B2A26F1F692CFA00A6D9F9 /* Incremental.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; };
@@ -422,6 +424,8 @@
 		83B018181FD9D0520079D08F /* btn_route@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_route@2x.png"; sourceTree = "<group>"; };
 		83B0181A1FD9D4320079D08F /* btn_close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_close@2x.png"; sourceTree = "<group>"; };
 		83B0181C1FD9DAAC0079D08F /* credits.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = credits.txt; sourceTree = "<group>"; };
+		83B0181E1FD9DF3E0079D08F /* btn_satellite@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_satellite@2x.png"; sourceTree = "<group>"; };
+		83B0181F1FD9DF3E0079D08F /* btn_map@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_map@2x.png"; sourceTree = "<group>"; };
 		83B0824D1F6302DF004070DA /* Model+UIKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+UIKit.swift"; sourceTree = "<group>"; };
 		83B0824F1F63052D004070DA /* Incremental.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incremental.swift; sourceTree = "<group>"; };
 		83B082511F630835004070DA /* MacPlayground.playground */ = {isa = PBXFileReference; lastKnownFileType = file.playground; path = MacPlayground.playground; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -553,6 +557,8 @@
 				834004E61F7BB4930035984B /* Icon@3x.png */,
 				83CA5A7A1FD846D900AC1840 /* btn_map.png */,
 				83CA5A7B1FD846D900AC1840 /* btn_satellite.png */,
+				83B0181F1FD9DF3E0079D08F /* btn_map@2x.png */,
+				83B0181E1FD9DF3E0079D08F /* btn_satellite@2x.png */,
 				8340DF931F61B1F8002176C6 /* AppDelegate.swift */,
 				8358C68F1FD29F3F005A257D /* State.swift */,
 				8340DF951F61B1F8002176C6 /* ViewController.swift */,
@@ -1022,6 +1028,7 @@
 				83099AF31F63CD7900D3EBB8 /* wabe lila-strecke 0.gpx in Resources */,
 				834079411F626EC600BC7C98 /* wabe braun-strecke 3.gpx in Resources */,
 				8340DFB21F61B40C002176C6 /* wabe rot-strecke 4.gpx in Resources */,
+				83B018201FD9DF3E0079D08F /* btn_satellite@2x.png in Resources */,
 				83099AF21F63CD7900D3EBB8 /* wabe hellgruen-strecke 0.gpx in Resources */,
 				8340794B1F626EC600BC7C98 /* wabe hellblau-strecke 4.gpx in Resources */,
 				834078F91F626A2600BC7C98 /* wabe hellgruen-strecke 3.gpx in Resources */,
@@ -1051,6 +1058,7 @@
 				8340793E1F626EC600BC7C98 /* wabe blau-strecke 3.gpx in Resources */,
 				83B018191FD9D0520079D08F /* btn_route@2x.png in Resources */,
 				834079551F626EC600BC7C98 /* wabe pink-strecke 4.gpx in Resources */,
+				83B018211FD9DF3E0079D08F /* btn_map@2x.png in Resources */,
 				83CA5A7D1FD846D900AC1840 /* btn_satellite.png in Resources */,
 				83099AF11F63CD7900D3EBB8 /* wabe hellbraun-strecke 0.gpx in Resources */,
 				83CA5A7C1FD846D900AC1840 /* btn_map.png in Resources */,
