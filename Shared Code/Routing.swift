@@ -23,9 +23,9 @@ struct Route: Equatable, Codable {
     mutating func add(coordinate: Coordinate, inTrack track: Track, graph: Graph) {
         let previous = points.last ?? startingPoint
         
-        let path: Path? = graph.shortestPath(from: previous.coordinate, to: coordinate).map {
+        let path: Path? = time { graph.shortestPath(from: previous.coordinate, to: coordinate).map {
             Path(entries: $0.path, distance: $0.distance)
-        }
+            } }
         let result = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: path)
         points.append(result)
     }
@@ -355,30 +355,44 @@ struct Graph: Codable, Equatable {
 extension Graph {
     /// Dijkstra's shortest path.
     func shortestPath(from source: Coordinate, to target: Coordinate) -> (path: [Entry], distance: CLLocationDistance)? {
-        // TODO experiment with a faster implementation, this is the "naive" impl straight from wikipedia.
         var known: Set<Coordinate> = []
-        var distances: [Coordinate:(path: [Entry], distance: CLLocationDistance)] = [:]
-        for edge in edges(from: source) {
-            distances[edge.destination] = (path: [edge], distance: edge.distance)
-        }
-        var last = source
-        while last != target {
-            let smallestKnownDistances = distances.sorted(by: { $0.value.distance < $1.value.distance })
-            guard let next = smallestKnownDistances.first(where: { !known.contains($0.key) }) else {
-                return nil // no path
+        var distances: [Coordinate:(previousEdge: (Coordinate, Entry)?, distance: CLLocationDistance)] = [source: (nil, 0)]
+        var queue = SortedArray<(Coordinate, distance: CLLocationDistance)>(unsorted: [(source, 0)] , isAscending: { $0.distance > $1.distance })
+
+        
+        while let (coord, dist) = queue.popLast() {
+            if coord == target {
+                break
             }
-            let distVNext = distances[next.key]?.distance ?? .greatestFiniteMagnitude
-            for edge in edges(from: next.key) {
-                let x = distances[edge.destination]
-                let existing = x ?? (path: [edge], distance: .greatestFiniteMagnitude)
-                if distVNext + edge.distance < existing.distance {
-                    distances[edge.destination] = (path: next.value.path + [edge], distance: distVNext + edge.distance) // todo cse
+
+            guard !known.contains(coord) else { continue }
+            let distVNext = distances[coord]!.distance
+            
+            for edge in edges(from: coord) {
+                let existing = distances[edge.destination]
+                let existingDistance = existing?.distance ?? .greatestFiniteMagnitude
+                let tentativeDistance = distVNext + edge.distance
+                if !known.contains(edge.destination) && tentativeDistance < existingDistance {
+                    distances[edge.destination] = (previousEdge: (coord, edge), distance: tentativeDistance)
+                    if let i = queue.index(where: { $0.0 == edge.destination }) {
+                        queue.mutate(at: i, { $0.1 = tentativeDistance })
+                    } else {
+                        queue.insert((edge.destination, tentativeDistance))
+                    }
+                    
                 }
             }
-            last = next.key
-            known.insert(next.key)
+            known.insert(coord)
         }
-        return distances[target]
+        guard let (_, distance) = distances[target] else { return nil }
+        
+        var path: [Entry] = []
+        var current = target
+        while case let ((previousCoord, edge)?, _)? = distances[current] {
+            path.append(edge)
+            current = previousCoord
+        }
+        return (path: path.reversed(), distance: distance)
     }
 }
 
