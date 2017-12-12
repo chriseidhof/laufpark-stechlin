@@ -1,0 +1,16 @@
+/* 
+  Localized.strings
+  Laufpark
+
+  Created by Chris Eidhof on 12.12.17.
+  Copyright © 2017 objc.io. All rights reserved.
+*/
+
+tapAnyWhereToStart = "Tap on the map to start";
+loadingGraph = "Loading...";
+karte = "Map";
+satellite = "Satellite";
+route = "Route";
+close = "Close";
+undo = "Undo";
+

@@ -228,7 +228,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     
     
     let satelliteValue = persistent.i.map { $0.satellite ? 1 : 0 }
-    let satellite = segmentedControl(segments: I(constant: [.init(image: #imageLiteral(resourceName: "btn_map.png"), title: "Karte"), .init(image: #imageLiteral(resourceName: "btn_satellite.png"), title: "Satellit")]), value: satelliteValue, textColor: textColor, selectedTextColor: textColor, onChange: { value in
+    let satellite = segmentedControl(segments: I(constant: [.init(image: #imageLiteral(resourceName: "btn_map.png"), title: .karte), .init(image: #imageLiteral(resourceName: "btn_satellite.png"), title: .satellite)]), value: satelliteValue, textColor: textColor, selectedTextColor: textColor, onChange: { value in
         persistent.change {
             $0.satellite = value == 1
         }
@@ -245,8 +245,8 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     }
     
     let routeColor = if_(state[\.routing], then: I(constant: Stylesheet.blue), else: textColor)
-    let routeButton = headerButton(title: "Planer", image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }} // todo localize
-    let closeButton = headerButton(title: "Schließen", image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } }) // todo localize
+    let routeButton = headerButton(title: .route, image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }} // todo localize
+    let closeButton = headerButton(title: .close, image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } }) // todo localize
 
     
     let selectionColor = state.i[\.selection].map { $0?.color.uiColor } ?? if_(persistent.i.map { $0.satellite }, then: UIColor.white, else: .black)
@@ -318,7 +318,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         }
         let routingInfo = label(text: routeInfo, textColor: textColor.map { $0 })
         routingInfo.unbox.adjustsFontSizeToFitWidth = true
-        let removeLastWayPointButton = button(title: I(constant: "↩️"), backgroundColor: I(constant: .clear)) { state.change {
+        let removeLastWayPointButton = button(title: I(constant: .undo), backgroundColor: I(constant: .clear), titleColor: textColor.map { $0 } ) { state.change {
             $0.removeLastWayPoint()
         }}
         let routeHasWaypoints = state.i.map { $0.route != nil && $0.route!.wayPoints.count > 0 }
@@ -335,7 +335,6 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         let bottomRoutingOffset: I<CGFloat> = if_(state.i[\.routing], then: I(constant: 0), else: -bottomHeight)
 
         rootView.addSubview(bottomRoutingView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: bottomHeight, \.heightAnchor), equal(\.bottomAnchor, constant: bottomRoutingOffset, animation: Stylesheet.dampingAnimation)])
-        rootView.observe(value: state[\.graphBuildingProgress], onChange: { print($1) })
     }
 
     
@@ -443,7 +442,11 @@ class ViewController: UIViewController {
 }
 
 extension String {
-    static let tapAnyWhereToStart = "Tippe auf die Karte um einen Startpunkt festzulegen" // todo localize
-//    static let route = "Create a Route" // todo localize
-    static let loadingGraph = "Laden..." // todo localize
+    static let tapAnyWhereToStart = NSLocalizedString("tapAnyWhereToStart", comment: "")
+    static let loadingGraph = NSLocalizedString("loadingGraph", comment: "")
+    static let karte = NSLocalizedString("karte", comment: "")
+    static let satellite = NSLocalizedString("satellite", comment: "")
+    static let route = NSLocalizedString("route", comment: "")
+    static let close = NSLocalizedString("close", comment: "")
+    static let undo = NSLocalizedString("undo", comment: "")
 }

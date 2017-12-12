@@ -425,7 +425,6 @@ func buildGraph(tracks: [Track], url: URL, progress: @escaping (Float) -> ()) ->
     
     // todo we can parallelize this
     for (trackIndex, t) in tracks.enumerated() {
-        print(trackIndex, tracks.count)
         progress(Float(trackIndex) / Float(tracks.count))
         let kdPoints = t.kdPoints
         let boundingBox = boundingBoxes[t.name]!

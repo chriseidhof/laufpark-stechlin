@@ -191,6 +191,7 @@
 		8384EC601F8288FD003AAC56 /* NavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8384EC5F1F8288FD003AAC56 /* NavigationController.swift */; };
 		838C765F1FC182A700EB13F1 /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838C765E1FC182A700EB13F1 /* Routing.swift */; };
 		838C76601FC1837B00EB13F1 /* Routing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 838C765E1FC182A700EB13F1 /* Routing.swift */; };
+		838E289C1FE026DD0069A170 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 838E28991FE023840069A170 /* Localizable.strings */; };
 		83A072C51FDF080500EDAA53 /* SortedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A072C41FDF080500EDAA53 /* SortedArray.swift */; };
 		83B018191FD9D0520079D08F /* btn_route@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B018181FD9D0520079D08F /* btn_route@2x.png */; };
 		83B0181B1FD9D4320079D08F /* btn_close@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 83B0181A1FD9D4320079D08F /* btn_close@2x.png */; };
@@ -420,6 +421,11 @@
 		837A8AB91F72DACB00ED898C /* IncrementalArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncrementalArray.swift; sourceTree = "<group>"; };
 		8384EC5F1F8288FD003AAC56 /* NavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationController.swift; sourceTree = "<group>"; };
 		838C765E1FC182A700EB13F1 /* Routing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Routing.swift; sourceTree = "<group>"; };
+		838E288B1FE022840069A170 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/LaunchScreen.strings; sourceTree = "<group>"; };
+		838E288C1FE022850069A170 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/MainMenu.strings; sourceTree = "<group>"; };
+		838E28981FE023840069A170 /* de */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = de; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		838E289A1FE024810069A170 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = Base; path = Base.lproj/Localizable.strings; sourceTree = "<group>"; };
+		838E289B1FE025590069A170 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		83A072C41FDF080500EDAA53 /* SortedArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SortedArray.swift; sourceTree = "<group>"; };
 		83B018181FD9D0520079D08F /* btn_route@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_route@2x.png"; sourceTree = "<group>"; };
 		83B0181A1FD9D4320079D08F /* btn_close@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "btn_close@2x.png"; sourceTree = "<group>"; };
@@ -569,6 +575,7 @@
 				83354DA11F6FEA5700F3C33A /* Helpers.swift */,
 				83CA5A781FD845BF00AC1840 /* SegmentedControl.swift */,
 				83B0181C1FD9DAAC0079D08F /* credits.txt */,
+				838E28991FE023840069A170 /* Localizable.strings */,
 			);
 			path = Laufpark;
 			sourceTree = "<group>";
@@ -1036,6 +1043,7 @@
 				834079561F626EC600BC7C98 /* wabe rosa-strecke 1.gpx in Resources */,
 				834079511F626EC600BC7C98 /* wabe orange-strecke 0.gpx in Resources */,
 				834078F81F626A2600BC7C98 /* wabe hellgruen-strecke 2.gpx in Resources */,
+				838E289C1FE026DD0069A170 /* Localizable.strings in Resources */,
 				8340790F1F626B2300BC7C98 /* wabe gruen-strecke 3.gpx in Resources */,
 				8340790D1F626B2300BC7C98 /* wabe gruen-strecke 1.gpx in Resources */,
 				8340793C1F626EC600BC7C98 /* wabe blau-strecke 1.gpx in Resources */,
@@ -1310,14 +1318,26 @@
 			isa = PBXVariantGroup;
 			children = (
 				8379CF351FB83E04009CD00F /* Base */,
+				838E288C1FE022850069A170 /* de */,
 			);
 			name = MainMenu.xib;
+			sourceTree = "<group>";
+		};
+		838E28991FE023840069A170 /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				838E28981FE023840069A170 /* de */,
+				838E289A1FE024810069A170 /* Base */,
+				838E289B1FE025590069A170 /* en */,
+			);
+			name = Localizable.strings;
 			sourceTree = "<group>";
 		};
 		83CC2E331F8E3B3D00F4302B /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
 				83CC2E341F8E3B3D00F4302B /* Base */,
+				838E288B1FE022840069A170 /* de */,
 			);
 			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
@@ -1329,6 +1349,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -1386,6 +1407,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";

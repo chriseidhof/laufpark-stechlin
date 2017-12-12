@@ -1,0 +1,15 @@
+/* 
+  Localized.strings
+  Laufpark
+
+  Created by Chris Eidhof on 12.12.17.
+  Copyright © 2017 objc.io. All rights reserved.
+*/
+
+"tapAnyWhereToStart" = "Tippe auf die Karte um einen Startpunkt festzulegen";
+"loadingGraph" = "Laden...";
+"karte" = "Karte";
+"satellite" = "Satellit";
+"route" = "Planer";
+"close" = "Schließen";
+"undo" = "Rückgangig machen";
