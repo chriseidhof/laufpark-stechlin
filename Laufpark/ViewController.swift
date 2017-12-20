@@ -16,6 +16,16 @@ extension MKPolyline {
     }
 }
 
+func headerButton(title: String, image: UIImage, color: I<UIColor>, action: @escaping () -> ()) -> IBox<UIView> {
+    let button = IBox(segment(image.withRenderingMode(.alwaysTemplate), title: title, textColor: color.value, size: CGSize(width: 55, height: 55))) //todo fix for color scheme change)
+    button.unbox.isUserInteractionEnabled = true
+    button.bind(color, to: \.textColor)
+    button.addGestureRecognizer(tapGestureRecognizer { _ in
+        action()
+    })
+    return button.cast
+}
+
 /// Returns a function that you can call to set the visible map rect
 func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
     var polygonToTrack: [MKPolygon:Track] = [:]
@@ -215,7 +225,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     
     let textColor = darkMode.map { $0 ? UIColor.white : .black }
     
-    let inset: CGFloat = 10
+    let inset: CGFloat = Stylesheet.regularInset
 
     // Info button
     let infoButton = button(type: .infoLight, backgroundColor: I(constant: .clear), tintColor: textColor, onTap: {
@@ -232,19 +242,11 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         }
     })
     
-    func headerButton(title: String, image: UIImage, color: I<UIColor>, action: @escaping () -> ()) -> IBox<UIView> {
-        let button = IBox(segment(image.withRenderingMode(.alwaysTemplate), title: title, textColor: color.value, size: CGSize(width: 55, height: 55))) //todo fix for color scheme change)
-        button.unbox.isUserInteractionEnabled = true
-        button.bind(color, to: \.textColor)
-        button.addGestureRecognizer(tapGestureRecognizer { _ in
-            action()
-        })
-        return button.cast
-    }
+
     
     let routeColor = if_(state[\.routing], then: I(constant: Stylesheet.blue), else: textColor)
-    let routeButton = headerButton(title: .route, image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }} // todo localize
-    let closeButton = headerButton(title: .close, image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } }) // todo localize
+    let routeButton = headerButton(title: .route, image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }}
+    let closeButton = headerButton(title: .close, image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } })
 
     
     let selectionColor = state.i[\.selection].map { $0?.color.uiColor } ?? if_(persistent.i.map { $0.satellite }, then: UIColor.white, else: .black)
@@ -443,19 +445,31 @@ class ViewController: UIViewController {
 }
 
 class InfoViewController: UIViewController {
+    var rootView: IBox<UIView>! = nil
+
     override func viewDidLoad() {
+        rootView = IBox(view)
+        view.backgroundColor = .white
         let textView = UITextView()
         let url = Bundle.main.url(forResource: "Attribution_en", withExtension: "rtf")!
         let attributedString = try! NSAttributedString(url: url, options: [:], documentAttributes: nil)
         textView.attributedText = attributedString
         textView.isEditable = false
         textView.contentInset = .init(top: 20, left: 20, bottom: 20, right: 20)
+
+        let closeButton = headerButton(title: .close, image: #imageLiteral(resourceName: "btn_close.png"), color: I(constant: .black), action: { [unowned self] in
+            self.dismiss(animated: true, completion: nil)
+        })
+        rootView.addSubview(closeButton, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -Stylesheet.regularInset), equal(\.trailingAnchor, Stylesheet.regularInset)])
+
         view.addSubview(textView, constraints: [
             textView.topAnchor.constraint(equalTo: view.topAnchor),
             textView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            textView.trailingAnchor.constraint(equalTo: closeButton.unbox.leadingAnchor, constant: -Stylesheet.regularInset),
             textView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-        ])
+            ])
+
+
     }
 }
 

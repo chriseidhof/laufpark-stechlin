@@ -17,6 +17,8 @@ enum Stylesheet {
     
     static let blue: UIColor = UIColor(red: 13.0/255, green: 107.0/255, blue: 181.0/255, alpha: 1)
     
+    static let regularInset: CGFloat = 10
+
     static let dampingAnimation: Animation = { parent, _ in
         UIViewPropertyAnimator(duration: 0.2, dampingRatio: 0.6) {
             parent.layoutIfNeeded()
