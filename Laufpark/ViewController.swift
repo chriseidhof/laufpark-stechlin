@@ -186,7 +186,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     return { mapView.unbox.setVisibleMapRect($0, animated: true) }
 }
 
-func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
+func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>, presentInfo: @escaping () -> ()) -> (MKMapRect) -> () {
     let darkMode = persistent[\.satellite]
     let setMapRect = addMapView(persistent: persistent, state: state, rootView: rootView)
     
@@ -214,19 +214,17 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     }
     
     let textColor = darkMode.map { $0 ? UIColor.white : .black }
-//    let diminishedTextColor = darkMode.map { $0 ? UIColor.lightGray : .darkGray }
     
-    // Configuration View
-//    let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), value: persistent[\.annotationsVisible], textColor: textColor, action: { value in persistent.change {
-//        $0.annotationsVisible = value
-//        }})
-//    let satellite = switchWith(label: NSLocalizedString("Satellit", comment: ""), value: persistent[\.satellite], textColor: textColor, action: { value in persistent.change {
-//        $0.satellite = value
-//        }})
-    
-    // todo localize
-    
-    
+    let inset: CGFloat = 10
+
+    // Info button
+    let infoButton = button(type: .infoLight, title: I(constant: ""), backgroundColor: I(constant: .clear), onTap: {
+        presentInfo()
+    })
+    rootView.addSubview(infoButton.cast, constraints: [
+        equal(\.safeAreaLayoutGuide.bottomAnchor, to: \.bottomAnchor, constant: inset), equal(\.trailingAnchor, inset)
+        ])
+
     let satelliteValue = persistent.i.map { $0.satellite ? 1 : 0 }
     let satellite = segmentedControl(segments: I(constant: [.init(image: #imageLiteral(resourceName: "btn_map.png"), title: .karte), .init(image: #imageLiteral(resourceName: "btn_satellite.png"), title: .satellite)]), value: satelliteValue, textColor: textColor, selectedTextColor: textColor, onChange: { value in
         persistent.change {
@@ -259,8 +257,6 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         return border
     }
     
-    let inset: CGFloat = 10
-
     func blurredView<V: UIView>(borderAnchor: @escaping Constraint, child: IBox<V>, inset: CGFloat = 10) -> IBox<UIVisualEffectView> {
         let result = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
         result.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), borderAnchor])
@@ -353,6 +349,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     toggleMapButton.bind(persistent.i.map { $0.showConfiguration }, to: \.hidden)
     toggleMapButton.unbox.widthAnchor.constraint(equalToConstant: 40).isActive = true
     toggleMapButton.unbox.heightAnchor.constraint(equalToConstant: 40).isActive = true
+    
 	
     
 //    // Toggle Routing Button
@@ -424,7 +421,11 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         rootView = IBox(view!)
-        setMapRect = build(persistent: persistentState, state: state, rootView: rootView)
+        setMapRect = build(persistent: persistentState, state: state, rootView: rootView, presentInfo: { [unowned self] in
+            let infoVC = InfoViewController()
+            infoVC.modalPresentationStyle = .pageSheet
+            self.present(infoVC, animated: true)
+        })
     }
     
     func resetMapRect() {
@@ -438,6 +439,21 @@ class ViewController: UIViewController {
             locationManager = CLLocationManager()
             locationManager!.requestWhenInUseAuthorization()
         }
+    }
+}
+
+class InfoViewController: UIViewController {
+    override func viewDidLoad() {
+        let textView = UITextView()
+        textView.text = "Hello, world."
+        textView.isEditable = false
+        view.addSubview(textView, constraints: [
+            // todo use safe area layout guides
+            textView.topAnchor.constraint(equalTo: view.topAnchor),
+            textView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            textView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+        ])
     }
 }
 

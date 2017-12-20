@@ -10,7 +10,7 @@ import UIKit
 import CoreLocation
 
 struct StoredState: Equatable, Codable {
-    var annotationsVisible: Bool = false
+    var annotationsVisible: Bool = true
     var satellite: Bool = false
     var showConfiguration: Bool = false
     
