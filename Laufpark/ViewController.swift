@@ -218,7 +218,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     let inset: CGFloat = 10
 
     // Info button
-    let infoButton = button(type: .infoLight, title: I(constant: ""), backgroundColor: I(constant: .clear), onTap: {
+    let infoButton = button(type: .infoLight, backgroundColor: I(constant: .clear), tintColor: textColor, onTap: {
         presentInfo()
     })
     rootView.addSubview(infoButton.cast, constraints: [
@@ -423,7 +423,7 @@ class ViewController: UIViewController {
         rootView = IBox(view!)
         setMapRect = build(persistent: persistentState, state: state, rootView: rootView, presentInfo: { [unowned self] in
             let infoVC = InfoViewController()
-            infoVC.modalPresentationStyle = .pageSheet
+            infoVC.modalPresentationStyle = .formSheet
             self.present(infoVC, animated: true)
         })
     }
@@ -445,10 +445,12 @@ class ViewController: UIViewController {
 class InfoViewController: UIViewController {
     override func viewDidLoad() {
         let textView = UITextView()
-        textView.text = "Hello, world."
+        let url = Bundle.main.url(forResource: "Attribution_en", withExtension: "rtf")!
+        let attributedString = try! NSAttributedString(url: url, options: [:], documentAttributes: nil)
+        textView.attributedText = attributedString
         textView.isEditable = false
+        textView.contentInset = .init(top: 20, left: 20, bottom: 20, right: 20)
         view.addSubview(textView, constraints: [
-            // todo use safe area layout guides
             textView.topAnchor.constraint(equalTo: view.topAnchor),
             textView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             textView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
