@@ -353,23 +353,6 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     toggleMapButton.unbox.widthAnchor.constraint(equalToConstant: 40).isActive = true
     toggleMapButton.unbox.heightAnchor.constraint(equalToConstant: 40).isActive = true
 	
-    
-//    // Toggle Routing Button
-//    let toggleRoutingButton = button(type: .custom, title: I(constant: "Route"), backgroundColor: I(constant: UIColor(white: 1, alpha: 0.8)), titleColor: I(constant: .black), onTap: {
-//        state.change {
-//            if $0.routing {
-//                $0.routing = false
-//                $0.route = nil
-//            } else {
-//                $0.routing = true
-//                $0.selection = nil
-//            }
-//        }
-//    })
-//    toggleRoutingButton.unbox.layer.cornerRadius = 3
-//    // todo: the layout is a bit of a hack.
-//    rootView.addSubview(toggleRoutingButton.cast, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -(inset + 50)), equal(\.trailingAnchor, 10)])
-    
     return setMapRect
 }
 
