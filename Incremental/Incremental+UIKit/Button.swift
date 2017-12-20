@@ -8,6 +8,14 @@
 
 import Foundation
 
+public func button(type: UIButtonType = .custom, backgroundColor: I<UIColor> = I(constant: .white), tintColor: I<UIColor>, onTap: @escaping () -> ()) -> IBox<UIButton> {
+    let result = IBox<UIButton>(UIButton(type: type))
+    result.bind(backgroundColor, to: \.backgroundColor)
+    result.observe(value: tintColor, onChange: { $0.tintColor = $1  })
+    result.handle(.touchUpInside, onTap)
+    return result
+}
+
 public func button(type: UIButtonType = .custom, title: I<String>, backgroundColor: I<UIColor> = I(constant: .white), titleColor: I<UIColor?> = I(constant: nil), onTap: @escaping () -> ()) -> IBox<UIButton> {
     let result = IBox<UIButton>(UIButton(type: type))
     result.bind(backgroundColor, to: \.backgroundColor)

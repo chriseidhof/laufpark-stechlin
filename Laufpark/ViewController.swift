@@ -16,6 +16,16 @@ extension MKPolyline {
     }
 }
 
+func headerButton(title: String, image: UIImage, color: I<UIColor>, action: @escaping () -> ()) -> IBox<UIView> {
+    let button = IBox(segment(image.withRenderingMode(.alwaysTemplate), title: title, textColor: color.value, size: CGSize(width: 55, height: 55))) //todo fix for color scheme change)
+    button.unbox.isUserInteractionEnabled = true
+    button.bind(color, to: \.textColor)
+    button.addGestureRecognizer(tapGestureRecognizer { _ in
+        action()
+    })
+    return button.cast
+}
+
 /// Returns a function that you can call to set the visible map rect
 func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
     var polygonToTrack: [MKPolygon:Track] = [:]
@@ -186,7 +196,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     return { mapView.unbox.setVisibleMapRect($0, animated: true) }
 }
 
-func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>) -> (MKMapRect) -> () {
+func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>, presentInfo: @escaping () -> ()) -> (MKMapRect) -> () {
     let darkMode = persistent[\.satellite]
     let setMapRect = addMapView(persistent: persistent, state: state, rootView: rootView)
     
@@ -214,19 +224,17 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     }
     
     let textColor = darkMode.map { $0 ? UIColor.white : .black }
-//    let diminishedTextColor = darkMode.map { $0 ? UIColor.lightGray : .darkGray }
     
-    // Configuration View
-//    let accomodation = switchWith(label: NSLocalizedString("Unterkünfte", comment: ""), value: persistent[\.annotationsVisible], textColor: textColor, action: { value in persistent.change {
-//        $0.annotationsVisible = value
-//        }})
-//    let satellite = switchWith(label: NSLocalizedString("Satellit", comment: ""), value: persistent[\.satellite], textColor: textColor, action: { value in persistent.change {
-//        $0.satellite = value
-//        }})
-    
-    // todo localize
-    
-    
+    let inset: CGFloat = Stylesheet.regularInset
+
+    // Info button
+    let infoButton = button(type: .infoLight, backgroundColor: I(constant: .clear), tintColor: textColor, onTap: {
+        presentInfo()
+    })
+    rootView.addSubview(infoButton.cast, constraints: [
+        equal(\.safeAreaLayoutGuide.bottomAnchor, to: \.bottomAnchor, constant: inset), equal(\.trailingAnchor, inset)
+        ])
+
     let satelliteValue = persistent.i.map { $0.satellite ? 1 : 0 }
     let satellite = segmentedControl(segments: I(constant: [.init(image: #imageLiteral(resourceName: "btn_map.png"), title: .karte), .init(image: #imageLiteral(resourceName: "btn_satellite.png"), title: .satellite)]), value: satelliteValue, textColor: textColor, selectedTextColor: textColor, onChange: { value in
         persistent.change {
@@ -234,19 +242,11 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         }
     })
     
-    func headerButton(title: String, image: UIImage, color: I<UIColor>, action: @escaping () -> ()) -> IBox<UIView> {
-        let button = IBox(segment(image.withRenderingMode(.alwaysTemplate), title: title, textColor: color.value, size: CGSize(width: 55, height: 55))) //todo fix for color scheme change)
-        button.unbox.isUserInteractionEnabled = true
-        button.bind(color, to: \.textColor)
-        button.addGestureRecognizer(tapGestureRecognizer { _ in
-            action()
-        })
-        return button.cast
-    }
+
     
     let routeColor = if_(state[\.routing], then: I(constant: Stylesheet.blue), else: textColor)
-    let routeButton = headerButton(title: .route, image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }} // todo localize
-    let closeButton = headerButton(title: .close, image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } }) // todo localize
+    let routeButton = headerButton(title: .route, image: #imageLiteral(resourceName: "btn_route.png"), color: routeColor) { state.change { $0.routing.toggle() }}
+    let closeButton = headerButton(title: .close, image: #imageLiteral(resourceName: "btn_close.png"), color: textColor, action: { persistent.change { $0.showConfiguration.toggle() } })
 
     
     let selectionColor = state.i[\.selection].map { $0?.color.uiColor } ?? if_(persistent.i.map { $0.satellite }, then: UIColor.white, else: .black)
@@ -259,8 +259,6 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         return border
     }
     
-    let inset: CGFloat = 10
-
     func blurredView<V: UIView>(borderAnchor: @escaping Constraint, child: IBox<V>, inset: CGFloat = 10) -> IBox<UIVisualEffectView> {
         let result = effectView(effect: darkMode.map { UIBlurEffect(style: $0 ? .dark : .light)})
         result.addSubview(border(), path: \.contentView, constraints: [equal(\.leadingAnchor), equal(\.trailingAnchor), borderAnchor])
@@ -352,6 +350,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     toggleMapButton.bind(persistent.i.map { $0.showConfiguration }, to: \.hidden)
     toggleMapButton.unbox.widthAnchor.constraint(equalToConstant: 40).isActive = true
     toggleMapButton.unbox.heightAnchor.constraint(equalToConstant: 40).isActive = true
+    
 	
     return setMapRect
 }
@@ -406,7 +405,11 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         rootView = IBox(view!)
-        setMapRect = build(persistent: persistentState, state: state, rootView: rootView)
+        setMapRect = build(persistent: persistentState, state: state, rootView: rootView, presentInfo: { [unowned self] in
+            let infoVC = InfoViewController()
+            infoVC.modalPresentationStyle = .formSheet
+            self.present(infoVC, animated: true)
+        })
     }
     
     func resetMapRect() {
@@ -420,6 +423,35 @@ class ViewController: UIViewController {
             locationManager = CLLocationManager()
             locationManager!.requestWhenInUseAuthorization()
         }
+    }
+}
+
+class InfoViewController: UIViewController {
+    var rootView: IBox<UIView>! = nil
+
+    override func viewDidLoad() {
+        rootView = IBox(view)
+        view.backgroundColor = .white
+        let textView = UITextView()
+        let url = Bundle.main.url(forResource: "Attribution_en", withExtension: "rtf")!
+        let attributedString = try! NSAttributedString(url: url, options: [:], documentAttributes: nil)
+        textView.attributedText = attributedString
+        textView.isEditable = false
+        textView.contentInset = .init(top: 20, left: 20, bottom: 20, right: 20)
+
+        let closeButton = headerButton(title: .close, image: #imageLiteral(resourceName: "btn_close.png"), color: I(constant: .black), action: { [unowned self] in
+            self.dismiss(animated: true, completion: nil)
+        })
+        rootView.addSubview(closeButton, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -Stylesheet.regularInset), equal(\.trailingAnchor, Stylesheet.regularInset)])
+
+        view.addSubview(textView, constraints: [
+            textView.topAnchor.constraint(equalTo: view.topAnchor),
+            textView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            textView.trailingAnchor.constraint(equalTo: closeButton.unbox.leadingAnchor, constant: -Stylesheet.regularInset),
+            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            ])
+
+
     }
 }
 
