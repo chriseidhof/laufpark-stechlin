@@ -303,7 +303,6 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     let formatter = MKDistanceFormatter()
 
     do { // Routing info view
-        // todo: compute the shortest path async
         // todo: show the elevation graph
         // todo: allow the user to save the route
         let routeInfo: I<String> = state.i.map {
@@ -327,11 +326,11 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         let progress = progressView(progress: state[\.graphBuildingProgress])
 //        progress.unbox.heightAnchor.constraint(equalToConstant: 1)
         let hasGraph = state.i.map { $0.graph != nil }
-        progress.bind(hasGraph, to: \.hidden)
+    progress.bind(hasGraph, to: \.hidden)
         let routingStack = stackView(arrangedSubviews: [infoStack.cast, progress.cast])
         let bottomRoutingView = blurredView(borderAnchor: equal(\.topAnchor), child: routingStack)
         
-        let bottomHeight: I<CGFloat> = if_(hasGraph, then: 50, else: 70)
+        let bottomHeight = if_(hasGraph, then: 50 as CGFloat, else: 70)
         let bottomRoutingOffset: I<CGFloat> = if_(state.i[\.routing], then: I(constant: 0), else: -bottomHeight)
 
         rootView.addSubview(bottomRoutingView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: bottomHeight, \.heightAnchor), equal(\.bottomAnchor, constant: bottomRoutingOffset, animation: Stylesheet.dampingAnimation)])

@@ -23,9 +23,9 @@ struct Route: Equatable, Codable {
     mutating func add(coordinate: Coordinate, inTrack track: Track, graph: Graph) {
         let previous = points.last ?? startingPoint
         
-        let path: Path? = time { graph.shortestPath(from: previous.coordinate, to: coordinate).map {
+        let path: Path? = graph.shortestPath(from: previous.coordinate, to: coordinate).map {
             Path(entries: $0.path, distance: $0.distance)
-            } }
+        }
         let result = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: path)
         points.append(result)
     }
@@ -360,7 +360,7 @@ extension Graph {
         var queue = SortedArray<(Coordinate, distance: CLLocationDistance)>(unsorted: [(source, 0)] , isAscending: { $0.distance > $1.distance })
 
         
-        while let (coord, dist) = queue.popLast() {
+        while let (coord, _) = queue.popLast() {
             if coord == target {
                 break
             }
