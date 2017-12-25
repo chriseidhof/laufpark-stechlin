@@ -392,6 +392,7 @@ class ViewController: UIViewController {
 
         super.init(nibName: nil, bundle: nil)
         
+        copyGraphIfNeeded()        
         if let g = readGraph(url: graphURL) {
             state.change { $0.graph = g }
         }
@@ -414,6 +415,14 @@ class ViewController: UIViewController {
             }
         })
 
+    }
+    
+    func copyGraphIfNeeded() {
+        let fm = FileManager.default
+        guard !fm.fileExists(atPath: graphURL.path),
+        let shipped = Bundle.main.path(forResource: "graph", ofType: "json")
+        else { return }
+        try? fm.copyItem(atPath: shipped, toPath: graphURL.path)
     }
     
     func setTracks(_ t: [Track]) {

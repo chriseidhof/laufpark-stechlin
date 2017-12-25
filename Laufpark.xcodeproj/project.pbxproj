@@ -231,6 +231,7 @@
 		83D934101F98D6CB0019BEA0 /* Incremental.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83F2AC9A1FEE99F500E39BDD /* LaufparkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F2AC991FEE99F500E39BDD /* LaufparkUITests.swift */; };
 		83F2ACA21FEE9A8600E39BDD /* SnapshotHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F2ACA11FEE9A8600E39BDD /* SnapshotHelper.swift */; };
+		83F7F8E11FF173540089E71F /* graph.json in Resources */ = {isa = PBXBuildFile; fileRef = 83F7F8E01FF173540089E71F /* graph.json */; };
 		83FC89791F7B86BB0020EED6 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC89781F7B86BB0020EED6 /* TableView.swift */; };
 		83FC897B1F7B86D90020EED6 /* StackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC897A1F7B86D90020EED6 /* StackView.swift */; };
 		83FC897D1F7B871F0020EED6 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83FC897C1F7B871F0020EED6 /* Button.swift */; };
@@ -476,6 +477,7 @@
 		83F2AC991FEE99F500E39BDD /* LaufparkUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaufparkUITests.swift; sourceTree = "<group>"; };
 		83F2AC9B1FEE99F500E39BDD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		83F2ACA11FEE9A8600E39BDD /* SnapshotHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = SnapshotHelper.swift; path = fastlane/SnapshotHelper.swift; sourceTree = SOURCE_ROOT; };
+		83F7F8E01FF173540089E71F /* graph.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = graph.json; sourceTree = "<group>"; };
 		83FC89781F7B86BB0020EED6 /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		83FC897A1F7B86D90020EED6 /* StackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StackView.swift; sourceTree = "<group>"; };
 		83FC897C1F7B871F0020EED6 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
@@ -601,6 +603,7 @@
 				83354DA11F6FEA5700F3C33A /* Helpers.swift */,
 				83CA5A781FD845BF00AC1840 /* SegmentedControl.swift */,
 				833169CB1FEA5864004186F0 /* Attribution_en.rtf */,
+				83F7F8E01FF173540089E71F /* graph.json */,
 				83B0181C1FD9DAAC0079D08F /* credits.txt */,
 				838E28991FE023840069A170 /* Localizable.strings */,
 				830F582B1FEEC46B0015B474 /* LaunchScreen.storyboard */,
@@ -1055,6 +1058,7 @@
 				83099AF61F63CD7900D3EBB8 /* wabe tuerkis-strecke 0.gpx in Resources */,
 				8340795D1F626F0700BC7C98 /* wabe braun-strecke 4.gpx in Resources */,
 				8340793F1F626EC600BC7C98 /* wabe braun-strecke 1.gpx in Resources */,
+				83F7F8E11FF173540089E71F /* graph.json in Resources */,
 				83099AEE1F63CD7900D3EBB8 /* wabe braun-strecke 0.gpx in Resources */,
 				83099AEC1F63CD7900D3EBB8 /* wabe beige-strecke 0.gpx in Resources */,
 				8340794A1F626EC600BC7C98 /* wabe hellblau-strecke 3.gpx in Resources */,
