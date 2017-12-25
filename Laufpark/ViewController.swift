@@ -466,17 +466,11 @@ class InfoViewController: UIViewController {
         })
         rootView.addSubview(closeButton, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -Stylesheet.regularInset), equal(\.trailingAnchor, Stylesheet.regularInset)])
 
-        let anchor: NSLayoutYAxisAnchor
-        if #available(iOS 11.0, *) {
-            anchor = view.safeAreaLayoutGuide.topAnchor
-        } else {
-            anchor = view.topAnchor
-        }
         view.addSubview(textView, constraints: [
-            textView.topAnchor.constraint(equalTo: anchor),
-            textView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            textView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            textView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
             textView.trailingAnchor.constraint(equalTo: closeButton.unbox.leadingAnchor, constant: -Stylesheet.regularInset),
-            textView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            textView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor),
             ])
 
 
