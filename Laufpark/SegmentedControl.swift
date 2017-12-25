@@ -94,6 +94,9 @@ func segment(_ image: UIImage, title: String, textColor: UIColor, size: CGSize) 
     
     imageView.frame = image.size.align(horizontal: .center, vertical: .top, in: view.frame)
     label.frame = label.intrinsicContentSize.align(horizontal: .center, vertical: .bottom, in: view.frame)
+    view.accessibilityLabel = title
+    view.accessibilityTraits = UIAccessibilityTraitButton
+    view.isAccessibilityElement = true
     return view
 }
 

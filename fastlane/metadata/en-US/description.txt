@@ -1,0 +1,1 @@
+This app allows you to see all the marked trails in Laufpark Stechlin, and create your own custom routes.

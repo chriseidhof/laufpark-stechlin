@@ -19,6 +19,8 @@ extension MKPolyline {
 func headerButton(title: String, image: UIImage, color: I<UIColor>, action: @escaping () -> ()) -> IBox<UIView> {
     let button = IBox(segment(image.withRenderingMode(.alwaysTemplate), title: title, textColor: color.value, size: CGSize(width: 55, height: 55))) //todo fix for color scheme change)
     button.unbox.isUserInteractionEnabled = true
+    button.unbox.accessibilityTraits = UIAccessibilityTraitButton
+    button.unbox.accessibilityValue = title
     button.bind(color, to: \.textColor)
     button.addGestureRecognizer(tapGestureRecognizer { _ in
         action()
@@ -35,9 +37,11 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         let track = polygonToTrack[polygon]!
         let isSelected = state.i[\.selection].map { $0 == track }
         let shouldHighlight = !state.i[\.hasSelection] || isSelected
-        let lineColor = polygonToTrack[polygon]!.color.uiColor
+        let lineColor = track.color.uiColor
+        let accessibilityValue = track.name
         let fillColor = if_(isSelected, then: lineColor.withAlphaComponent(0.4), else: lineColor.withAlphaComponent(0.3))
         return polygonRenderer(polygon: polygon,
+                               accessibilityValue: accessibilityValue,
                                strokeColor: I(constant: lineColor),
                                fillColor: fillColor.map { $0 },
                                alpha: I(constant: 1.0),
@@ -275,6 +279,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     let topContainr = IBox(UIView())
     topContainr.addSubview(topStackview, constraints: [equal(\.topAnchor), equal(\.rightAnchor), equal(\.leftAnchor), equal(\.bottomAnchor)])
     let topView = blurredView(borderAnchor: equal(\.bottomAnchor), child: topContainr, inset: 25)
+    topView.unbox.accessibilityValue = "Configuration"
     
     rootView.addSubview(topView, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equal(\.topAnchor, constant: topOffset, animation: Stylesheet.dampingAnimation), equalTo(constant: I(constant: blurredTopViewHeight), \.heightAnchor)])
     
@@ -355,9 +360,13 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     return setMapRect
 }
 
+var isUITesting: Bool {
+    return CommandLine.arguments.contains("--uitesting")
+}
+
 class ViewController: UIViewController {
     let state: Input<DisplayState>
-    let persistentState: Input<StoredState> = persistent(key: "de.laufpark-stechlin.state", initial: StoredState())
+    let persistentState: Input<StoredState>
     var rootView: IBox<UIView>!
 
     var disposables: [Any] = []
@@ -368,6 +377,16 @@ class ViewController: UIViewController {
 
     init() {
         state = Input(DisplayState(tracks: []))
+        if isUITesting {
+            var storedState = StoredState()
+            if CommandLine.arguments.contains("--testSelection") {
+                storedState.showConfiguration = true
+                storedState.satellite = true
+            }
+            persistentState = Input(storedState)
+        } else {
+            persistentState = persistent(key: "de.laufpark-stechlin.state", initial: StoredState())
+        }
 
         super.init(nibName: nil, bundle: nil)
         
@@ -416,10 +435,11 @@ class ViewController: UIViewController {
         setMapRect?(MKMapRect(origin: MKMapPoint(x: 143758507.60971117, y: 86968700.835495561), size: MKMapSize(width: 437860.61378830671, height: 749836.27541357279)))
     }
     
+    
     override func viewDidAppear(_ animated: Bool) {
         resetMapRect()
-        
-        if CLLocationManager.authorizationStatus() == .notDetermined {
+        print(CommandLine.arguments)
+        if CLLocationManager.authorizationStatus() == .notDetermined && !isUITesting {
             locationManager = CLLocationManager()
             locationManager!.requestWhenInUseAuthorization()
         }
