@@ -200,7 +200,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     return { mapView.unbox.setVisibleMapRect($0, animated: true) }
 }
 
-func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>, presentInfo: @escaping () -> ()) -> (MKMapRect) -> () {
+func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>, safeAreaInsets: UIEdgeInsets, presentInfo: @escaping () -> ()) -> (MKMapRect) -> () {
     let darkMode = persistent[\.satellite]
     let setMapRect = addMapView(persistent: persistent, state: state, rootView: rootView)
     
@@ -333,7 +333,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         let routingStack = stackView(arrangedSubviews: [infoStack.cast, progress.cast])
         let bottomRoutingView = blurredView(borderAnchor: equal(\.topAnchor), child: routingStack)
         
-        let bottomHeight = if_(hasGraph, then: 50 as CGFloat, else: 70)
+        let bottomHeight = if_(hasGraph, then: 50 as CGFloat, else: 70).map { $0 + safeAreaInsets.bottom }
         let bottomRoutingOffset: I<CGFloat> = if_(state.i[\.routing], then: I(constant: 0), else: -bottomHeight)
 
         rootView.addSubview(bottomRoutingView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: bottomHeight, \.heightAnchor), equal(\.bottomAnchor, constant: bottomRoutingOffset, animation: Stylesheet.dampingAnimation)])
@@ -372,10 +372,12 @@ class ViewController: UIViewController {
     var disposables: [Any] = []
     var locationManager: CLLocationManager?
     var setMapRect: ((MKMapRect) -> ())?
+    var safeAreaInsets: UIEdgeInsets
     
     lazy var graphURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent("graph.json")
 
-    init() {
+    init(safeAreaInsets: UIEdgeInsets) {
+        self.safeAreaInsets = safeAreaInsets
         state = Input(DisplayState(tracks: []))
         if isUITesting {
             var storedState = StoredState()
@@ -424,7 +426,7 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         rootView = IBox(view!)
-        setMapRect = build(persistent: persistentState, state: state, rootView: rootView, presentInfo: { [unowned self] in
+        setMapRect = build(persistent: persistentState, state: state, rootView: rootView, safeAreaInsets: safeAreaInsets, presentInfo: { [unowned self] in
             let infoVC = InfoViewController()
             infoVC.modalPresentationStyle = .formSheet
             self.present(infoVC, animated: true)
@@ -464,8 +466,14 @@ class InfoViewController: UIViewController {
         })
         rootView.addSubview(closeButton, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -Stylesheet.regularInset), equal(\.trailingAnchor, Stylesheet.regularInset)])
 
+        let anchor: NSLayoutYAxisAnchor
+        if #available(iOS 11.0, *) {
+            anchor = view.safeAreaLayoutGuide.topAnchor
+        } else {
+            anchor = view.topAnchor
+        }
         view.addSubview(textView, constraints: [
-            textView.topAnchor.constraint(equalTo: view.topAnchor),
+            textView.topAnchor.constraint(equalTo: anchor),
             textView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             textView.trailingAnchor.constraint(equalTo: closeButton.unbox.leadingAnchor, constant: -Stylesheet.regularInset),
             textView.leadingAnchor.constraint(equalTo: view.leadingAnchor),

@@ -8,7 +8,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         window = UIWindow(frame: UIScreen.main.bounds)
-        mapViewController = ViewController()
+        let insets: UIEdgeInsets
+        if #available(iOS 11.0, *) {
+            insets = window!.safeAreaInsets
+        } else {
+            insets = .zero
+        }
+        mapViewController = ViewController(safeAreaInsets: insets)
         window?.rootViewController = mapViewController
         window?.makeKeyAndVisible()
         DispatchQueue(label: "Track Loading").async {
