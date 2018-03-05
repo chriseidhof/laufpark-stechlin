@@ -87,11 +87,24 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
             } else {
                 let result = MKPinAnnotationView(annotation: annotation, reuseIdentifier: nil)
                 result.pinTintColor = .red
+                result.canShowCallout = true
+                let deleteButton = UIButton(type: .custom)
+                deleteButton.setTitle("🗑", for: .normal)
+                deleteButton.frame.size = CGSize(width: 46, height: 46)
+                result.leftCalloutAccessoryView = deleteButton
                 return result
             }
     }, regionDidChangeAnimated: { [unowned mapView] _ in
     }, didSelectAnnotation: { mapview, annotation in
-    })
+    }, callOutAccessoryTapped: { mapView, view, control in
+//        print("accessory tapped \(mapView, annotation, control)")
+        guard let p = view.annotation as? MKPointAnnotation else { return }
+        state.change {
+            guard let g = $0.graph else { return }
+            $0.route?.removeWaypoint(Coordinate(p.coordinate), g)
+        }
+    }
+    )
     
     mapView.disposables.append(state.i.map { $0.tracks }.observe { [unowned mapView] in
         mapView.unbox.removeOverlays(mapView.unbox.overlays)
@@ -127,7 +140,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         let waypoints: I<[Coordinate]> = state.i.map { $0.route?.wayPoints ?? [] }
         let waypointAnnotations = waypoints.map { coordinates in
             coordinates.map {
-                MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "")
+                MKPointAnnotation(coordinate: $0.clLocationCoordinate, title: "Delete")
             }
         }
         mapView.bind(annotations: waypointAnnotations)
@@ -139,6 +152,8 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         mapView.bind(overlays: lines)
         
         func addWaypoint(mapView: IBox<MKMapView>, sender: UITapGestureRecognizer) {
+            if !mapView.unbox.selectedAnnotations.isEmpty { return }
+            
             let point = sender.location(in: mapView.unbox)
             let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
             let mapPoint = MKMapPointForCoordinate(coordinate)
@@ -153,8 +168,14 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
                 polygon.boundingMapRect.contains(mapPoint)
             }
             
-            if let (track, segment) = possibilities.flatMap({ (_,track) in track.segment(closestTo: coordinate, maxDistance: treshold).map { (track, $0) }}).first {
-                state.change {
+            state.change {
+                // todo this can be done in a nicer way, probably. currently we can only remove the last waypoint, should make it possible to remove any waypoint!
+                let existingWaypoints = $0.route?.wayPoints.dropFirst().filter { $0.clLocationCoordinate.squaredDistanceApproximation(to: coordinate).squareRoot() < treshold }
+                if let match = existingWaypoints?.first {
+                    let index = waypointAnnotations.value.index(where: { $0.coordinate == match.clLocationCoordinate })!
+                    let ann = waypointAnnotations.value[index]
+                    mapView.unbox.selectAnnotation(ann, animated: true)
+                } else if let (track, segment) = possibilities.flatMap({ (_,track) in track.segment(closestTo: coordinate, maxDistance: treshold).map { (track, $0) }}).first {
                     if let r = $0.route, r.startingPoint.coordinate.clLocationCoordinate.squaredDistanceApproximation(to: coordinate).squareRoot() < treshold {
                         // close the route
                         let endPoint = r.startingPoint.coordinate.clLocationCoordinate
@@ -166,6 +187,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
                     }
                 }
             }
+            
         }
         
         
@@ -320,12 +342,12 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         }
         let routingInfo = label(text: routeInfo, textColor: textColor.map { $0 })
         routingInfo.unbox.adjustsFontSizeToFitWidth = true
-        let removeLastWayPointButton = button(title: I(constant: .undo), backgroundColor: I(constant: .clear), titleColor: textColor.map { $0 } ) { state.change {
-            $0.removeLastWayPoint()
-        }}
+//        let removeLastWayPointButton = button(title: I(constant: .undo), backgroundColor: I(constant: .clear), titleColor: textColor.map { $0 } ) { state.change {
+//            $0.removeLastWayPoint()
+//        }}
         let routeHasWaypoints = state.i.map { $0.route != nil && $0.route!.wayPoints.count > 0 }
-        removeLastWayPointButton.bind(!routeHasWaypoints, to: \.hidden)
-        let infoStack = stackView(arrangedSubviews: [routingInfo.cast, removeLastWayPointButton.cast], axis: .horizontal)
+//        removeLastWayPointButton.bind(!routeHasWaypoints, to: \.hidden)
+        let infoStack = stackView(arrangedSubviews: [routingInfo.cast], axis: .horizontal)
         let progress = progressView(progress: state[\.graphBuildingProgress])
 //        progress.unbox.heightAnchor.constraint(equalToConstant: 1)
         let hasGraph = state.i.map { $0.graph != nil }
@@ -333,7 +355,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
         let routingStack = stackView(arrangedSubviews: [infoStack.cast, progress.cast])
         let bottomRoutingView = blurredView(borderAnchor: equal(\.topAnchor), child: routingStack)
         
-        let bottomHeight = if_(hasGraph, then: 50 as CGFloat, else: 70).map { $0 + safeAreaInsets.bottom }
+        let bottomHeight = if_(hasGraph, then: 100 as CGFloat, else: 70).map { $0 + safeAreaInsets.bottom }
         let bottomRoutingOffset: I<CGFloat> = if_(state.i[\.routing], then: I(constant: 0), else: -bottomHeight)
 
         rootView.addSubview(bottomRoutingView.map { $0 }, constraints: [equal(\.leftAnchor), equal(\.rightAnchor), equalTo(constant: bottomHeight, \.heightAnchor), equal(\.bottomAnchor, constant: bottomRoutingOffset, animation: Stylesheet.dampingAnimation)])

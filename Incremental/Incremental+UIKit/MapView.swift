@@ -61,15 +61,18 @@ public final class MapViewDelegate: NSObject, MKMapViewDelegate {
     let viewForAnnotation: (_ mapView: MKMapView, _ annotation: MKAnnotation) -> MKAnnotationView?
     let regionDidChangeAnimated: (_ mapView: MKMapView) -> ()
     let didSelectAnnotation: ((_ mapView: MKMapView, _ annotation: MKAnnotationView) -> ())?
+    let callOutAccessoryTapped: ((_ mapView: MKMapView, _ annotationView: MKAnnotationView, _ control: UIControl) -> ())?
     
     public init(rendererForOverlay: @escaping (_ mapView: MKMapView, _ overlay: MKOverlay) -> MKOverlayRenderer,
          viewForAnnotation: @escaping (_ mapView: MKMapView, _ annotation: MKAnnotation) -> MKAnnotationView?,
          regionDidChangeAnimated: @escaping (_ mapView: MKMapView) -> (),
-         didSelectAnnotation: ((_ mapView: MKMapView, _ annotation: MKAnnotationView) -> ())? = nil) {
+         didSelectAnnotation: ((_ mapView: MKMapView, _ annotation: MKAnnotationView) -> ())? = nil,
+         callOutAccessoryTapped: @escaping (_ mapView: MKMapView, _ annotationView: MKAnnotationView, _ control: UIControl) -> ()) {
         self.rendererForOverlay = rendererForOverlay
         self.viewForAnnotation = viewForAnnotation
         self.regionDidChangeAnimated = regionDidChangeAnimated
         self.didSelectAnnotation = didSelectAnnotation
+        self.callOutAccessoryTapped = callOutAccessoryTapped
     }
     
     
@@ -83,6 +86,10 @@ public final class MapViewDelegate: NSObject, MKMapViewDelegate {
     
     public func mapView(_ mapView: MKMapView, didSelect view: MKAnnotationView) {
         didSelectAnnotation?(mapView, view)
+    }
+    
+    public func mapView(_ mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
+        callOutAccessoryTapped?(mapView, view, control)
     }
     
     public func mapView(_ mapView: MKMapView, regionDidChangeAnimated animated: Bool) {

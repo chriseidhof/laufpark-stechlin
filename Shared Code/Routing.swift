@@ -74,6 +74,18 @@ struct Route: Equatable, Codable {
         }
         points.removeLast()
     }
+    
+    mutating func removeWaypoint(_ coordinate: Coordinate, _ graph: Graph) {
+        guard let i = points.index(where: { $0.coordinate == coordinate }) else {
+            assertionFailure()
+            return
+        }
+        let toBeAdded = points[(i+1)..<points.endIndex]
+        points = Array(points[0..<i]) // todo actually remove only the one waypoint
+        for p in toBeAdded {
+            add(coordinate: p.coordinate, inTrack: p.track, graph: graph)
+        }
+    }
 }
 
 extension Sequence {
