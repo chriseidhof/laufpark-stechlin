@@ -104,7 +104,7 @@ public func newMapView() -> IBox<MKMapView> {
 
 public func polygonRenderer(polygon: MKPolygon, accessibilityValue: String, strokeColor: I<IncColor>, fillColor: I<IncColor?>, alpha: I<CGFloat>, lineWidth: I<CGFloat>) -> IBox<MKPolygonRenderer> {
     let renderer = MKPolygonRenderer(polygon: polygon)
-    renderer.accessibilityValue = accessibilityValue
+//    renderer.accessibilityValue = accessibilityValue
     let box = IBox(renderer)
     box.bind(strokeColor, to: \.strokeColor)
     box.bind(alpha, to : \.alpha)

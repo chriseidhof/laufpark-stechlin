@@ -427,7 +427,7 @@ extension ArrayWithHistory {
 }
 
 public func flatten<A>(_ array: [I<A>]) -> ArrayWithHistory<A> {
-    let initial = array.flatMap { $0.value }
+    let initial = array.compactMap { $0.value }
     let result = ArrayWithHistory(initial)
     for (x, idx) in zip(array, array.indices) {
         x.read(target: result.changes) { change in

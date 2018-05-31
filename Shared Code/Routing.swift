@@ -432,7 +432,7 @@ func buildGraph(tracks: [Track], url: URL, progress: @escaping (Float) -> ()) ->
         let neighbors = tracks.filter { $0.name != t.name && boundingBox.intersects(boundingBoxes[$0.name]!) }
         
         let joinedPoints: [(TrackPoint, overlaps: [(Box<Track>, Segment)])] = kdPoints.map { p in
-            let pointNeighbors = neighbors.flatMap { neighbor in
+            let pointNeighbors = neighbors.compactMap { neighbor in
                 neighbor.segment(closeTo: p.point.coordinate, maxDistance: maxDistance).map { (Box(neighbor), $0) }
             }
             return (p, pointNeighbors)

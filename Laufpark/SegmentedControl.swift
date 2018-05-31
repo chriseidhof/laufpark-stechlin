@@ -135,7 +135,7 @@ public final class SegmentedControl: UIControl {
     }
     
     var segmentLabels: [UILabel] {
-        return subviews.dropLast().map { $0.subviews.flatMap { $0 as? UILabel }.first! }
+        return subviews.dropLast().map { $0.subviews.compactMap { $0 as? UILabel }.first! }
     }
     
     public var selectedTextColor: UIColor = .white {

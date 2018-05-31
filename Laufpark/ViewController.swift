@@ -153,7 +153,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
                 polygon.boundingMapRect.contains(mapPoint)
             }
             
-            if let (track, segment) = possibilities.flatMap({ (_,track) in track.segment(closestTo: coordinate, maxDistance: treshold).map { (track, $0) }}).first {
+            if let (track, segment) = possibilities.compactMap({ (_,track) in track.segment(closestTo: coordinate, maxDistance: treshold).map { (track, $0) }}).first {
                 state.change {
                     if let r = $0.route, r.startingPoint.coordinate.clLocationCoordinate.squaredDistanceApproximation(to: coordinate).squareRoot() < treshold {
                         // close the route
