@@ -364,6 +364,12 @@ var isUITesting: Bool {
     return CommandLine.arguments.contains("--uitesting")
 }
 
+struct AllState: Codable, Equatable {
+    let displayState: DisplayState
+    let persistentState: StoredState
+}
+
+
 class ViewController: UIViewController {
     let state: Input<DisplayState>
     let persistentState: Input<StoredState>
@@ -373,6 +379,8 @@ class ViewController: UIViewController {
     var locationManager: CLLocationManager?
     var setMapRect: ((MKMapRect) -> ())?
     var safeAreaInsets: UIEdgeInsets
+    
+    let debugger = RemoteDebugger()
     
     lazy var graphURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent("graph.json")
 
@@ -395,6 +403,20 @@ class ViewController: UIViewController {
         copyGraphIfNeeded()        
         if let g = readGraph(url: graphURL) {
             state.change { $0.graph = g }
+        }
+        
+        disposables.append(state.i.zip2(persistentState.i, { AllState(displayState: $0, persistentState: $1) }).observe { [unowned self] state in
+                try! self.debugger.write(action: "change", state: state, snapshot: self.view)
+            }
+        )
+        debugger.onData = { [unowned self] data in
+            let decoder = JSONDecoder()
+            if let d = data, let s = try? decoder.decode(AllState.self, from: d) {
+                DispatchQueue.main.async {
+                    self.state.write(s.displayState)
+                    self.persistentState.write(s.persistentState)
+                }
+            }
         }
         
         var alreadyBuilding = false

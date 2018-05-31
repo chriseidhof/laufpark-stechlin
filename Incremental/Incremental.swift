@@ -319,6 +319,15 @@ extension I {
         return flatMap { value in other.map { with(value, $0) } }
     }
     
+    public func zip2<B>(_ other: I<B>) -> I<(A,B)> {
+        let eq: ((A,B), (A,B)) -> Bool = { l, r in
+            self.eq(l.0, r.0) && other.eq(l.1, r.1)
+        }
+        return flatMap(eq: eq) { (value: A) -> I<(A,B)> in
+            other.map(eq: eq) { (value2: B) -> (A,B) in (value, value2) }
+        }
+    }
+
     public func zip3<B: Equatable,C: Equatable,D: Equatable>(_ x: I<B>, _ y: I<C>, _ with: @escaping (A,B,C) -> D) -> I<D> {
         return flatMap { value1 in
             x.flatMap { value2 in

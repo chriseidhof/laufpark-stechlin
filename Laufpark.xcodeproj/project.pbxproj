@@ -99,6 +99,7 @@
 		8353F57B1FCF38E5007A132A /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8353F57A1FCF38E5007A132A /* ProgressIndicator.swift */; };
 		8358C6901FD29F3F005A257D /* State.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8358C68F1FD29F3F005A257D /* State.swift */; };
 		8358C6921FD29F82005A257D /* Switch.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8358C6911FD29F82005A257D /* Switch.swift */; };
+		8371D92220BFE05100A64E33 /* RemoteDebugging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8371D92120BFE05000A64E33 /* RemoteDebugging.swift */; };
 		8379CF291FB83D01009CD00F /* Model+MapKit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF281FB83D01009CD00F /* Model+MapKit.swift */; };
 		8379CF311FB83E04009CD00F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8379CF301FB83E04009CD00F /* AppDelegate.swift */; };
 		8379CF331FB83E04009CD00F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8379CF321FB83E04009CD00F /* Assets.xcassets */; };
@@ -422,6 +423,7 @@
 		8353F57A1FCF38E5007A132A /* ProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
 		8358C68F1FD29F3F005A257D /* State.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = State.swift; sourceTree = "<group>"; };
 		8358C6911FD29F82005A257D /* Switch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Switch.swift; sourceTree = "<group>"; };
+		8371D92120BFE05000A64E33 /* RemoteDebugging.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RemoteDebugging.swift; sourceTree = "<group>"; };
 		8379CF281FB83D01009CD00F /* Model+MapKit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Model+MapKit.swift"; sourceTree = "<group>"; };
 		8379CF2E1FB83E04009CD00F /* GPXPreprocessing.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GPXPreprocessing.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8379CF301FB83E04009CD00F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -583,6 +585,7 @@
 		8340DF921F61B1F8002176C6 /* Laufpark */ = {
 			isa = PBXGroup;
 			children = (
+				8371D92120BFE05000A64E33 /* RemoteDebugging.swift */,
 				83B0181A1FD9D4320079D08F /* btn_close@2x.png */,
 				83B018181FD9D0520079D08F /* btn_route@2x.png */,
 				834004E71F7BBDB70035984B /* partner.png */,
@@ -1271,6 +1274,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8340DFAE1F61B2F6002176C6 /* Model.swift in Sources */,
+				8371D92220BFE05100A64E33 /* RemoteDebugging.swift in Sources */,
 				83354DA21F6FEA5700F3C33A /* Helpers.swift in Sources */,
 				83CA5A791FD845BF00AC1840 /* SegmentedControl.swift in Sources */,
 				83099ADF1F630FC100D3EBB8 /* LineView.swift in Sources */,
