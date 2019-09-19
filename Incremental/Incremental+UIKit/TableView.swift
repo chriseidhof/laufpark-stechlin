@@ -83,7 +83,7 @@ public func tableViewController<A>(items value: ArrayWithHistory<A>, didSelect: 
 public func tableViewController<A>(items: I<ArrayWithHistory<A>>, didSelect: ((A) -> ())? = nil, didDelete: ((A) -> ())? = nil, configure: @escaping (UITableViewCell, A) -> ()) -> IBox<UITableViewController> {
     let tableVC = TableVC([], didSelect: didSelect, didDelete: didDelete, configure: configure)
     let box = IBox<UITableViewController>(tableVC)
-    var previousObserver: Any?
+    var previousObserver: Any? // this warning is expected, we need to retain the previousObserver
     box.disposables.append(items.observe { value in
         previousObserver = nil
         previousObserver = value.observe(current: {

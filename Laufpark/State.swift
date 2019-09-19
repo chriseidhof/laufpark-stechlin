@@ -13,26 +13,14 @@ struct StoredState: Equatable, Codable {
     var annotationsVisible: Bool = true
     var satellite: Bool = false
     var showConfiguration: Bool = false
-    
-    static func ==(lhs: StoredState, rhs: StoredState) -> Bool {
-        return lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite && lhs.showConfiguration == rhs.showConfiguration
-    }
 }
 
 struct Path: Equatable, Codable {
     let entries: [Graph.Entry]
     let distance: CLLocationDistance
-    
-    static func ==(lhs: Path, rhs: Path) -> Bool {
-        return lhs.entries == rhs.entries && lhs.distance == rhs.distance
-    }
 }
 
-struct CoordinateAndTrack: Equatable, Codable { // tuples aren't codable
-    static func ==(lhs: CoordinateAndTrack, rhs: CoordinateAndTrack) -> Bool {
-        return lhs.coordinate == rhs.coordinate && lhs.track == rhs.track && lhs.pathFromPrevious == rhs.pathFromPrevious
-    }
-    
+struct CoordinateAndTrack: Equatable, Codable {
     let coordinate: Coordinate
     let track: Track
     var pathFromPrevious: Path?

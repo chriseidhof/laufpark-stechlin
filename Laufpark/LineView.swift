@@ -20,10 +20,6 @@ extension CGContext {
 
 final class LineView: UIView {
     struct Point: Equatable {
-        static func ==(lhs: LineView.Point, rhs: LineView.Point) -> Bool {
-            return lhs.x == rhs.x && lhs.y == rhs.y
-        }
-
         var x: Double
         var y: Double
     }

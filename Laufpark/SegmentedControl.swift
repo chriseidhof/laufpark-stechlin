@@ -106,10 +106,6 @@ public final class SegmentedControl: UIControl {
     public struct Segment: Equatable {
         let image: UIImage
         let title: String
-        
-        public static func ==(lhs: Segment, rhs: Segment) -> Bool {
-            return lhs.image == rhs.image && lhs.title == rhs.title
-        }
     }
     
     public var selectedSegmentIndex: Int? = nil {

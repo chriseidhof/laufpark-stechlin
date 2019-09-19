@@ -324,12 +324,12 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
             $0.removeLastWayPoint()
         }}
         let routeHasWaypoints = state.i.map { $0.route != nil && $0.route!.wayPoints.count > 0 }
-        removeLastWayPointButton.bind(!routeHasWaypoints, to: \.hidden)
+        removeLastWayPointButton.bind(!routeHasWaypoints, to: \.isHidden)
         let infoStack = stackView(arrangedSubviews: [routingInfo.cast, removeLastWayPointButton.cast], axis: .horizontal)
         let progress = progressView(progress: state[\.graphBuildingProgress])
 //        progress.unbox.heightAnchor.constraint(equalToConstant: 1)
         let hasGraph = state.i.map { $0.graph != nil }
-    progress.bind(hasGraph, to: \.hidden)
+        progress.bind(hasGraph, to: \.isHidden)
         let routingStack = stackView(arrangedSubviews: [infoStack.cast, progress.cast])
         let bottomRoutingView = blurredView(borderAnchor: equal(\.topAnchor), child: routingStack)
         
@@ -352,7 +352,7 @@ func build(persistent: Input<StoredState>, state: Input<DisplayState>, rootView:
     })
     toggleMapButton.unbox.layer.cornerRadius = 3
     rootView.addSubview(toggleMapButton.cast, constraints: [equal(\.safeAreaLayoutGuide.topAnchor, to: \.topAnchor, constant: -inset), equal(\.trailingAnchor, 10)])
-    toggleMapButton.bind(persistent.i.map { $0.showConfiguration }, to: \.hidden)
+    toggleMapButton.bind(persistent.i.map { $0.showConfiguration }, to: \.isHidden)
     toggleMapButton.unbox.widthAnchor.constraint(equalToConstant: 40).isActive = true
     toggleMapButton.unbox.heightAnchor.constraint(equalToConstant: 40).isActive = true
     

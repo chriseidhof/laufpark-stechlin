@@ -64,12 +64,6 @@ struct State: Reducer {
     }
 }
 
-extension State: Equatable {
-    static func ==(lhs: State, rhs: State) -> Bool {
-        return lhs.inputText == rhs.inputText && lhs.rate == rhs.rate && lhs.rates == rhs.rates && lhs.targetCurrency == rhs.targetCurrency
-    }
-}
-
 protocol Reducer {
     associatedtype Message
     mutating func send(_ message: Message) -> Command<Message>?

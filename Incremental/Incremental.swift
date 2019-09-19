@@ -10,7 +10,7 @@ final class Queue {
     var processing: Bool = false
     
     func enqueue<S: Sequence>(_ edges: S) where S.Element: Edge {
-        self.edges.append(contentsOf: edges.map { ($0, $0.height) })
+        self.edges.append(contentsOf: edges.map { ($0 as Edge, $0.height) })
         self.edges.sort { $0.1 < $1.1 }
     }
     
@@ -174,7 +174,7 @@ public final class Input<A> {
 }
 
 public extension Input where A: Equatable {
-    public convenience init(_ value: A) {
+    convenience init(_ value: A) {
         self.init(eq: ==, value)
     }
 }

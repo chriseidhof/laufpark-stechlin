@@ -77,7 +77,7 @@ extension CLLocation {
     }
 }
 
-extension Sequence where SubSequence: Sequence, SubSequence.Element == Element {
+extension Collection {
     func diffed() -> AnySequence<(Element, Element)> {
         return AnySequence(zip(self, self.dropFirst()))
     }
@@ -93,15 +93,7 @@ struct Coordinate: Codable {
     let longitude: Double
 }
 
-extension Coordinate: Equatable, Hashable {
-    static func ==(lhs: Coordinate, rhs: Coordinate) -> Bool {
-        return lhs.latitude == rhs.latitude
-    }
-    
-    var hashValue: Int {
-        return latitude.hashValue ^ longitude.hashValue
-    }
-}
+extension Coordinate: Equatable, Hashable { }
 
 extension Coordinate {
     init(_ locationCoordinate: CLLocationCoordinate2D) {

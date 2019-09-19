@@ -9,10 +9,6 @@
 import MapKit
 
 struct Route: Equatable, Codable {
-    static func ==(lhs: Route, rhs: Route) -> Bool {
-        return lhs.startingPoint == rhs.startingPoint && lhs.points == rhs.points
-    }
-    
     let startingPoint: CoordinateAndTrack
     var points: [CoordinateAndTrack] = []
     
@@ -202,9 +198,9 @@ extension Track {
         }
         
         // todo check segments?
-        if let sourceIndex = coordinates.index(where: { $0.coordinate == between }) {
+        if let _ = coordinates.index(where: { $0.coordinate == between }) {
             return ([], between.clLocationCoordinate.squaredDistanceApproximation(to: destination.clLocationCoordinate).squareRoot())
-        } else if let destinationIndex = coordinates.index(where: { $0.coordinate == destination }) {
+        } else if let _ = coordinates.index(where: { $0.coordinate == destination }) {
             return ([], between.clLocationCoordinate.squaredDistanceApproximation(to: destination.clLocationCoordinate).squareRoot())
         }
         
@@ -331,10 +327,6 @@ struct Graph: Codable, Equatable {
     private(set) var items: [Coordinate:[Entry]] = [:]
     
     struct Entry: Codable, Equatable {
-        static func ==(lhs: Graph.Entry, rhs: Graph.Entry) -> Bool {
-            return lhs.destination == rhs.destination && lhs.distance == rhs.distance && lhs.trackName == rhs.trackName
-        }
-        
         let destination: Coordinate
         let distance: CLLocationDistance
         let trackName: String
