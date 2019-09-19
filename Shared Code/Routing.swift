@@ -148,34 +148,6 @@ extension Array {
     
 }
 
-extension ArraySlice {
-    typealias Segment = (Element, Element)
-    
-    func douglasPeuckerGeneric<Distance>(perpendicularDistance: ((Element, Element), Element) -> Distance, epsilon e: Distance) -> [Element] where Distance: Numeric & Comparable {
-        guard count > 2 else { return Array(self) }
-        
-        var distanceMax: Distance = 0
-        var currentIndex = startIndex
-        let indexBeforeEnd = index(before: endIndex)
-        let segment = (self[startIndex], self[indexBeforeEnd])
-        for index in 1..<indexBeforeEnd {
-            let current = self[index]
-            let distance = perpendicularDistance(segment, current)
-            if distance > distanceMax {
-                distanceMax = distance
-                currentIndex = index
-            }
-        }
-        
-        if distanceMax > e {
-            let a1 = self[0...currentIndex].douglasPeuckerGeneric(perpendicularDistance: perpendicularDistance, epsilon: e).dropLast()
-            let a2 = self[currentIndex..<endIndex].douglasPeuckerGeneric(perpendicularDistance: perpendicularDistance, epsilon: e)
-            return a1 + a2
-        } else {            
-            return [self[startIndex], self[indexBeforeEnd]]
-        }
-    }
-}
 extension Track {
     func points(between: Coordinate, and: Coordinate) -> [CoordinateWithElevation] {
         let (c1, d1) = points(between: between, and: and, reversed: false)
