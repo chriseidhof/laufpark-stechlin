@@ -14,88 +14,73 @@ struct StoredState: Equatable, Codable {
     var annotationsVisible: Bool = false
     var satellite: Bool = false
     var showConfiguration: Bool = false
-    
-    static func ==(lhs: StoredState, rhs: StoredState) -> Bool {
-        return lhs.annotationsVisible == rhs.annotationsVisible && lhs.satellite == rhs.satellite && lhs.showConfiguration == rhs.showConfiguration
-    }
 }
 
 struct Path: Equatable, Codable {
     let entries: [Graph.Entry]
     let distance: CLLocationDistance
-    
-    static func ==(lhs: Path, rhs: Path) -> Bool {
-        return lhs.entries == rhs.entries && lhs.distance == rhs.distance
-    }
 }
 
 struct CoordinateAndTrack: Equatable, Codable { // tuples aren't codable
-    static func ==(lhs: CoordinateAndTrack, rhs: CoordinateAndTrack) -> Bool {
-        return lhs.coordinate == rhs.coordinate && lhs.track == rhs.track && lhs.pathFromPrevious == rhs.pathFromPrevious
-    }
-    
     let coordinate: Coordinate
     let track: Track
     var pathFromPrevious: Path?
 }
 
-struct Route: Equatable, Codable {
-    static func ==(lhs: Route, rhs: Route) -> Bool {
-        return lhs.startingPoint == rhs.startingPoint && lhs.points == rhs.points
-    }
-    
-    let startingPoint: CoordinateAndTrack
-    var points: [CoordinateAndTrack] = []
-    
-    init(track: Track, coordinate: Coordinate) {
-        startingPoint = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: nil)
-    }
-    
-    mutating func add(coordinate: Coordinate, inTrack track: Track, graph: Graph) {
-        let previous = points.last ?? startingPoint
-        let path = graph.shortestPath(from: previous.coordinate, to: coordinate).map {
-            Path(entries: $0.path, distance: $0.distance)
-        }
-//        assert(path != nil)
-        let result = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: path)
-        points.append(result)
-    }
-    
-    var wayPoints: [Coordinate] {
-        return [startingPoint.coordinate] + points.map { $0.coordinate }
-    }
-    
-    var segments: [(Coordinate, Coordinate)] {
-        let coordinates = points.map { $0.coordinate }
-        return Array(zip([startingPoint.coordinate] + coordinates, coordinates))
-    }
-    
-    var distance: Double {
-        return points.map { $0.pathFromPrevious?.distance ?? 0 }.reduce(into: 0, +=)
-    }
-    
-    func allPoints(tracks: [Track]) -> [Coordinate] {
-        var result: [Coordinate] = [startingPoint.coordinate]
-        for wayPoint in points {
-            if let p = wayPoint.pathFromPrevious?.entries {
-                for entry in p {
-                    if entry.trackName != "Close" {
-                        let track = tracks.first { $0.name == entry.trackName }!
-                        result += track.points(between: result.last!, and: entry.destination).map { $0.coordinate }
-                    }
-                    result.append(entry.destination)
-                }
-            }
-            result.append(wayPoint.coordinate)
-        }
-        return result
-    }
-    
-    mutating func removeLastWaypoint() {
-        guard !points.isEmpty else { return }
-        points.removeLast()
-    }
-}
+//struct Route: Equatable, Codable {
+//
+//    let startingPoint: CoordinateAndTrack
+//    var points: [CoordinateAndTrack] = []
+//
+//    init(track: Track, coordinate: Coordinate) {
+//        startingPoint = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: nil)
+//    }
+//
+//    mutating func add(coordinate: Coordinate, inTrack track: Track, graph: Graph) {
+//        let previous = points.last ?? startingPoint
+//        let path = graph.shortestPath(from: previous.coordinate, to: coordinate).map {
+//            Path(entries: $0.path, distance: $0.distance)
+//        }
+////        assert(path != nil)
+//        let result = CoordinateAndTrack(coordinate: coordinate, track: track, pathFromPrevious: path)
+//        points.append(result)
+//    }
+//
+//    var wayPoints: [Coordinate] {
+//        return [startingPoint.coordinate] + points.map { $0.coordinate }
+//    }
+//
+//    var segments: [(Coordinate, Coordinate)] {
+//        let coordinates = points.map { $0.coordinate }
+//        return Array(zip([startingPoint.coordinate] + coordinates, coordinates))
+//    }
+//
+//    var distance: Double {
+//        return points.map { $0.pathFromPrevious?.distance ?? 0 }.reduce(into: 0, +=)
+//    }
+//
+//    func allPoints(tracks: [Track]) -> [Coordinate] {
+//        var result: [Coordinate] = [startingPoint.coordinate]
+//        for wayPoint in points {
+//            if let p = wayPoint.pathFromPrevious?.entries {
+//                for entry in p {
+//                    if entry.trackName != "Close" {
+//                        let track = tracks.first { $0.name == entry.trackName }!
+//                        result += track.points(between: result.last!, and: entry.destination).map { $0.coordinate }
+//                    }
+//                    result.append(entry.destination)
+//                }
+//            }
+//            result.append(wayPoint.coordinate)
+//        }
+//        return result
+//    }
+//
+//    mutating func removeLastWaypoint() {
+//        guard !points.isEmpty else { return }
+//        points.removeLast()
+//    }
+//}
 
 struct DisplayState: Equatable, Codable {
     var tracks: [Track]
@@ -131,10 +116,6 @@ struct DisplayState: Equatable, Codable {
         let distance = Double(location) * track.distance
         guard let point = track.point(at: distance) else { return nil }
         return (distance: distance, location: point)
-    }
-    
-    static func ==(lhs: DisplayState, rhs: DisplayState) -> Bool {
-        return lhs.selection == rhs.selection && lhs.trackPosition == rhs.trackPosition && lhs.tracks == rhs.tracks && lhs.firstPoint == rhs.firstPoint && lhs.graph == rhs.graph && lhs.route == rhs.route && lhs.tmpPoints == rhs.tmpPoints
     }
 }
 
@@ -327,7 +308,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     
     
     
-    let allPoints: I<[Coordinate]> = state.i.map { $0.route?.allPoints(tracks: $0.tracks) ?? [] }
+    let allPoints: I<[Coordinate]> = state.i.map { $0.route?.allPoints(tracks: $0.tracks).map { $0.coordinate } ?? [] }
     let lines: I<[MKPolyline]> = allPoints.map {
         if $0.isEmpty {
             return []
@@ -426,7 +407,7 @@ final class ViewController: NSViewController {
                 }
             }
             time {
-                buildGraph(tracks: tracks, url: graphURL, mapView: mapView)
+                buildGraph(tracks: tracks, url: graphURL, progress: { print($0) })
             }
             let graph = readGraph(url: graphURL)
             DispatchQueue.main.async {
@@ -438,14 +419,5 @@ final class ViewController: NSViewController {
     }
 }
 
-extension KDTreePoint {
-    func range(upTo other: Self) -> [(Double,Double)] {
-        return (0..<Self.dimensions).map {
-            let v1 = kdDimension($0)
-            let v2 = other.kdDimension($0)
-            return v1 < v2 ? (v1, v2) : (v2, v1)
-        }
-    }
-}
 
 let graphURL = URL(fileURLWithPath: "/Users/chris/Downloads/graph.json")
