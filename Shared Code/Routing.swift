@@ -477,6 +477,8 @@ func buildGraph(tracks: [Track], url: URL, progress: @escaping (Float) -> ()) ->
     let result = try! json.encode(graph)
     try! result.write(to: url)
     
+    print("Built graph \(url)")
+    
     return graph
 }
 

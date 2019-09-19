@@ -226,6 +226,8 @@
 		83CC2E571F8E3CAA00F4302B /* SideEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC2E541F8E3CA900F4302B /* SideEffects.swift */; };
 		83CC2E591F8E3CAA00F4302B /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC2E561F8E3CAA00F4302B /* Utilities.swift */; };
 		83CC2E5C1F8E5E2900F4302B /* Driver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83CC2E5B1F8E5E2800F4302B /* Driver.swift */; };
+		83D1F07A23336426001FA01A /* wabe tuerkis-strecke 6.gpx in Resources */ = {isa = PBXBuildFile; fileRef = 834078EE1F6269C500BC7C98 /* wabe tuerkis-strecke 6.gpx */; };
+		83D1F07B23336559001FA01A /* SortedArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83A072C41FDF080500EDAA53 /* SortedArray.swift */; };
 		83D9340F1F98D6CB0019BEA0 /* Incremental.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; };
 		83D934101F98D6CB0019BEA0 /* Incremental.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83B2A2681F692CFA00A6D9F9 /* Incremental.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		83F2AC9A1FEE99F500E39BDD /* LaufparkUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 83F2AC991FEE99F500E39BDD /* LaufparkUITests.swift */; };
@@ -1077,6 +1079,7 @@
 				834079591F626EC600BC7C98 /* wabe rosa-strecke 4.gpx in Resources */,
 				83099AEF1F63CD7900D3EBB8 /* wabe gruen-strecke 0.gpx in Resources */,
 				834078E91F62695600BC7C98 /* wabe tuerkis-strecke 1.gpx in Resources */,
+				83D1F07A23336426001FA01A /* wabe tuerkis-strecke 6.gpx in Resources */,
 				834079441F626EC600BC7C98 /* wabe gelb-strecke 2.gpx in Resources */,
 				834079401F626EC600BC7C98 /* wabe braun-strecke 2.gpx in Resources */,
 				8340DF9B1F61B1F8002176C6 /* Assets.xcassets in Resources */,
@@ -1160,7 +1163,6 @@
 				8379CF721FB83F7A009CD00F /* wabe tuerkis-strecke 2.gpx in Resources */,
 				8379CF331FB83E04009CD00F /* Assets.xcassets in Resources */,
 				8379CF571FB83F7A009CD00F /* wabe gelb-strecke 4.gpx in Resources */,
-				8379CF761FB83F7A009CD00F /* wabe tuerkis-strecke 6.gpx in Resources */,
 				8379CF511FB83F7A009CD00F /* wabe braun-strecke 2.gpx in Resources */,
 				8379CF7C1FB83F7A009CD00F /* wabe hellgruen-strecke 7.gpx in Resources */,
 				8379CF441FB83F7A009CD00F /* wabe gruen-strecke 0.gpx in Resources */,
@@ -1219,6 +1221,7 @@
 				8379CF7F1FB83F7A009CD00F /* wabe violett-strecke 2.gpx in Resources */,
 				8379CF641FB83F7A009CD00F /* wabe pink-strecke 2.gpx in Resources */,
 				8379CF4E1FB83F7A009CD00F /* wabe blau-strecke 2.gpx in Resources */,
+				8379CF761FB83F7A009CD00F /* wabe tuerkis-strecke 6.gpx in Resources */,
 				8379CF5E1FB83F7A009CD00F /* wabe hellbraun-strecke 2.gpx in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1286,6 +1289,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				83D1F07B23336559001FA01A /* SortedArray.swift in Sources */,
 				8379CF8C1FB83FD0009CD00F /* ViewController.swift in Sources */,
 				8379CF311FB83E04009CD00F /* AppDelegate.swift in Sources */,
 				838C76601FC1837B00EB13F1 /* Routing.swift in Sources */,
