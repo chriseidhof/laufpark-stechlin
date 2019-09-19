@@ -194,7 +194,7 @@ extension Track {
     static func load() -> [Track] {
         let definitions: [(Color, Int)] = [
             (.red, 4),
-            (.turquoise, 5),
+            (.turquoise, 6),
             (.brightGreen, 7),
             (.beige, 2),
             (.green, 4),
