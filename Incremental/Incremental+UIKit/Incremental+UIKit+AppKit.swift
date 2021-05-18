@@ -55,7 +55,7 @@ extension IBox where V: IncView {
     
     private func remove<View: IncView>(at index: Int, ofType: View.Type) {
         let oldView = self.unbox.subviews[index] as! View
-        guard let i = self.disposables.index(where: {
+        guard let i = self.disposables.firstIndex(where: {
             if let oldDisposable = $0 as? IBox<View>, oldDisposable.unbox == oldView {
                 return true
             }

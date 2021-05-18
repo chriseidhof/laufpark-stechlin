@@ -9,14 +9,14 @@
 import Foundation
 
 extension IBox where V == UIStackView {
-    public convenience init<S>(arrangedSubviews: [IBox<S>], axis: UILayoutConstraintAxis = .vertical) where S: UIView {
+    public convenience init<S>(arrangedSubviews: [IBox<S>], axis: NSLayoutConstraint.Axis = .vertical) where S: UIView {
         let stackView = UIStackView(arrangedSubviews: arrangedSubviews.map { $0.unbox })
         stackView.axis = axis
         self.init(stackView)
         disposables.append(arrangedSubviews)
     }
     
-    public convenience init<S>(arrangedSubviews: ArrayWithHistory<IBox<S>>, axis: UILayoutConstraintAxis = .vertical) where S: UIView {
+    public convenience init<S>(arrangedSubviews: ArrayWithHistory<IBox<S>>, axis: NSLayoutConstraint.Axis = .vertical) where S: UIView {
         let stackView = UIStackView(arrangedSubviews: [])
         self.init(stackView)
         self.bindArrangedSubviews(to: arrangedSubviews)
@@ -37,7 +37,7 @@ extension IBox where V: UIStackView {
     }
     
     func removeArrangedSubview<V: UIView>(_ subview: V) {
-        guard let index = disposables.index(where: { ($0 as? IBox<V>)?.unbox === subview }) else {
+        guard let index = disposables.firstIndex(where: { ($0 as? IBox<V>)?.unbox === subview }) else {
             assertionFailure("Can't find subview.")
             return
         }
@@ -92,7 +92,7 @@ extension IBox where V: UIStackView {
     }
 }
 
-public func stackView<V: UIView>(arrangedSubviews: [IBox<V>], axis: UILayoutConstraintAxis = .vertical, spacing: I<CGFloat> = I(constant: 10)) -> IBox<UIStackView> {
+public func stackView<V: UIView>(arrangedSubviews: [IBox<V>], axis: NSLayoutConstraint.Axis = .vertical, spacing: I<CGFloat> = I(constant: 10)) -> IBox<UIStackView> {
     let stackView = IBox<UIStackView>(arrangedSubviews: arrangedSubviews)
     stackView.unbox.axis = axis
     stackView.bind(spacing, to: \.spacing)

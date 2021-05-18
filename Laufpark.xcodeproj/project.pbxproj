@@ -830,6 +830,7 @@
 				TargetAttributes = {
 					8340DF8F1F61B1F8002176C6 = {
 						CreatedOnToolsVersion = 9.0;
+						LastSwiftMigration = 1240;
 						SystemCapabilities = {
 							com.apple.Maps.iOS = {
 								enabled = 1;
@@ -847,6 +848,7 @@
 					};
 					83B2A2671F692CFA00A6D9F9 = {
 						CreatedOnToolsVersion = 9.0;
+						LastSwiftMigration = 1240;
 					};
 					83C0FB031F74F5280041A802 = {
 						CreatedOnToolsVersion = 9.0;
@@ -854,6 +856,7 @@
 					};
 					83F2AC961FEE99F400E39BDD = {
 						CreatedOnToolsVersion = 9.2;
+						LastSwiftMigration = 1240;
 						ProvisioningStyle = Automatic;
 						TestTargetID = 8340DF8F1F61B1F8002176C6;
 					};
@@ -1341,7 +1344,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "de.laufpark-stechlin.laufpark";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -1358,7 +1361,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "de.laufpark-stechlin.laufpark";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -1418,7 +1421,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Incremental;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1442,7 +1445,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.objcio.Incremental;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
 				VERSION_INFO_PREFIX = "";
@@ -1513,7 +1516,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "de.laufpark-stechlin.LaufparkUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Laufpark;
 			};
@@ -1529,7 +1532,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = "de.laufpark-stechlin.LaufparkUITests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_VERSION = 4.0;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = Laufpark;
 			};

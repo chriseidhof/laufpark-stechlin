@@ -18,10 +18,10 @@ extension UIActivityIndicatorView {
     }
 }
 
-public func activityIndicator(style: I<UIActivityIndicatorViewStyle> = I(constant: .white), animating: I<Bool>) -> IBox<UIView> {
+public func activityIndicator(style: I<UIActivityIndicatorView.Style> = I(constant: .white), animating: I<Bool>) -> IBox<UIView> {
     let loadingIndicator = IBox(UIActivityIndicatorView())
     loadingIndicator.unbox.hidesWhenStopped = true
     loadingIndicator.bind(animating, to: \.animating)
-    loadingIndicator.bind(style, to: \.activityIndicatorViewStyle)
+    loadingIndicator.bind(style, to: \.style)
     return loadingIndicator.cast
 }

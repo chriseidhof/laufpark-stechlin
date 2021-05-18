@@ -19,7 +19,7 @@ extension MKPolyline {
 func headerButton(title: String, image: UIImage, color: I<UIColor>, action: @escaping () -> ()) -> IBox<UIView> {
     let button = IBox(segment(image.withRenderingMode(.alwaysTemplate), title: title, textColor: color.value, size: CGSize(width: 55, height: 55))) //todo fix for color scheme change)
     button.unbox.isUserInteractionEnabled = true
-    button.unbox.accessibilityTraits = UIAccessibilityTraitButton
+    button.unbox.accessibilityTraits = UIAccessibilityTraits.button
     button.unbox.accessibilityValue = title
     button.bind(color, to: \.textColor)
     button.addGestureRecognizer(tapGestureRecognizer { _ in
@@ -31,7 +31,7 @@ func headerButton(title: String, image: UIImage, color: I<UIColor>, action: @esc
 /// Returns a function that you can call to set the visible map rect
 func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, rootView: IBox<UIView>) -> ((MKMapRect) -> ()) {
     var polygonToTrack: [MKPolygon:Track] = [:]
-    let darkMode = persistent[\.satellite]
+//    let darkMode = persistent[\.satellite]
 
     func buildRenderer(_ polygon: MKPolygon) -> IBox<MKPolygonRenderer> {
         let track = polygonToTrack[polygon]!
@@ -98,7 +98,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         $0.forEach { track in
             let polygon = track.polygon
             polygonToTrack[polygon] = track
-            mapView.unbox.add(polygon)
+            mapView.unbox.addOverlay(polygon)
         }
     })
     
@@ -106,7 +106,7 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
     
     func selectTrack(mapView: IBox<MKMapView>, sender: UITapGestureRecognizer) {
         let point = sender.location(ofTouch: 0, in: mapView.unbox)
-        let mapPoint = MKMapPointForCoordinate(mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox))
+        let mapPoint = MKMapPoint.init(mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox))
         let possibilities = polygonToTrack.filter { (polygon, track) in
             let renderer = mapView.unbox.renderer(for: polygon) as! MKPolygonRenderer
             let point = renderer.point(for: mapPoint)
@@ -141,10 +141,10 @@ func addMapView(persistent: Input<StoredState>, state: Input<DisplayState>, root
         func addWaypoint(mapView: IBox<MKMapView>, sender: UITapGestureRecognizer) {
             let point = sender.location(in: mapView.unbox)
             let coordinate = mapView.unbox.convert(point, toCoordinateFrom: mapView.unbox)
-            let mapPoint = MKMapPointForCoordinate(coordinate)
+            let mapPoint = MKMapPoint.init(coordinate)
             
-            let region = MKCoordinateRegionMakeWithDistance(mapView.unbox.centerCoordinate, 1, 1)
-            let rect = mapView.unbox.convertRegion(region, toRectTo: mapView.unbox)
+            let region = MKCoordinateRegion.init(center: mapView.unbox.centerCoordinate, latitudinalMeters: 1, longitudinalMeters: 1)
+            let rect = mapView.unbox.convert(region, toRectTo: mapView.unbox)
             let meterPerPixel = Double(1/rect.width)
             let tresholdPixels: Double = 40
             let treshold = meterPerPixel*tresholdPixels

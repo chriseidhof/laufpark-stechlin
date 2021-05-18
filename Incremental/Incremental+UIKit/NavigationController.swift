@@ -8,7 +8,7 @@
 
 import Foundation
 
-public func barButtonItem(systemItem: UIBarButtonSystemItem, onTap: @escaping () -> ()) -> IBox<UIBarButtonItem> {
+public func barButtonItem(systemItem: UIBarButtonItem.SystemItem, onTap: @escaping () -> ()) -> IBox<UIBarButtonItem> {
     let ta = TargetAction(onTap)
     let result = UIBarButtonItem(barButtonSystemItem: systemItem, target: ta, action: #selector(TargetAction.action(_:)))
     let box = IBox(result)
@@ -46,7 +46,7 @@ extension IBox where V: UINavigationController {
                 self.disposables.append(v)
             case .remove(at: let i):
                 let v: UIViewController = self.unbox.viewControllers[i]
-                let index = self.disposables.index { d in
+                let index = self.disposables.firstIndex { d in
                     if let vcBox = d as? IBox<UIViewController>, vcBox.unbox === v {
                         return true
                     }
@@ -56,7 +56,7 @@ extension IBox where V: UINavigationController {
                 self.unbox.viewControllers.remove(at: i)
             case .replace(let with, let i):
                 let v: UIViewController = self.unbox.viewControllers[i]
-                let index = self.disposables.index { d in
+                let index = self.disposables.firstIndex { d in
                     if let vcBox = d as? IBox<UIViewController>, vcBox.unbox === v {
                         return true
                     }

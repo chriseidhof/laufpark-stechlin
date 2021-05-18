@@ -95,7 +95,7 @@ func segment(_ image: UIImage, title: String, textColor: UIColor, size: CGSize) 
     imageView.frame = image.size.align(horizontal: .center, vertical: .top, in: view.frame)
     label.frame = label.intrinsicContentSize.align(horizontal: .center, vertical: .bottom, in: view.frame)
     view.accessibilityLabel = title
-    view.accessibilityTraits = UIAccessibilityTraitButton
+    view.accessibilityTraits = UIAccessibilityTraits.button
     view.isAccessibilityElement = true
     return view
 }
@@ -181,7 +181,7 @@ public final class SegmentedControl: UIControl {
     
     @objc func tapped(_ sender: UITapGestureRecognizer) {
         let location = sender.location(in: self)
-        guard let index = subviews.index(where: { $0.frame.contains(location) }) else { return } // todo should we compute this with math?
+        guard let index = subviews.firstIndex(where: { $0.frame.contains(location) }) else { return } // todo should we compute this with math?
         selectedSegmentIndex = index
         let newX = leftForSegment(i: index)
         UIView.animate(withDuration: animationDuration) { [weak self] in

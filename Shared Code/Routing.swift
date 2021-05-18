@@ -170,9 +170,9 @@ extension Track {
         }
         
         // todo check segments?
-        if let _ = coordinates.index(where: { $0.coordinate == between }) {
+        if let _ = coordinates.firstIndex(where: { $0.coordinate == between }) {
             return ([], between.clLocationCoordinate.squaredDistanceApproximation(to: destination.clLocationCoordinate).squareRoot())
-        } else if let _ = coordinates.index(where: { $0.coordinate == destination }) {
+        } else if let _ = coordinates.firstIndex(where: { $0.coordinate == destination }) {
             return ([], between.clLocationCoordinate.squaredDistanceApproximation(to: destination.clLocationCoordinate).squareRoot())
         }
         
@@ -267,12 +267,12 @@ extension Track {
     }
     
     func vertexBefore(coordinate: Coordinate, graph: Graph) -> (Coordinate, CLLocationDistance)? {
-        guard let index = coordinates.index(where: { $0.coordinate == coordinate }) else { return nil }
+        guard let index = coordinates.firstIndex(where: { $0.coordinate == coordinate }) else { return nil }
         return vertexHelper(coordinate: coordinate, at: index, graph: graph, reversed: true)
     }
     
     func vertexAfter(coordinate: Coordinate, graph: Graph) -> (Coordinate, CLLocationDistance)? {
-        guard let index = coordinates.index(where: { $0.coordinate == coordinate }) else { return nil }
+        guard let index = coordinates.firstIndex(where: { $0.coordinate == coordinate }) else { return nil }
         return vertexHelper(coordinate: coordinate, at: index, graph: graph, reversed: false)
     }
 
@@ -338,7 +338,7 @@ extension Graph {
                 let tentativeDistance = distVNext + edge.distance
                 if !known.contains(edge.destination) && tentativeDistance < existingDistance {
                     distances[edge.destination] = (previousEdge: (coord, edge), distance: tentativeDistance)
-                    if let i = queue.index(where: { $0.0 == edge.destination }) {
+                    if let i = queue.firstIndex(where: { $0.0 == edge.destination }) {
                         queue.mutate(at: i, { $0.1 = tentativeDistance })
                     } else {
                         queue.insert((edge.destination, tentativeDistance))
@@ -363,16 +363,6 @@ extension Graph {
 extension Track {
     var boundingBox: MKMapRect {
         return polygon.boundingMapRect
-    }
-}
-
-extension MKMapRect {
-    func intersects(_ other: MKMapRect) -> Bool {
-        return MKMapRectIntersectsRect(self, other)
-    }
-    
-    func contains(_ point: MKMapPoint) -> Bool {
-        return MKMapRectContainsPoint(self, point)
     }
 }
 
@@ -467,7 +457,7 @@ struct TrackPoint {
     let track: Box<Track>
     let point: CLLocation
     var mapPoint: MKMapPoint {
-        return MKMapPointForCoordinate(point.coordinate)
+        return MKMapPoint.init(point.coordinate)
     }
 }
 
@@ -511,7 +501,7 @@ extension TrackPoint {
     }
     
     func distanceInMeters(to other: TrackPoint) -> Double {
-        return MKMetersBetweenMapPoints(self.mapPoint, other.mapPoint)
+        return self.mapPoint.distance(to: other.mapPoint)
     }
     
     static func ==(lhs: TrackPoint, rhs: TrackPoint) -> Bool {

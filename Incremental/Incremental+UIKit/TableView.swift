@@ -34,7 +34,7 @@ final class TableVC<A>: UITableViewController {
         didSelect?(items[indexPath.row])
     }
     
-    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         guard editingStyle == .delete else { return }
         didDelete?(items[indexPath.row])
     }

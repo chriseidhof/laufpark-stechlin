@@ -85,7 +85,7 @@ final class LineView: UIView {
             return currentTick
         }))
 
-        let attributes: [NSAttributedStringKey : Any] = [
+        let attributes: [NSAttributedString.Key : Any] = [
             .foregroundColor: strokeColor,
             .font: Stylesheet.smallFont
         ]
